@@ -1,8 +1,8 @@
-# Phaser React TypeScript Template
+# Игра про некроманта на веб
+
+Дальше описание использованного шаблона на английском.
 
 This is a Phaser project template that uses the React framework and Vite for bundling. It includes a bridge for React to Phaser game communication, hot-reloading for quick development workflow and scripts to generate production-ready builds.
-
-**[This Template is also available as a JavaScript version.](https://github.com/phaserjs/template-react)**
 
 ### Versions
 
@@ -12,8 +12,6 @@ This template has been updated for:
 - [React 19.0.0](https://github.com/facebook/react)
 - [Vite 6.3.1](https://github.com/vitejs/vite)
 - [TypeScript 5.7.2](https://github.com/microsoft/TypeScript)
-
-![screenshot](screenshot.png)
 
 ## Requirements
 
@@ -49,8 +47,8 @@ We have provided a default project structure to get you started. This is as foll
 | `src/PhaserGame.tsx`          | The React component that initializes the Phaser Game and acts as a bridge between React and Phaser. |
 | `src/vite-env.d.ts`           | Global TypeScript declarations, providing type information.                |
 | `src/App.tsx`                 | The main React component.                                                  |
-| `src/game/EventBus.ts`        | A simple event bus to communicate between React and Phaser.                |
 | `src/game`                    | Contains the game source code.                                             |
+| `src/game/EventBus.ts`        | A simple event bus to communicate between React and Phaser.                |
 | `src/game/main.tsx`           | The main **game** entry point. This contains the game configuration and starts the game. |
 | `src/game/scenes/`            | The folder where Phaser Scenes are located.                                |
 | `public/style.css`            | Some simple CSS rules to help with page layout.                            |
