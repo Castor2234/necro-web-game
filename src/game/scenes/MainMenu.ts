@@ -5,9 +5,9 @@ import { EventBus } from '../EventBus';
 export class MainMenu extends Scene
 {
     background: GameObjects.Image;
-    logo: GameObjects.Image;
+    forest: GameObjects.Image;
     title: GameObjects.Text;
-    logoTween: Phaser.Tweens.Tween | null;
+    forestTween: Phaser.Tweens.Tween | null;
 
     constructor ()
     {
@@ -16,9 +16,9 @@ export class MainMenu extends Scene
 
     create ()
     {
-        this.background = this.add.image(512, 384, 'background');
+        this.background = this.add.image(320, 180, 'background');
 
-        this.logo = this.add.image(512, 300, 'logo').setDepth(100);
+        this.forest = this.add.image(512, 300, 'forest').setDepth(100);
 
         this.title = this.add.text(512, 460, 'Main Menu', {
             fontFamily: 'Arial Black', fontSize: 38, color: '#ffffff',

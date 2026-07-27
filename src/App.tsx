@@ -9,7 +9,7 @@ function App()
 
     //  References to the PhaserGame component (game and scene are exposed)
     const phaserRef = useRef<IRefPhaserGame | null>(null);
-    const [spritePosition, setSpritePosition] = useState({ x: 0, y: 0 });
+    //const [spritePosition, setSpritePosition] = useState({ x: 0, y: 0 });
 
     const changeScene = () => {
 
@@ -24,6 +24,7 @@ function App()
         }
     }
 
+    /*
     const moveSprite = () => {
 
         if(phaserRef.current)
@@ -44,6 +45,7 @@ function App()
 
     }
 
+    
     const addSprite = () => {
 
         if (phaserRef.current)
@@ -72,6 +74,7 @@ function App()
             }
         }
     }
+    */
 
     // Event emitted from the PhaserGame component
     const currentScene = (scene: Phaser.Scene) => {
@@ -87,6 +90,7 @@ function App()
                 <div>
                     <button className="button" onClick={changeScene}>Change Scene</button>
                 </div>
+                {/*
                 <div>
                     <button disabled={canMoveSprite} className="button" onClick={moveSprite}>Toggle Movement</button>
                 </div>
@@ -96,6 +100,7 @@ function App()
                 <div>
                     <button className="button" onClick={addSprite}>Add New Sprite</button>
                 </div>
+                */}
             </div>
         </div>
     )
