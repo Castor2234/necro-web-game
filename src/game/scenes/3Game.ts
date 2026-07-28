@@ -31,29 +31,7 @@ export class Game extends Scene
     }
 
     public create (): void {
-        // Bg 
-        this.background = this.add.image(320, 180, 'background').setDepth(-1);
-
-        // Scene title
-        this.gameText = this.add.text(220, 50, 'Игра', {
-            fontFamily: 'Arial Black', fontSize: 32, color: '#b98ba0',
-            stroke: '#000000', strokeThickness: 2,
-            align: 'center'
-        }).setOrigin(0.5).setDepth(100);
-
-        // Camera
-        this.camera = this.cameras.main;
-        this.camera.setZoom(1.3)
-        this.camera.setScroll(-70,-10)
-
-        // Forest
-        this.forest = this.add.image(100, 160, 'forest').setScale(2);
-
-        // Village
-        this.village = this.add.image(350, 160, 'village').setScale(2);
-
         
-
 
 
 
@@ -62,6 +40,6 @@ export class Game extends Scene
 
     changeScene ()
     {
-        this.scene.start('GameOver');
+        this.scene.start('Map');
     }
 }
