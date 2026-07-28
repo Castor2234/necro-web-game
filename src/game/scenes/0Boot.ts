@@ -1,33 +1,8 @@
-import * as Phaser from 'phaser';
+import { Scene } from 'phaser';
 
 
-export class CustomContainer extends Phaser.GameObjects.Container {
-    image: Phaser.GameObjects.Image;
-    label: Phaser.GameObjects.Text;
 
-    constructor(scene: Phaser.Scene, pathToImg: string, label: string, x: number, y: number) {
-        // Super arguments: scene, x, y, [children]
-        super(scene, x, y);
-
-        // Create internal child components relative to (0, 0)
-        this.image = scene.add.image(0, 0, pathToImg);
-        this.label = scene.add.text(0,-(20+(this.image.height/2)), label, { color: '#ffffff' }).setOrigin(0.5);
-
-        // Add children to this container
-        this.add([this.image, this.label]);
-
-        // REQUIRED: Register this container instance with the Scene's display list
-        scene.add.existing(this);
-    }
-
-    // Example custom method
-    public updateText(newText: string): void {
-        this.label.setText(newText);
-    }
-}
-
-
-export class Boot extends Phaser.Scene
+export class Boot extends Scene
 {
     constructor ()
     {

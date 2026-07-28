@@ -1,5 +1,36 @@
-import { Scene } from 'phaser';
+import { Scene, GameObjects } from 'phaser';
 
+
+// Классы для удобства
+export class CustomContainer extends GameObjects.Container {
+    image: GameObjects.Image;
+    label: GameObjects.Text;
+
+    constructor(scene: Scene, pathToImg: string, label: string, x: number, y: number) {
+        // Super arguments: scene, x, y, [children]
+        super(scene, x, y);
+
+        // Create internal child components relative to (0, 0)
+        this.image = scene.add.image(0, 0, pathToImg);
+        this.label = scene.add.text(0,-(10+(this.image.height/2)), label, { color: 'rgb(250, 250, 250)', fontSize: '24px' }).setOrigin(0.5);
+
+        // Add children to this container
+        this.add([this.image, this.label]);
+
+        // REQUIRED: Register this container instance with the Scene's display list
+        scene.add.existing(this);
+    }
+
+    // Change text method
+    public changeText(newText: string): void {
+        this.label.setText(newText);
+    }
+
+}
+
+
+
+// Класс сцены
 export class Preloader extends Scene
 {
     constructor ()
@@ -48,6 +79,6 @@ export class Preloader extends Scene
         //  For example, you can define global animations here, so we can use them in other scenes.
 
         //  Move to the MainMenu. You could also swap this for a Scene Transition, such as a camera fade.
-        this.scene.start('FullMap');
+        this.scene.start('WorldMap');
     }
 }

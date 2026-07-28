@@ -8,10 +8,6 @@ export class Game extends Scene
     gameText: Phaser.GameObjects.Text;
     camera: Phaser.Cameras.Scene2D.Camera;
     
-    // Images
-    forest: Phaser.GameObjects.Image;
-    village: Phaser.GameObjects.Image;
-
     // Starting values
     private ratSpeed = 400;
     private v1pw = 50;
@@ -31,6 +27,16 @@ export class Game extends Scene
     }
 
     public create (): void {
+
+        // Bg 
+        this.background = this.add.image(320, 180, 'background').setDepth(-1);
+
+        // Scene title
+        this.gameText = this.add.text(220, 50, 'Основная сцена игры', {
+            fontFamily: 'Arial Black', fontSize: 32, color: '#b98ba0',
+            stroke: '#000000', strokeThickness: 2,
+            align: 'center'
+        }).setOrigin(0.5).setDepth(100);
         
 
 
@@ -40,6 +46,6 @@ export class Game extends Scene
 
     changeScene ()
     {
-        this.scene.start('Map');
+        this.scene.start('WorldMap');
     }
 }

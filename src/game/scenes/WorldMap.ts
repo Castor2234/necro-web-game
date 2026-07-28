@@ -1,18 +1,9 @@
 import { EventBus } from '../EventBus';
 import { Scene } from 'phaser';
-import { CustomContainer } from './0Boot'
+import { CustomContainer } from './1Preloader'
 
-/*
-interface EntityContainer {
-    image: Phaser.GameObjects.Image, 
-    text: Phaser.GameObjects.Text,
-    x: number,
-    y: number,
-    name: string
-}
-*/
 
-export class FullMap extends Scene
+export class WorldMap extends Scene
 {
     // Scene setup
     background: Phaser.GameObjects.Image;
@@ -23,19 +14,10 @@ export class FullMap extends Scene
     forest: Phaser.GameObjects.Container;
     village: Phaser.GameObjects.Image;
 
-    // Starting values
-    private ratSpeed = 400;
-    private v1pw = 50;
-
-    private ratAmount = 0;
-    private corpseAmount = 2;
-    private lootMulti = 1;
-
-
 
     constructor ()
     {
-        super('FullMap');
+        super('WorldMap');
     }
 
     public init (data: number): void {
@@ -46,8 +28,8 @@ export class FullMap extends Scene
         // Bg 
         this.background = this.add.image(320, 180, 'background').setDepth(-1);
 
-        // Scene title
-        this.gameText = this.add.text(220, 50, 'Игра', {
+        // Scene title (Карта пока что показывается в зуме 2)
+        this.gameText = this.add.text(220, 50, 'Карта мира', {
             fontFamily: 'Arial Black', fontSize: 32, color: '#b98ba0',
             stroke: '#000000', strokeThickness: 2,
             align: 'center'
@@ -55,15 +37,15 @@ export class FullMap extends Scene
 
         // Camera
         this.camera = this.cameras.main;
-        this.camera.setZoom(1.3)
-        this.camera.setScroll(-70,-10)
+        this.camera.setZoom(2)
+        this.camera.setScroll(-90,-70)
 
         // Forest
-        this.forest = new CustomContainer(this,'forest','Лес', 250, 160)
+        this.forest = new CustomContainer(this,'forest','База', 180, 160)
 
 
         // Village
-        this.village = this.add.image(350, 160, 'village').setScale(2);
+        this.village = this.add.image(280, 160, 'village');
 
         
 
