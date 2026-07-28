@@ -1,6 +1,5 @@
 import * as Phaser from 'phaser'
 
-
 /** 
  * Класс для быстрого создания контейнера с картинкой и текстом над ней.
  * @param scene - Всегда пишем this
@@ -9,6 +8,7 @@ import * as Phaser from 'phaser'
  * @param x - Координата x расположения
  * @param y - Координата y расположения
 */
+
 export class CustomContainer extends Phaser.GameObjects.Container {
     image: Phaser.GameObjects.Image;
     label: Phaser.GameObjects.Text;
@@ -20,9 +20,14 @@ export class CustomContainer extends Phaser.GameObjects.Container {
 
         // Create internal child components relative to (0, 0)
         this.image = scene.add.image(0, 0, imageKey);
-        this.label = scene.add.text(0,-(5*this.image.height/6), label, { 
-            color: 'rgb(250, 250, 250)', 
-            fontFamily: 'Pixelify Sans', fontSize: '18px' 
+        this.label = scene.add.text(0,-(this.image.height), label, { 
+            color: 'rgb(255, 255, 255)', 
+            fontFamily: 'Pixelify Sans', fontSize: '14px',
+            wordWrap: {
+                width: 128,
+                useAdvancedWrap: true
+            },
+            align: 'center'
         }).setOrigin(0.5);
 
         // Add children to this container
@@ -33,18 +38,27 @@ export class CustomContainer extends Phaser.GameObjects.Container {
 
         
     }
-    // Change text method
-    public changeText(newText: string): void {
+    
+    // Change label
+    public updateLabel(newText: string): void {
         this.label.setText(newText);
+    }
+
+    // Return radius
+    public getRadius(): number {
+        return 1.1*this.image.width/2
+    }
+
+    // Change label color
+    public updateLabelColor(newColor:string | CanvasPattern | CanvasGradient): void {
+        this.label.setColor(newColor)
     }
 
     
 
 }
 
-
-
-// Класс сцены
+// Класс сцены фейзера
 export class Preloader extends Phaser.Scene
 {
     agr: Phaser.GameObjects.Container

@@ -10,7 +10,7 @@ export class WorldMap extends Phaser.Scene
     gameText: Phaser.GameObjects.Text;
     camera: Phaser.Cameras.Scene2D.Camera;
     
-    // Images
+    // Containers
     forestBase: CustomContainer
     village1: CustomContainer
 
@@ -25,6 +25,8 @@ export class WorldMap extends Phaser.Scene
     }
 
     public create (): void {
+        this.cameras.main.setRoundPixels(true);
+
         // Bg 
         this.background = this.add.image(320, 180, 'background').setDepth(-1);
 
@@ -41,17 +43,44 @@ export class WorldMap extends Phaser.Scene
         this.camera.setScroll(-90,-70);
 
         // Forest Base
-        this.forestBase = new CustomContainer(this,'forest','База', 160, 140);
+        this.forestBase = new CustomContainer(this,'forest','Вернуться на базу', 160, 140);
         this.forestBase.setInteractive(
-            new Phaser.Geom.Circle(this.forestBase.width/2,this.forestBase.width/2,this.forestBase.width/2),
-            Phaser.Geom.Circle.Contains,
-        );
-        this.add.circle(160, 140, this.forestBase.height, 0xff0012).setDepth(200);
-        
-        
+            new Phaser.Geom.Circle(0, 0, this.forestBase.getRadius()),
+            Phaser.Geom.Circle.Contains
 
+        ).on('pointerover', () => {
+            this.forestBase.setScale(1.1)
+            this.forestBase.setAlpha(0.95)
+            this.forestBase.updateLabelColor('rgb(23, 252, 72)')
+
+        }).on('pointerout', () => {
+            this.forestBase.setScale(1)
+            this.forestBase.setAlpha(1)
+            this.forestBase.updateLabelColor('rgb(255,255,255)')
+
+        }).on('pointerdown', () => {
+            this.scene.start('Base');
+        });
+        
         // Village 1
-        this.village1 = new CustomContainer(this, 'village', 'Деревня', 280, 140)
+        this.village1 = new CustomContainer(this, 'village', 'Атаковать деревню', 280, 140);
+        this.village1.setInteractive(
+            new Phaser.Geom.Circle(0, 0, this.forestBase.getRadius()),
+            Phaser.Geom.Circle.Contains
+
+        ).on('pointerover', () => {
+            this.village1.setScale(1.1)
+            this.village1.setAlpha(0.95)
+            this.village1.updateLabelColor('rgb(161, 19, 19)')
+
+        }).on('pointerout', () => {
+            this.village1.setScale(1)
+            this.village1.setAlpha(1)
+            this.village1.updateLabelColor('rgb(255,255,255)')
+
+        }).on('pointerdown', () => {
+            this.scene.start('Base');
+        });
         
 
         
