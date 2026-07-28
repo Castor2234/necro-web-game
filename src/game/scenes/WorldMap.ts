@@ -11,8 +11,8 @@ export class WorldMap extends Phaser.Scene
     camera: Phaser.Cameras.Scene2D.Camera;
     
     // Images
-    forestBase: Phaser.GameObjects.Container;
-    village1: Phaser.GameObjects.Container;
+    forestBase: CustomContainer
+    village1: CustomContainer
 
 
     constructor ()
@@ -47,7 +47,6 @@ export class WorldMap extends Phaser.Scene
             Phaser.Geom.Circle.Contains,
         );
         this.add.circle(160, 140, this.forestBase.height, 0xff0012).setDepth(200);
-        this.forestBase.changeText('dad')
         
         
 

@@ -12,6 +12,7 @@ import * as Phaser from 'phaser'
 export class CustomContainer extends Phaser.GameObjects.Container {
     image: Phaser.GameObjects.Image;
     label: Phaser.GameObjects.Text;
+    
 
     constructor(scene: Phaser.Scene, imageKey: string, label: string, x: number, y: number) {
         // Super arguments: scene, x, y, [children]
