@@ -20,8 +20,8 @@ export class MainMenu extends Scene
 
         this.forest = this.add.image(512, 300, 'forest').setDepth(100);
 
-        this.title = this.add.text(320, 100, 'Main Menu', {
-            fontFamily: 'sans-serif', fontSize: 40, color: '#6d2121',
+        this.title = this.add.text(320, 100, 'Главное меню', {
+            fontFamily: 'sans-serif', fontSize: 40, color: '#faf8f8',
             stroke: '#000000', strokeThickness: 4,
             align: 'center'
         }).setOrigin(0.5).setDepth(100);
