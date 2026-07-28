@@ -20,29 +20,6 @@ function App()
         }
     }
 
-    /*
-    const moveSprite = () => {
-
-        if(phaserRef.current)
-        {
-
-            const scene = phaserRef.current.scene as MainMenu;
-
-            if (scene && scene.scene.key === 'MainMenu')
-            {
-                // Get the update logo position
-                scene.moveLogo(({ x, y }) => {
-
-                    setSpritePosition({ x, y });
-
-                });
-            }
-        }
-
-    }
-    */
-
-
     return (
         <div id="app">
             <PhaserGame ref={phaserRef} />

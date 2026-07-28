@@ -1,7 +1,7 @@
 import { Boot } from './scenes/0Boot';
 import { Preloader } from './scenes/1Preloader';
 import { MainMenu } from './scenes/2MainMenu';
-import { Game as MainGame } from './scenes/3Game';
+import { Base } from './scenes/3Base';
 import { WorldMap } from './scenes/WorldMap';
 
 import { AUTO, Game, Scale } from 'phaser';
@@ -31,7 +31,7 @@ const config: Phaser.Types.Core.GameConfig = {
         Boot,
         Preloader,
         MainMenu,
-        MainGame,
+        Base,
         WorldMap
     ]
 };

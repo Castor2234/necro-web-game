@@ -1,7 +1,7 @@
 import { EventBus } from '../EventBus';
-import { Scene } from 'phaser';
+import * as Phaser from 'phaser'
 
-export class Game extends Scene
+export class Base extends Phaser.Scene
 {
     // Scene setup
     background: Phaser.GameObjects.Image;
@@ -19,7 +19,7 @@ export class Game extends Scene
 
     constructor ()
     {
-        super('Game');
+        super('Base');
     }
 
     public init (data: number): void {
@@ -32,7 +32,7 @@ export class Game extends Scene
         this.background = this.add.image(320, 180, 'background').setDepth(-1);
 
         // Scene title
-        this.gameText = this.add.text(220, 50, 'Основная сцена игры', {
+        this.gameText = this.add.text(220, 50, 'Сцена базы', {
             fontFamily: 'Arial Black', fontSize: 32, color: '#b98ba0',
             stroke: '#000000', strokeThickness: 2,
             align: 'center'

@@ -1,38 +1,52 @@
-import { Scene, GameObjects } from 'phaser';
+import * as Phaser from 'phaser'
 
 
-// Классы для удобства
-export class CustomContainer extends GameObjects.Container {
-    image: GameObjects.Image;
-    label: GameObjects.Text;
+/** 
+ * Класс для быстрого создания контейнера с картинкой и текстом над ней.
+ * @param scene - Всегда пишем this
+ * @param imageKey - Уникальный ключ картинки, выбранный при её загрузке в память
+ * @param label - Текст над картинкой
+ * @param x - Координата x расположения
+ * @param y - Координата y расположения
+*/
+export class CustomContainer extends Phaser.GameObjects.Container {
+    image: Phaser.GameObjects.Image;
+    label: Phaser.GameObjects.Text;
 
-    constructor(scene: Scene, pathToImg: string, label: string, x: number, y: number) {
+    constructor(scene: Phaser.Scene, imageKey: string, label: string, x: number, y: number) {
         // Super arguments: scene, x, y, [children]
         super(scene, x, y);
 
         // Create internal child components relative to (0, 0)
-        this.image = scene.add.image(0, 0, pathToImg);
-        this.label = scene.add.text(0,-(10+(this.image.height/2)), label, { color: 'rgb(250, 250, 250)', fontSize: '24px' }).setOrigin(0.5);
+        this.image = scene.add.image(0, 0, imageKey);
+        this.label = scene.add.text(0,-(5*this.image.height/6), label, { 
+            color: 'rgb(250, 250, 250)', 
+            fontFamily: 'Pixelify Sans', fontSize: '18px' 
+        }).setOrigin(0.5);
 
         // Add children to this container
         this.add([this.image, this.label]);
 
         // REQUIRED: Register this container instance with the Scene's display list
         scene.add.existing(this);
-    }
 
+        
+    }
     // Change text method
     public changeText(newText: string): void {
         this.label.setText(newText);
     }
+
+    
 
 }
 
 
 
 // Класс сцены
-export class Preloader extends Scene
+export class Preloader extends Phaser.Scene
 {
+    agr: Phaser.GameObjects.Container
     constructor ()
     {
         super('Preloader');
@@ -74,7 +88,8 @@ export class Preloader extends Scene
     }
 
     create ()
-    {
+    {           
+        
         //  When all the assets have loaded, it's often worth creating global objects here that the rest of the game can use.
         //  For example, you can define global animations here, so we can use them in other scenes.
 

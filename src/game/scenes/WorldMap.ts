@@ -1,9 +1,9 @@
 import { EventBus } from '../EventBus';
-import { Scene } from 'phaser';
+import * as Phaser from 'phaser'
 import { CustomContainer } from './1Preloader'
 
 
-export class WorldMap extends Scene
+export class WorldMap extends Phaser.Scene
 {
     // Scene setup
     background: Phaser.GameObjects.Image;
@@ -11,8 +11,8 @@ export class WorldMap extends Scene
     camera: Phaser.Cameras.Scene2D.Camera;
     
     // Images
-    forest: Phaser.GameObjects.Container;
-    village: Phaser.GameObjects.Image;
+    forestBase: Phaser.GameObjects.Container;
+    village1: Phaser.GameObjects.Container;
 
 
     constructor ()
@@ -28,24 +28,32 @@ export class WorldMap extends Scene
         // Bg 
         this.background = this.add.image(320, 180, 'background').setDepth(-1);
 
-        // Scene title (Карта пока что показывается в зуме 2)
+        // Scene title (Карта пока что показывается в зуме x2)
         this.gameText = this.add.text(220, 50, 'Карта мира', {
-            fontFamily: 'Arial Black', fontSize: 32, color: '#b98ba0',
+            fontFamily: 'Pixelify Sans', fontSize: 32, color: '#b98ba0',
             stroke: '#000000', strokeThickness: 2,
             align: 'center'
         }).setOrigin(0.5).setDepth(100);
 
         // Camera
         this.camera = this.cameras.main;
-        this.camera.setZoom(2)
-        this.camera.setScroll(-90,-70)
+        this.camera.setZoom(2);
+        this.camera.setScroll(-90,-70);
 
-        // Forest
-        this.forest = new CustomContainer(this,'forest','База', 180, 160)
+        // Forest Base
+        this.forestBase = new CustomContainer(this,'forest','База', 160, 140);
+        this.forestBase.setInteractive(
+            new Phaser.Geom.Circle(this.forestBase.width/2,this.forestBase.width/2,this.forestBase.width/2),
+            Phaser.Geom.Circle.Contains,
+        );
+        this.add.circle(160, 140, this.forestBase.height, 0xff0012).setDepth(200);
+        this.forestBase.changeText('dad')
+        
+        
 
-
-        // Village
-        this.village = this.add.image(280, 160, 'village');
+        // Village 1
+        this.village1 = new CustomContainer(this, 'village', 'Деревня', 280, 140)
+        
 
         
 

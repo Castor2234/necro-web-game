@@ -1,8 +1,8 @@
-import { Scene } from 'phaser';
+import * as Phaser from 'phaser'
 
 import { EventBus } from '../EventBus';
 
-export class MainMenu extends Scene
+export class MainMenu extends Phaser.Scene
 {
     background: Phaser.GameObjects.Image;
     title: Phaser.GameObjects.Text;
@@ -29,7 +29,7 @@ export class MainMenu extends Scene
     
     changeScene ()
     {
-        this.scene.start('Game');
+        this.scene.start('Base');
     }
 
 }
