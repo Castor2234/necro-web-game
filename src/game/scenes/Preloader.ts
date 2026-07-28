@@ -27,6 +27,7 @@ export class Preloader extends Scene
 
         });
         */
+        
     }
 
     preload ()
