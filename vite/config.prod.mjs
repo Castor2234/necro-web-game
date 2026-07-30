@@ -23,7 +23,7 @@ export default defineConfig({
         react(),
         phasermsg()
     ],
-    resolve: { tsconfigPaths: true },
+    
     logLevel: 'warning',
     build: {
         rollupOptions: {
