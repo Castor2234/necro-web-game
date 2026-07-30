@@ -76,7 +76,14 @@ export const PhaserGame = forwardRef<IRefPhaserGame, IProps>(function PhaserGame
 
     return (
         <div id="game-container" style={{ position: 'relative'}}>
-            {children}
+            <div style={{
+                display: 'flex', 
+                justifyContent: 'center', 
+                alignItems: 'center', 
+                
+            }}>
+                {children}
+            </div>
         </div>
     );
 

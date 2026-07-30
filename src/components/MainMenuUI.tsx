@@ -8,7 +8,6 @@ interface MainMenuUIProps {
 export const MainMenuUI: React.FC<MainMenuUIProps> = ({ activeSceneKey }) => {
     // Only render the UI if the active scene is 'MainMenu'
     if (activeSceneKey !== 'MainMenu') {
-        console.log(activeSceneKey)
         return null;
     }
 
