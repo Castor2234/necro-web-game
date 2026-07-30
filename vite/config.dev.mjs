@@ -6,6 +6,7 @@ export default defineConfig({
     base: './',
     plugins: [
         react(),
+        
         {
         name: "full-reload-on-no-modules",
         hotUpdate({ modules, server, file }) {
@@ -15,9 +16,11 @@ export default defineConfig({
             path: '*'
             })
             }
-        }
+        } 
     }
     ],
+    resolve: { tsconfigPaths: true },
+    
     server: {
         port: 8080,
         open: true,

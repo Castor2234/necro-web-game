@@ -86,6 +86,10 @@ export class Preloader extends Phaser.Scene
             bar.width = 4 + (236 * progress);
 
         });
+
+
+        // Initial values
+        this.registry.set('score', 0)
         
         
     }
@@ -109,6 +113,6 @@ export class Preloader extends Phaser.Scene
         //  For example, you can define global animations here, so we can use them in other scenes.
 
         //  Move to the MainMenu. You could also swap this for a Scene Transition, such as a camera fade.
-        this.scene.start('WorldMap');
+        this.scene.start('Base');
     }
 }

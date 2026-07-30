@@ -23,7 +23,7 @@ export class Base extends Phaser.Scene
     }
 
     public init (data: number): void {
-        // this.score = data.score || 0;
+        //this.registry.set('score', 0)
     }
 
     public create (): void {

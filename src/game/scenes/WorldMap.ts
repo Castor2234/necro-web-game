@@ -14,6 +14,9 @@ export class WorldMap extends Phaser.Scene
     forestBase: CustomContainer
     village1: CustomContainer
 
+    // Starting values
+    private ratSpeed = 400;
+    private v1pw = 50;
 
     constructor ()
     {
