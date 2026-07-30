@@ -14,11 +14,12 @@ export class MainMenu extends Phaser.Scene
 
     create ()
     {
+        // Делаем фон и затемняем
         this.background = this.add.image(320, 180, 'background');
         this.background.setAlpha(0.5);
 
 
-
+        // Сцена готова к использованию
         EventBus.emit('current-scene-ready', this);
     }
     

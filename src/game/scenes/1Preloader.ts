@@ -104,6 +104,8 @@ export class Preloader extends Phaser.Scene
         this.load.image('zombie_horde', 'zombie_horde.png');
         this.load.image('dark_tree', 'dark_tree.png');
 
+        this.load.image('necro_icon', 'necromancer_icon.png');
+
     }
 
     create ()

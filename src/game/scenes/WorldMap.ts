@@ -28,10 +28,10 @@ export class WorldMap extends Phaser.Scene
     }
 
     public create (): void {
-        this.cameras.main.setRoundPixels(true);
 
         // Bg 
         this.background = this.add.image(320, 180, 'background').setDepth(-1);
+
 
         // Scene title (Карта пока что показывается в зуме x2)
         this.gameText = this.add.text(220, 50, 'Карта мира', {
@@ -42,8 +42,7 @@ export class WorldMap extends Phaser.Scene
 
         // Camera
         this.camera = this.cameras.main;
-        this.camera.setZoom(2);
-        this.camera.setScroll(-90,-70);
+        this.camera.setZoom(1);
 
         // Forest Base
         this.forestBase = new CustomContainer(this,'forest','Вернуться на базу', 160, 140);
