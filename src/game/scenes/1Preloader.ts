@@ -8,7 +8,7 @@ export class Preloader extends Scene {
 
   init() {
     //  We loaded this image in our Boot Scene, so we can display it here
-    this.add.image(0, 0, 'background');
+    this.add.image(320, 180, 'background');
 
     //  A simple progress bar. This is the outline of the bar.
     this.add.rectangle(320, 180, 240, 32).setStrokeStyle(1, 0xffffff);
@@ -30,12 +30,16 @@ export class Preloader extends Scene {
     //  Load the assets for the game - Replace with your own assets
     this.load.setPath('assets');
 
+    // Фоны
+
+    // Спрайты
     this.load.image('forest', 'forest_tile.png');
     this.load.image('village', 'village_tile.png');
-    this.load.image('zombie_horde', 'zombie_horde.png');
     this.load.image('dark_tree', 'dark_tree.png');
 
+    // Юниты
     this.load.image('necro_icon', 'necromancer_icon.png');
+    this.load.image('zombie_horde', 'zombie_horde.png');
   }
 
   create() {
