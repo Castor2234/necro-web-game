@@ -1,6 +1,6 @@
 import { EventBus } from '../EventBus';
 import * as Phaser from 'phaser';
-import { CustomContainer } from './1Preloader';
+import { EntityContainer } from '../objects/EntityContainer';
 
 export class WorldMap extends Phaser.Scene {
   // Scene setup
@@ -9,8 +9,8 @@ export class WorldMap extends Phaser.Scene {
   camera: Phaser.Cameras.Scene2D.Camera;
 
   // Containers
-  forestBase: CustomContainer;
-  village1: CustomContainer;
+  forestBase: EntityContainer;
+  village1: EntityContainer;
 
   // Starting values
   private ratSpeed = 400;
@@ -46,7 +46,7 @@ export class WorldMap extends Phaser.Scene {
     this.camera.setZoom(1);
 
     // Forest Base
-    this.forestBase = new CustomContainer(
+    this.forestBase = new EntityContainer(
       this,
       'forest',
       'Вернуться на базу',
@@ -73,7 +73,7 @@ export class WorldMap extends Phaser.Scene {
       });
 
     // Village 1
-    this.village1 = new CustomContainer(
+    this.village1 = new EntityContainer(
       this,
       'village',
       'Атаковать деревню',

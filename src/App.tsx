@@ -21,7 +21,7 @@ function App() {
       const scene = phaserRef.current.scene as MainMenu;
 
       if (scene) {
-        scene.changeScene();
+        scene.scene.start('Base');
       }
     }
   };
