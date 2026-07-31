@@ -9,11 +9,10 @@ export interface IRefPhaserGame {
 
 interface IProps {
   currentActiveScene?: (scene_instance: Phaser.Scene) => void;
-  children?: React.ReactNode; // Add children to props
 }
 
 export const PhaserGame = forwardRef<IRefPhaserGame, IProps>(
-  function PhaserGame({ currentActiveScene, children }, ref) {
+  function PhaserGame({ currentActiveScene }, ref) {
     const game = useRef<Phaser.Game | null>(null!);
 
     useLayoutEffect(() => {
@@ -54,7 +53,7 @@ export const PhaserGame = forwardRef<IRefPhaserGame, IProps>(
       };
     }, [currentActiveScene, ref]);
 
-    return <div id="game-container">{children}</div>;
+    return <div id="game-container"></div>;
   }
 );
 

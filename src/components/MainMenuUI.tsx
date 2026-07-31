@@ -12,12 +12,14 @@ export const MainMenuUI: React.FC<MainMenuUIProps> = ({ activeSceneKey }) => {
   }
 
   return (
-    <div style={overlayStyle}>
-      <h1 style={titleStyle}>Главное меню</h1>
+    <div>
+      {/*style={overlayStyle}*/}
+      <h1>Главное меню</h1> {/*style={titleStyle}*/}
     </div>
   );
 };
 
+/*
 // Styles moved from App.tsx
 const overlayStyle: React.CSSProperties = {
   position: 'absolute',
@@ -39,3 +41,5 @@ const titleStyle: React.CSSProperties = {
   WebkitTextStroke: '2px #000000',
   margin: 0,
 };
+*/
+

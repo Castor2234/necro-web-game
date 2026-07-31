@@ -2,8 +2,8 @@ import { useRef, useState } from 'react';
 import { IRefPhaserGame, PhaserGame } from './PhaserGame';
 import { MainMenu } from './game/scenes/2MainMenu';
 //import { MainMenuUI } from './components/MainMenuUI';
-//import { Game } from 'phaser';
 import { usePhaserScale } from './hooks/usePhaserScale';
+import styles from '../public/css_modules/ExternalUI.module.css';
 
 function App() {
   //  References to the PhaserGame component (game and scene are exposed)
@@ -16,26 +16,20 @@ function App() {
     setCurrentSceneKey(scene.scene.key);
   };
 
-  const changeScene = () => {
+  const startScene = (sceneKey: string) => {
     if (phaserRef.current) {
       const scene = phaserRef.current.scene as MainMenu;
 
       if (scene) {
-        scene.scene.start('Base');
+        scene.scene.start(sceneKey);
       }
     }
   };
 
   return (
-    <div
-      id="app"
-      style={{
-        position: 'relative',
-        width: '100vw',
-        height: '100vh',
-        overflow: 'hidden',
-      }}
-    >
+    // Главный компонент app сразу под root
+    <div id="app">
+      {/* gamecontainer, внутри которого phaser canvas */}
       <PhaserGame ref={phaserRef} currentActiveScene={updateCurrentSceneKey} />
       {/* Dynamic React Game HUD Overlay */}
       <div style={uiStyle}>
@@ -56,9 +50,37 @@ function App() {
           Score: 100
         </div>
       </div>
-      <div>
-        <button className="button" onClick={changeScene}>
-          Change Scene
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          position: 'absolute', // Added so it doesn't get hidden behind the canvas
+          bottom: '50%', // Adjust as needed
+          right: '2px', // Adjust as needed
+          transform: 'translatey(50%)',
+          zIndex: 10,
+        }}
+      >
+        <button
+          className={styles.button}
+          onClick={() => startScene('MainMenu')}
+          disabled={currentSceneKey === 'MainMenu'}
+        >
+          Главное меню
+        </button>
+        <button
+          className={styles.button}
+          onClick={() => startScene('Base')}
+          disabled={currentSceneKey === 'Base'}
+        >
+          База
+        </button>
+        <button
+          className={styles.button}
+          onClick={() => startScene('WorldMap')}
+          disabled={currentSceneKey === 'WorldMap'}
+        >
+          Карта локации
         </button>
       </div>
     </div>
