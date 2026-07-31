@@ -32,15 +32,20 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.22.0",
+    "@eslint/compat": "^2.1.0",
+    "@eslint/eslintrc": "^0.1.0",
+    "@eslint/js": "^9.39.5",
     "@types/node": "^26.1.2",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@vitejs/plugin-react": "^4.3.4",
     "eslint": "^10.8.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.4.19",
-    "globals": "^16.0.0",
+    "globals": "^16.5.0",
+    "prettier": "^3.9.6",
     "terser": "^5.28.1",
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.26.1",
@@ -48,5 +53,8 @@
   },
   "allowScripts": {
     "esbuild@0.25.12": true
+  },
+  "overrides": {
+    "minimatch": "^10.2.4"
   }
 }
