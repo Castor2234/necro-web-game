@@ -3,7 +3,7 @@ import { IRefPhaserGame, PhaserGame } from './PhaserGame';
 import { MainMenu } from './game/scenes/2MainMenu';
 //import { MainMenuUI } from './components/MainMenuUI';
 import { usePhaserScale } from './hooks/usePhaserScale';
-import styles from '../public/css_modules/ExternalUI.module.css';
+import styles from './styles/ExternalUI.module.css';
 
 function App() {
   //  References to the PhaserGame component (game and scene are exposed)
