@@ -24,6 +24,17 @@
   }
 }
 
+/* ExternalUI.module.css */
+.navPanel {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  bottom: 50%;
+  right: 2px;
+  transform: translateY(50%); /* fixed the typo: translatey → translateY */
+  z-index: 10;
+}
+
 /* Перенес из MainMenuUI*/
 .overlay {
   position: 'absolute';
