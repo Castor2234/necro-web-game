@@ -1,34 +1,37 @@
-import { useState, useEffect, RefObject } from 'react';
+import { useState, useEffect, useRef, RefObject } from 'react';
 import * as Phaser from 'phaser';
 import { IRefPhaserGame } from '../PhaserGame';
+import { EventBus } from '../game/EventBus';
 
 export const usePhaserScale = (phaserRef: RefObject<IRefPhaserGame | null>) => {
   const [uiStyle, setUiStyle] = useState<React.CSSProperties>({
     position: 'absolute',
-    pointerEvents: 'none', // Allows clicks to pass through to canvas if needed
+    pointerEvents: 'none',
     transformOrigin: 'top left',
+    visibility: 'hidden', // hide until first real measurement
   });
 
-  useEffect(() => {
-    if (!phaserRef.current) return;
+  const rafRef = useRef<number | null>(null);
+  const resizeObserverRef = useRef<ResizeObserver | null>(null);
+  const gameRef = useRef<Phaser.Game | undefined>(undefined);
 
-    const gameInstance: Phaser.Game = phaserRef.current?.game as Phaser.Game;
+  useEffect(() => {
+    const scheduleUpdate = () => {
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+      rafRef.current = requestAnimationFrame(updateBounds);
+    };
 
     const updateBounds = () => {
-      const canvas = phaserRef.current?.game?.canvas;
-      if (!canvas) return;
+      const game = gameRef.current;
+      const canvas = game?.canvas;
+      if (!game || !canvas) return;
 
-      // Get Phaser's internal scale manager size data
-      const { width: dispWidth, height: dispHeight } =
-        gameInstance.scale.displaySize;
-      const { width: gameWidth, height: gameHeight } =
-        gameInstance.scale.gameSize;
+      const { width: dispWidth, height: dispHeight } = game.scale.displaySize;
+      const { width: gameWidth, height: gameHeight } = game.scale.gameSize;
+      if (!gameWidth || !gameHeight) return;
 
-      // Calculate the scaling factor between the virtual game logic coordinates and the actual CSS pixels
       const scaleX = dispWidth / gameWidth;
       const scaleY = dispHeight / gameHeight;
-
-      // Find where the canvas sits inside its parent container
       const rect = canvas.getBoundingClientRect();
 
       setUiStyle({
@@ -37,25 +40,53 @@ export const usePhaserScale = (phaserRef: RefObject<IRefPhaserGame | null>) => {
         top: `${rect.top}px`,
         width: `${gameWidth}px`,
         height: `${gameHeight}px`,
-        // Scale the React elements to exactly match the canvas stretching/scaling
         transform: `scale(${scaleX}, ${scaleY})`,
         transformOrigin: 'top left',
         pointerEvents: 'none',
+        zIndex: 10,
+        visibility: 'visible',
       });
     };
 
-    // Run initially when game instances becomes active
-    updateBounds();
+    const attachScaleListeners = (game: Phaser.Game) => {
+      game.scale.on(Phaser.Scale.Events.RESIZE, scheduleUpdate);
+      game.scale.on(Phaser.Scale.Events.ORIENTATION_CHANGE, scheduleUpdate);
 
-    // Bind directly to Phaser's scale manager event loop
-    gameInstance.scale.on('resize', updateBounds);
+      resizeObserverRef.current = new ResizeObserver(scheduleUpdate);
+      const parent = game.canvas.parentElement;
+      if (parent) resizeObserverRef.current.observe(parent);
+    };
 
-    // Standard window resize backup
-    window.addEventListener('resize', updateBounds);
+    // Fires once the game has booted AND a scene is actually running —
+    // by this point game.scale is fully resolved, so this replaces polling.
+    const onSceneReady = () => {
+      const game = phaserRef.current?.game as Phaser.Game | undefined;
+      if (!game || !game.canvas) return;
+
+      // Only attach scale/resize listeners once, even if multiple scenes start
+      if (gameRef.current !== game) {
+        gameRef.current = game;
+        attachScaleListeners(game);
+      }
+
+      updateBounds();
+    };
+
+    EventBus.on('current-scene-ready', onSceneReady);
+    window.addEventListener('resize', scheduleUpdate);
 
     return () => {
-      gameInstance.scale.off('resize', updateBounds);
-      window.removeEventListener('resize', updateBounds);
+      EventBus.removeListener('current-scene-ready', onSceneReady);
+      window.removeEventListener('resize', scheduleUpdate);
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+      if (gameRef.current) {
+        gameRef.current.scale.off(Phaser.Scale.Events.RESIZE, scheduleUpdate);
+        gameRef.current.scale.off(
+          Phaser.Scale.Events.ORIENTATION_CHANGE,
+          scheduleUpdate
+        );
+      }
+      resizeObserverRef.current?.disconnect();
     };
   }, [phaserRef]);
 

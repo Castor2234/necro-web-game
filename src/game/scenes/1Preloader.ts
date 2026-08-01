@@ -31,6 +31,7 @@ export class Preloader extends Scene {
     this.load.setPath('assets');
 
     // Фоны
+    this.load.image('location_1', 'location_1.png');
 
     // Спрайты
     this.load.image('forest', 'forest_tile.png');
