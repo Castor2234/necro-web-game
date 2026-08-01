@@ -1,16 +1,6 @@
 import React from 'react';
 
-// Define the props for our new component
-interface MainMenuUIProps {
-  activeSceneKey: string;
-}
-
-export const MainMenuUI: React.FC<MainMenuUIProps> = ({ activeSceneKey }) => {
-  // Only render the UI if the active scene is 'MainMenu'
-  if (activeSceneKey !== 'MainMenu') {
-    return null;
-  }
-
+export const MainMenuHUD: React.FC = () => {
   return (
     <div>
       {/*style={overlayStyle}*/}
