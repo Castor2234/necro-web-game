@@ -1,9 +1,9 @@
 body {
   margin: 0;
   padding: 0;
-  color: rgba(51, 25, 56, 0.87);
+  color: rgba(255, 255, 255);
   background-color: #002400;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: Alagard;
 }
 
 #app {
