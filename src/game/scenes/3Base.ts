@@ -19,11 +19,11 @@ export class Base extends Phaser.Scene {
     super('Base');
   }
 
-  public init(data: number): void {
+  init(data: number): void {
     //this.registry.set('score', 0)
   }
 
-  public create(): void {
+  create(): void {
     // Bg
     this.background = this.add.image(320, 180, 'background').setDepth(-1);
 
@@ -41,10 +41,6 @@ export class Base extends Phaser.Scene {
       .setDepth(100);
 
     EventBus.emit('current-scene-ready', this);
-  }
-
-  changeScene() {
-    this.scene.start('WorldMap');
   }
 }
 

@@ -31,7 +31,7 @@ export class Preloader extends Scene {
     this.load.setPath('assets');
 
     // Фоны
-    this.load.image('location_1', 'location_1.png');
+    this.load.image('location_1_bg', 'location_1.png');
 
     // Спрайты
     this.load.image('forest', 'forest_tile.png');
@@ -40,7 +40,7 @@ export class Preloader extends Scene {
 
     // Юниты
     this.load.image('necro_icon', 'necromancer_icon.png');
-    this.load.image('zombie_horde', 'zombie_horde.png');
+    this.load.image('zombie_horde_img', 'zombie_horde.png');
   }
 
   create() {

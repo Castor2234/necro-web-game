@@ -2,6 +2,7 @@ import { Boot } from './scenes/0Boot';
 import { Preloader } from './scenes/1Preloader';
 import { MainMenu } from './scenes/2MainMenu';
 import { Base } from './scenes/3Base';
+import { Location_1 } from './scenes/Location1';
 import { WorldMap } from './scenes/WorldMap';
 
 import { AUTO, Game, Scale } from 'phaser';
@@ -24,7 +25,7 @@ const config: Phaser.Types.Core.GameConfig = {
     autoCenter: Scale.CENTER_BOTH,
   },
 
-  scene: [Boot, Preloader, MainMenu, Base, WorldMap],
+  scene: [Boot, Preloader, MainMenu, Base, Location_1, WorldMap],
 };
 
 const StartGame = (parent: string) => {

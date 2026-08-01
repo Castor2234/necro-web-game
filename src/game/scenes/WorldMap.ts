@@ -20,11 +20,11 @@ export class WorldMap extends Phaser.Scene {
     super('WorldMap');
   }
 
-  public init(data: number): void {
+  init(data: number): void {
     // this.score = data.score || 0;
   }
 
-  public create(): void {
+  create(): void {
     // Bg
     this.background = this.add.image(320, 180, 'background').setDepth(-1);
 
@@ -100,10 +100,6 @@ export class WorldMap extends Phaser.Scene {
       });
 
     EventBus.emit('current-scene-ready', this);
-  }
-
-  changeScene() {
-    this.scene.start('MainMenu');
   }
 }
 
