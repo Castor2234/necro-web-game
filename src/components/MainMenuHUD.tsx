@@ -2,9 +2,17 @@ import React from 'react';
 
 export const MainMenuHUD: React.FC = () => {
   return (
-    <div>
-      {/*style={overlayStyle}*/}
-      <h1>Главное меню</h1> {/*style={titleStyle}*/}
+    <div
+      style={{
+        position: 'absolute',
+        top: '40px',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        fontSize: '32px',
+        textAlign: 'center',
+      }}
+    >
+      Главное меню
     </div>
   );
 };
