@@ -1,9 +1,8 @@
-import { ExternalHUD } from './components/ExternalHUD';
+import { ExternalHUD, ExternalHUDProps } from './components/ExternalHUD';
 import { MainMenuHUD } from './components/MainMenuHUD';
 import { GameplayHUD } from './components/GameplayHUD';
 
 export const SCENE_UI: Record<string, React.ComponentType> = {
-  //MainMenu: MainMenuHUD,
   MainMenu: GameplayHUD,
   Base: GameplayHUD,
   //Base: BaseHUD,
@@ -11,9 +10,11 @@ export const SCENE_UI: Record<string, React.ComponentType> = {
   //WorldMap: GameplayHUD, // reuse same HUD for multiple scenes if needed
 };
 
-/*
-export const SCENE_EXTERNAL_UI: Record<string, React.ComponentType> = {
+export const SCENE_EXTERNAL_UI: Record<
+  string,
+  React.ComponentType<ExternalHUDProps>
+> = {
   //MainMenu: GameplayHUD,
   Base: ExternalHUD,
 };
-*/
+

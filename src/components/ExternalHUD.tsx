@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from '../styles/ExternalHUD.module.css';
 
-interface ExternalHUDProps {
+export interface ExternalHUDProps {
   currentSceneKey: string;
   onNavigate: (sceneKey: string) => void;
 }
