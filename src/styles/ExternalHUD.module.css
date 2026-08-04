@@ -1,7 +1,8 @@
 .button {
-  width: 60px;
+  width: 80px;
   margin: 5px;
   padding: 5px;
+  font-size: 16px;
   background-color: #000000;
   color: rgb(255, 255, 255);
   border: 1px solid rgba(255, 255, 255, 0.87);
@@ -9,12 +10,12 @@
   transition: all 0.3s;
 
   &:hover {
-    border: 1px solid #0ec3c9;
-    color: #0ec3c9;
+    border: 1px solid #076807;
+    color: #076807;
   }
 
   &:active {
-    background-color: #0ec3c9;
+    background-color: #076807;
   }
 
   /* Disabled styles */
