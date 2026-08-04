@@ -21,5 +21,6 @@ export const SCENE_EXTERNAL_UI: Record<
 > = {
   Base: ExternalHUD,
   Location_1: ExternalHUD,
+  WorldMap: ExternalHUD,
 };
 

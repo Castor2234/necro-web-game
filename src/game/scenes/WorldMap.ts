@@ -48,7 +48,7 @@ export class WorldMap extends Phaser.Scene {
     // Forest Base
     this.forestBase = new EntityContainer(
       this,
-      'forest',
+      'forest_img',
       'Вернуться на базу',
       160,
       140
@@ -75,7 +75,7 @@ export class WorldMap extends Phaser.Scene {
     // Village 1
     this.village1 = new EntityContainer(
       this,
-      'village',
+      'village_img',
       'Атаковать деревню',
       280,
       140

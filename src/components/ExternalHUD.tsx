@@ -10,6 +10,7 @@ const NAV_ITEMS = [
   { key: 'MainMenu', label: 'Главное меню' },
   { key: 'Base', label: 'База' },
   { key: 'Location_1', label: 'Первая локация' },
+  { key: 'WorldMap', label: 'Карта мира' },
 ] as const;
 
 export const ExternalHUD: React.FC<ExternalHUDProps> = ({

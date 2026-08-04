@@ -5,8 +5,9 @@ import { CameraController } from '../controllers/CameraController';
 export class Location_1 extends Phaser.Scene {
   // Scene setup
   necromancer: Phaser.GameObjects.Image;
+  house1: Phaser.GameObjects.Image;
   village1: Phaser.GameObjects.Image;
-  village2: Phaser.GameObjects.Image;
+  village3: Phaser.GameObjects.Image;
 
   // Camera zoom and drag
   private cameraController: CameraController;
@@ -35,9 +36,12 @@ export class Location_1 extends Phaser.Scene {
     // Necromancer
     this.necromancer = this.add.image(20, 50, 'necro_icon').setScale(0.5);
 
+    // Houses
+    this.house1 = this.add.image(60, 150, 'house_1_img');
+
     // Villages
     this.village1 = this.add.image(130, 70, 'village_img').setScale(2);
-    this.village2 = this.add.image(35, 170, 'village_img').setScale(2);
+    this.village3 = this.add.image(185, 215, 'village_img').setScale(2);
 
     EventBus.emit('current-scene-ready', this);
   }

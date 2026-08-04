@@ -33,6 +33,7 @@ export class Preloader extends Scene {
     // Спрайты
     this.load.image('forest_img', 'forest_tile.png');
     this.load.image('village_img', 'village_tile.png');
+    this.load.image('house_1_img', 'house1.png');
     this.load.image('dark_tree_img', 'dark_tree.png');
 
     // Юниты
