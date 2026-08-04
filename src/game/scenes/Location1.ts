@@ -1,47 +1,43 @@
 import { EventBus } from '../EventBus';
 import * as Phaser from 'phaser';
-import { EntityContainer } from '../objects/EntityContainer';
-
-const LOCATION_1_CONFIG = {
-  ratSpeed: 400,
-  village1Power: 50,
-} as const;
+import { CameraController } from '../controllers/CameraController';
 
 export class Location_1 extends Phaser.Scene {
   // Scene setup
-  background: Phaser.GameObjects.Image;
-  gameText: Phaser.GameObjects.Text;
-  camera: Phaser.Cameras.Scene2D.Camera;
+  necromancer: Phaser.GameObjects.Image;
+  village1: Phaser.GameObjects.Image;
+  village2: Phaser.GameObjects.Image;
 
-  // Containers
-  village1: EntityContainer;
+  // Camera zoom and drag
+  private cameraController: CameraController;
 
-  // Starting values
-  private ratSpeed = LOCATION_1_CONFIG.ratSpeed;
-  private village1power = LOCATION_1_CONFIG.village1Power;
+  // Values sourced from the global registry
+  private ratSpeed = 0;
+  private village1Power = 0;
 
   constructor() {
     super('Location_1');
   }
 
-  init(): void {}
+  init(): void {
+    this.village1Power = this.registry.get('village1Power') ?? 0;
+    this.ratSpeed = this.registry.get('ratSpeed') ?? 0;
+  }
 
   create(): void {
     // Bg
-    this.background = this.add.image(320, 180, 'location_1_bg').setDepth(-1);
+    this.add.image(320, 180, 'location_1_bg').setDepth(-1);
 
-    // Scene title (Карта пока что показывается в зуме x2)
-    this.gameText = this.add
-      .text(220, 50, 'Первая локация', {
-        fontFamily: 'Pixelify Sans',
-        fontSize: 32,
-        color: '#b98ba0',
-        stroke: '#000000',
-        strokeThickness: 2,
-        align: 'center',
-      })
-      .setOrigin(0.5)
-      .setDepth(100);
+    // Zoom and drag
+    this.cameraController = new CameraController(this);
+    this.events.once('shutdown', () => this.cameraController.destroy());
+
+    // Necromancer
+    this.necromancer = this.add.image(20, 50, 'necro_icon').setScale(0.5);
+
+    // Villages
+    this.village1 = this.add.image(130, 70, 'village_img').setScale(2);
+    this.village2 = this.add.image(35, 170, 'village_img').setScale(2);
 
     EventBus.emit('current-scene-ready', this);
   }

@@ -21,9 +21,6 @@ export class Preloader extends Scene {
       //  Update the progress bar (our bar is 464px wide, so 100% = 464px)
       bar.width = 4 + 236 * progress;
     });
-
-    // Initial values
-    this.registry.set('score', 0);
   }
 
   preload() {
@@ -34,9 +31,9 @@ export class Preloader extends Scene {
     this.load.image('location_1_bg', 'location_1.png');
 
     // Спрайты
-    this.load.image('forest', 'forest_tile.png');
-    this.load.image('village', 'village_tile.png');
-    this.load.image('dark_tree', 'dark_tree.png');
+    this.load.image('forest_img', 'forest_tile.png');
+    this.load.image('village_img', 'village_tile.png');
+    this.load.image('dark_tree_img', 'dark_tree.png');
 
     // Юниты
     this.load.image('necro_icon', 'necromancer_icon.png');
@@ -47,8 +44,20 @@ export class Preloader extends Scene {
     //  When all the assets have loaded, it's often worth creating global objects here that the rest of the game can use.
     //  For example, you can define global animations here, so we can use them in other scenes.
 
+    // ! Initial values !
+
+    // Zombie rats stats
+    this.registry.set('zombieRats', 0);
+    this.registry.set('ratSpeed', 400);
+
+    // Resources
+    this.registry.set('corpseAmount', 0);
+
+    // Villages
+    this.registry.set('village1Power', 50);
+
     //  Move to the MainMenu. You could also swap this for a Scene Transition, such as a camera fade.
-    this.scene.start('MainMenu');
+    this.scene.start('Location_1');
   }
 }
 

@@ -7,14 +7,6 @@ export class Base extends Phaser.Scene {
   gameText: Phaser.GameObjects.Text;
   camera: Phaser.Cameras.Scene2D.Camera;
 
-  // Starting values
-  private ratSpeed = 400;
-  private v1pw = 50;
-
-  private ratAmount = 0;
-  private corpseAmount = 2;
-  private lootMulti = 1;
-
   constructor() {
     super('Base');
   }

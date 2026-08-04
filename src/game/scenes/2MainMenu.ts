@@ -4,7 +4,6 @@ import { EventBus } from '../EventBus';
 
 export class MainMenu extends Phaser.Scene {
   background: Phaser.GameObjects.Image;
-  title: Phaser.GameObjects.Text;
 
   constructor() {
     super('MainMenu');
@@ -17,10 +16,6 @@ export class MainMenu extends Phaser.Scene {
 
     // Сцена готова к использованию
     EventBus.emit('current-scene-ready', this);
-  }
-
-  changeScene() {
-    this.scene.start('Base');
   }
 }
 
