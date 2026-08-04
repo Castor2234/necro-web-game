@@ -27,6 +27,10 @@ export class CameraController {
 
   private targetZoom: number;
 
+  /** Screen position (game canvas space) to zoom toward; updated on each wheel tick. */
+  private zoomAnchorX = GAME_WIDTH / 2;
+  private zoomAnchorY = GAME_HEIGHT / 2;
+
   private readonly minZoom: number;
   private readonly maxZoom: number;
   private readonly zoomSpeed: number;
@@ -35,11 +39,14 @@ export class CameraController {
 
   // Store bound handler references so we can remove them in destroy()
   private handleWheel = (
-    _pointer: Phaser.Input.Pointer,
+    pointer: Phaser.Input.Pointer,
     _gameObjects: Phaser.GameObjects.GameObject[],
     _deltaX: number,
     deltaY: number
   ) => {
+    this.zoomAnchorX = pointer.x;
+    this.zoomAnchorY = pointer.y;
+
     this.targetZoom = Phaser.Math.Clamp(
       this.targetZoom - deltaY * this.zoomSpeed,
       this.minZoom,
@@ -104,11 +111,23 @@ export class CameraController {
   private update = (): void => {
     if (Math.abs(this.cam.zoom - this.targetZoom) < 0.001) return;
 
+    const oldZoom = this.cam.zoom;
     const newZoom = Phaser.Math.Linear(
-      this.cam.zoom,
+      oldZoom,
       this.targetZoom,
       this.zoomSmoothing
     );
+
+    // Phaser 4: world under a viewport pixel is
+    // scroll + halfSize + (local - halfSize) / zoom — adjust scroll when zoom changes.
+    const halfW = this.cam.width * 0.5;
+    const halfH = this.cam.height * 0.5;
+    const localX = this.zoomAnchorX - this.cam.x;
+    const localY = this.zoomAnchorY - this.cam.y;
+    const zoomFactor = 1 / oldZoom - 1 / newZoom;
+
+    this.cam.scrollX += (localX - halfW) * zoomFactor;
+    this.cam.scrollY += (localY - halfH) * zoomFactor;
     this.cam.setZoom(newZoom);
   };
 
