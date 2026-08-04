@@ -2,7 +2,12 @@ import { ExternalHUD, ExternalHUDProps } from './components/ExternalHUD';
 import { MainMenuHUD } from './components/MainMenuHUD';
 import { GameplayHUD } from './components/GameplayHUD';
 
-export const SCENE_UI: Record<string, React.ComponentType> = {
+export const SCENE_UI: Record<
+  string,
+  React.ComponentType<{
+    startScene: (sceneKey: string) => void;
+  }>
+> = {
   MainMenu: MainMenuHUD,
   Base: GameplayHUD,
   //Base: BaseHUD,
@@ -14,7 +19,6 @@ export const SCENE_EXTERNAL_UI: Record<
   string,
   React.ComponentType<ExternalHUDProps>
 > = {
-  MainMenu: ExternalHUD,
   Base: ExternalHUD,
   Location_1: ExternalHUD,
 };
