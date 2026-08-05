@@ -1,4 +1,5 @@
 import { Scene } from 'phaser';
+import { INITIAL_VALUES_CONFIG } from '../VALUES_CONFIG';
 
 export class Preloader extends Scene {
   agr: Phaser.GameObjects.Container;
@@ -45,17 +46,13 @@ export class Preloader extends Scene {
     //  When all the assets have loaded, it's often worth creating global objects here that the rest of the game can use.
     //  For example, you can define global animations here, so we can use them in other scenes.
 
-    // ! Initial values !
-
-    // Zombie rats stats
-    this.registry.set('zombieRats', 0);
-    this.registry.set('ratSpeed', 400);
-
-    // Resources
-    this.registry.set('corpseAmount', 0);
-
-    // Villages
-    this.registry.set('village1Power', 50);
+    // Setup initial values from imported config
+    for (const [stat, value] of Object.entries(INITIAL_VALUES_CONFIG) as [
+      string,
+      number,
+    ][]) {
+      this.registry.set(stat, value);
+    }
 
     //  Move to the MainMenu. You could also swap this for a Scene Transition, such as a camera fade.
     this.scene.start('Location_1');
