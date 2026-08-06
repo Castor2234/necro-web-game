@@ -46,7 +46,7 @@ export class Preloader extends Scene {
     //  When all the assets have loaded, it's often worth creating global objects here that the rest of the game can use.
     //  For example, you can define global animations here, so we can use them in other scenes.
 
-    // Setup initial values from imported config
+    // Setup all initial values from imported config
     for (const [stat, value] of Object.entries(INITIAL_VALUES_CONFIG) as [
       string,
       number,
@@ -55,7 +55,7 @@ export class Preloader extends Scene {
     }
 
     //  Move to the MainMenu. You could also swap this for a Scene Transition, such as a camera fade.
-    this.scene.start('Location_1');
+    this.scene.start('Base');
   }
 }
 
