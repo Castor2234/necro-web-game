@@ -98,3 +98,4 @@ export function LootProgressBar() {
     </div>
   );
 }
+
