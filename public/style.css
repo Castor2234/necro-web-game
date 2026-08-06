@@ -1,18 +1,23 @@
+html,
 body {
   margin: 0;
   padding: 0;
-  color: rgba(255, 255, 255);
+  height: 100%;
   background-color: #002400;
-  font-family: Alagard;
 }
 
-#app {
-  position: relative;
-  width: 100%;
-  height: 100vh;
-  overflow: hidden;
+body {
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
+#app {
+  position: relative;
+  width: 100vw;
+  max-height: 100vh;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  color: rgba(255, 255, 255);
+  font-family: Alagard;
+}
