@@ -1,14 +1,16 @@
 import React from 'react';
+import { LootProgressBar } from './LootProgressBar';
 
 export const GameplayHUD: React.FC = () => {
   return (
     <div>
+      <LootProgressBar />
       <button
         style={{
           pointerEvents: 'auto',
           position: 'absolute',
-          top: '20px',
-          left: '20px',
+          top: '10px',
+          left: '10px',
         }}
         onClick={() => console.log('React UI Scale Synced!')}
       >

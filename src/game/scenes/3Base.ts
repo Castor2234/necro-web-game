@@ -1,17 +1,19 @@
 import { EventBus } from '../EventBus';
 import * as Phaser from 'phaser';
+import { CameraController } from '../controllers/CameraController';
 
 export class Base extends Phaser.Scene {
   // Scene setup
   background: Phaser.GameObjects.Image;
   gameText: Phaser.GameObjects.Text;
   camera: Phaser.Cameras.Scene2D.Camera;
+  cameraController: CameraController;
 
   constructor() {
     super('Base');
   }
 
-  init(data: number): void {
+  init(_data: number): void {
     //this.registry.set('score', 0)
   }
 
@@ -31,6 +33,10 @@ export class Base extends Phaser.Scene {
       })
       .setOrigin(0.5)
       .setDepth(100);
+
+    // Zoom and drag
+    this.cameraController = new CameraController(this);
+    this.events.once('shutdown', () => this.cameraController.destroy());
 
     EventBus.emit('current-scene-ready', this);
   }

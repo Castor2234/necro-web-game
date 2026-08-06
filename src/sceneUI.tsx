@@ -11,7 +11,7 @@ export const SCENE_UI: Record<
   MainMenu: MainMenuHUD,
   Base: GameplayHUD,
   //Base: BaseHUD,
-  //Location_1: GameplayHUD,
+  Location_1: GameplayHUD,
   //WorldMap: GameplayHUD, // reuse same HUD for multiple scenes if needed
 };
 
