@@ -1,5 +1,5 @@
 {
-  "js/ts.tsdk.path": "./node_modules/typescript/lib",
+  
 
   // Set Prettier as the default formatter for all files
   "editor.defaultFormatter": "esbenp.prettier-vscode",
@@ -13,6 +13,7 @@
   },
 
   // Prevent VS Code's built-in JS/TS formatter from conflicting
-  "js/ts.format.enabled": false
+  "js/ts.format.enabled": false,
+  "js/ts.tsdk.path": "./node_modules/typescript/lib"
 }
 
