@@ -148,5 +148,15 @@ export class CameraController {
     this.scene.input.off('pointerout', this.handlePointerUp);
     this.scene.events.off('update', this.update, this);
   }
+
+  worldToScreen(worldX: number, worldY: number): { x: number; y: number } {
+    const halfW = this.cam.width * 0.5;
+    const halfH = this.cam.height * 0.5;
+
+    return {
+      x: halfW + (worldX - this.cam.scrollX - halfW) * this.cam.zoom,
+      y: halfH + (worldY - this.cam.scrollY - halfH) * this.cam.zoom,
+    };
+  }
 }
 

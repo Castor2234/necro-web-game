@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback, RefObject } from 'react';
 import * as Phaser from 'phaser';
 import { IRefPhaserGame } from '../PhaserGame';
 import { useEventBus } from './useEventBus';
+import { EventBus } from '../game/EventBus';
 
 export const usePhaserScale = (phaserRef: RefObject<IRefPhaserGame | null>) => {
   const [uiStyle, setUiStyle] = useState<React.CSSProperties>({
@@ -29,6 +30,8 @@ export const usePhaserScale = (phaserRef: RefObject<IRefPhaserGame | null>) => {
     const scaleX = dispWidth / gameWidth;
     const scaleY = dispHeight / gameHeight;
     const rect = canvas.getBoundingClientRect();
+
+    EventBus.emit('canvas-scale', { scaleX, scaleY });
 
     setUiStyle({
       position: 'absolute',

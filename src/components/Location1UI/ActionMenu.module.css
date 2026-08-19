@@ -1,0 +1,13 @@
+.actionMenu {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: top left;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: -30px;
+  margin-left: 15px;
+}
+

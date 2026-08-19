@@ -1,0 +1,32 @@
+.btn {
+  cursor: pointer;
+  color: #ffffff;
+  border: 2px solid black;
+  border-radius: 6px;
+  padding: 2px 12px;
+  font-family: inherit;
+  font-size: 16px;
+  transition: filter 0.3s ease;
+}
+
+.btn:hover {
+  filter: brightness(1.2);
+}
+
+.btn:active {
+  filter: brightness(0.9);
+}
+
+.primary {
+  background-color: #007400;
+}
+
+.danger {
+  background-color: #8a1f1f;
+}
+
+.ghost {
+  background-color: transparent;
+  border: 1px solid #ffffff;
+}
+

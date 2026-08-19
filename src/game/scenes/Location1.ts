@@ -2,16 +2,33 @@ import { EventBus } from '../EventBus';
 import * as Phaser from 'phaser';
 import { CameraController } from '../controllers/CameraController';
 
+interface VillageConfig {
+  id: string;
+  x: number;
+  y: number;
+  texture: string;
+}
+
+interface RatTask {
+  type: 'attack' | 'loot' | 'scout';
+  x: number;
+  y: number;
+  villageId: string;
+}
+
 export class Location_1 extends Phaser.Scene {
   // ---Scene objects---
   necromancer: Phaser.Physics.Arcade.Sprite;
   house1: Phaser.Physics.Arcade.Sprite;
-  village1: Phaser.Physics.Arcade.Sprite;
-  village2: Phaser.Physics.Arcade.Sprite;
   zombieRats: Phaser.Physics.Arcade.Sprite;
+  private villages: Phaser.Physics.Arcade.Sprite[] = [];
+  private selectedAnchor: { x: number; y: number } | null = null;
+  private ratTask: RatTask | null = null;
 
-  // Camera zoom and drag
-  private cameraController: CameraController;
+  private readonly villageConfigs: VillageConfig[] = [
+    { id: 'village1', x: 130, y: 70, texture: 'village_img' },
+    { id: 'village2', x: 40, y: 160, texture: 'village_img' },
+  ];
 
   // Values sourced from the global registry
   private zombieRatsAmount = 0;
@@ -19,9 +36,8 @@ export class Location_1 extends Phaser.Scene {
   private ratCorpsesAmount = 0;
   private lootDuration = 0;
 
-  // Prevent multiple loot triggers
-  private isLooting = false;
-  private lootCollider?: Phaser.Physics.Arcade.Collider;
+  // Camera zoom and drag
+  private cameraController: CameraController;
 
   constructor() {
     super('Location_1');
@@ -40,7 +56,6 @@ export class Location_1 extends Phaser.Scene {
 
     // Zoom and drag
     this.cameraController = new CameraController(this);
-    this.events.once('shutdown', () => this.cameraController.destroy());
 
     // Necromancer
     this.necromancer = this.physics.add
@@ -50,12 +65,28 @@ export class Location_1 extends Phaser.Scene {
     this.necromancer.refreshBody();
 
     // Villages
-    this.village1 = this.physics.add
-      .staticSprite(130, 70, 'village_img')
-      .setInteractive()
-      .on('pointerdown', () => this.lootVillage(this.village1));
+    this.villages = this.villageConfigs.map((cfg) => {
+      const sprite = this.physics.add
+        .staticSprite(cfg.x, cfg.y, cfg.texture)
+        .setData('villageId', cfg.id)
+        .setInteractive({ useHandCursor: true });
 
-    this.village2 = this.physics.add.sprite(40, 160, 'village_img');
+      sprite.on('pointerdown', (pointer: Phaser.Input.Pointer) =>
+        this.selectVillage(sprite, pointer)
+      );
+      return sprite;
+    });
+
+    // Clicking empty space deselects
+    this.input.on(
+      'pointerdown',
+      (
+        _p: Phaser.Input.Pointer,
+        currentlyOver: Phaser.GameObjects.GameObject[]
+      ) => {
+        if (currentlyOver.length === 0) this.deselectVillage();
+      }
+    );
 
     // Houses
     this.house1 = this.physics.add.sprite(350, 160, 'house_1_img');
@@ -66,72 +97,77 @@ export class Location_1 extends Phaser.Scene {
       .setScale(0.5);
     this.zombieRats.setVisible(false);
 
+    EventBus.on('village-action', this.handleVillageAction, this);
+
+    this.events.once('shutdown', () => {
+      EventBus.off('village-action', this.handleVillageAction, this);
+      this.events.once('shutdown', () => this.cameraController.destroy());
+    });
     EventBus.emit('current-scene-ready', this);
   }
 
-  lootVillage(target: Phaser.Physics.Arcade.Sprite) {
-    if (this.isLooting) return;
-    this.isLooting = true;
-
-    this.zombieRats.setVisible(true);
-
-    // Visual line
-    const graphics = this.add.graphics();
-    graphics.lineStyle(4, 0xff0000, 0.5);
-    graphics.lineBetween(
-      this.zombieRats.x,
-      this.zombieRats.y,
-      target.x,
-      target.y
-    );
-    graphics.setDepth(-0.5); // за крысами, но перед фоном
-
-    // Move zombieRats to village
-    this.physics.moveToObject(this.zombieRats, target, this.ratSpeed);
-
-    // One-time collider
-    this.lootCollider = this.physics.add.collider(
-      this.zombieRats,
-      target,
-      () => {
-        const ratsBody = this.zombieRats.body as Phaser.Physics.Arcade.Body;
-        ratsBody.stop();
-
-        // Hide rats, destroy line
-        this.zombieRats.setVisible(false);
-        graphics.destroy();
-
-        // Tell React to show the progress bar
-        EventBus.emit('village-loot-started', {
-          duration: this.lootDuration,
-          x: target.x,
-          y: target.y,
-        });
-
-        // Phaser handles the actual game timer
-        this.time.delayedCall(this.lootDuration, () => {
-          this.isLooting = false;
-
-          // Actual loot logic here
-          this.handleLootComplete(target);
-
-          // Tell React to hide the progress bar
-          EventBus.emit('village-loot-finished');
-        });
-      }
-    );
+  private selectVillage(
+    sprite: Phaser.Physics.Arcade.Sprite,
+    pointer: Phaser.Input.Pointer
+  ): void {
+    // pointer.worldX/worldY = click position already converted to world space
+    // (accounts for current scroll/zoom at click time)
+    this.selectedAnchor = { x: pointer.worldX, y: pointer.worldY };
+    EventBus.emit('village-selected', {
+      id: sprite.getData('villageId') as string,
+    });
   }
 
-  private handleLootComplete(target: Phaser.Physics.Arcade.Sprite) {
-    console.log('Loot complete!');
-    // e.g. add resources, play sound, destroy village, etc.
+  private deselectVillage(): void {
+    if (!this.selectedAnchor) return;
+    this.selectedAnchor = null;
+    EventBus.emit('village-selected', null);
+  }
+
+  private handleVillageAction = (payload: {
+    type: string;
+    villageId: string;
+  }): void => {
+    const target = this.villages.find(
+      (v) => v.getData('villageId') === payload.villageId
+    );
+    if (!target) return;
+
+    if (payload.type === 'attack') {
+      this.sendRats('attack', target);
+    } else if (payload.type === 'loot') {
+      this.sendRats('loot', target);
+    } else if (payload.type === 'scout') {
+      this.sendRats('scout', target);
+    }
+  };
+
+  private sendRats(
+    type: 'attack' | 'loot' | 'scout',
+    target: Phaser.Physics.Arcade.Sprite
+  ): void {
     this.zombieRats.setVisible(true);
-    // Move zombieRats to necro
-    this.physics.moveToObject(this.zombieRats, this.necromancer, this.ratSpeed);
-    this.physics.add.collider(this.zombieRats, this.necromancer, () => {
-      this.zombieRats.body?.stop();
-      this.zombieRats.setVisible(false);
-    });
+    this.zombieRats.setPosition(this.necromancer.x, this.necromancer.y);
+
+    this.ratTask = {
+      type,
+      x: target.x,
+      y: target.y,
+      villageId: target.getData('villageId') as string,
+    };
+
+    const speed = this.ratSpeed || 60;
+    this.physics.moveTo(this.zombieRats, target.x, target.y, speed);
+  }
+
+  update(): void {
+    if (!this.selectedAnchor) return;
+    const { x, y } = this.cameraController.worldToScreen(
+      this.selectedAnchor.x,
+      this.selectedAnchor.y
+    );
+
+    EventBus.emit('village-ui-position', { x, y });
   }
 }
 
