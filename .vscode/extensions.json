@@ -1,0 +1,12 @@
+{
+  "recommendations": [
+    // required
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    // optional
+    "SeyyedKhandon.firacode",
+    "oderwat.indent-rainbow",
+    "PKief.material-icon-theme",
+    "enkia.tokyo-night"
+  ]
+}
