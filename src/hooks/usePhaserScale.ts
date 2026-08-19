@@ -33,7 +33,7 @@ export const usePhaserScale = (phaserRef: RefObject<IRefPhaserGame | null>) => {
     setUiStyle({
       position: 'absolute',
       left: `${rect.left}px`,
-      top: `${rect.top}px`,
+      top: 0,
       width: `${gameWidth}px`,
       height: `${gameHeight}px`,
       transform: `scale(${scaleX}, ${scaleY})`,
@@ -93,3 +93,4 @@ export const usePhaserScale = (phaserRef: RefObject<IRefPhaserGame | null>) => {
 
   return uiStyle;
 };
+
