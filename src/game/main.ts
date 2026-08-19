@@ -4,7 +4,6 @@ import { MainMenu } from './scenes/2MainMenu';
 import { Base } from './scenes/3Base';
 import { Location_1 } from './scenes/Location1';
 import { WorldMap } from './scenes/WorldMap';
-
 import { AUTO, Game, Scale } from 'phaser';
 
 //  Find out more information about the Game Config at:
@@ -25,7 +24,7 @@ const config: Phaser.Types.Core.GameConfig = {
   },
 
   scale: {
-    mode: Scale.FIT,
+    mode: Scale.HEIGHT_CONTROLS_WIDTH,
     autoCenter: Scale.CENTER_BOTH,
   },
 
