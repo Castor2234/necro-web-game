@@ -1,6 +1,9 @@
-import { ExternalHUD, ExternalHUDProps } from './components/ExternalHUD';
-import { MainMenuHUD } from './components/MainMenuHUD';
-import { GameplayHUD } from './components/GameplayHUD';
+import {
+  ExternalHUD,
+  ExternalHUDProps,
+} from './components/ExternalHUD/ExternalHUD';
+import { MainMenuHUD } from './components/MainMenuHUD/MainMenuHUD';
+import { GameplayHUD } from './components/GameplayHUD/GameplayHUD';
 
 export const SCENE_UI: Record<
   string,
@@ -11,8 +14,6 @@ export const SCENE_UI: Record<
   MainMenu: MainMenuHUD,
   Base: GameplayHUD,
   //Base: BaseHUD,
-  Location_1: GameplayHUD,
-  //WorldMap: GameplayHUD, // reuse same HUD for multiple scenes if needed
 };
 
 export const SCENE_EXTERNAL_UI: Record<

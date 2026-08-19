@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from '../styles/ExternalHUD.module.css';
+import styles from './ExternalHUD.module.css';
 
 export interface ExternalHUDProps {
   currentSceneKey: string;

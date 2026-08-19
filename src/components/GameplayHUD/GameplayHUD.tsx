@@ -1,10 +1,8 @@
 import React from 'react';
-import { LootProgressBar } from './LootProgressBar';
 
 export const GameplayHUD: React.FC = () => {
   return (
     <div>
-      <LootProgressBar />
       <button
         style={{
           pointerEvents: 'auto',

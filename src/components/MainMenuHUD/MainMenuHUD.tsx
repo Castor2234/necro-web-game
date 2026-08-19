@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from '../styles/MainMenuHUD.module.css';
+import styles from './MainMenuHUD.module.css';
 
 export const MainMenuHUD: React.FC<{
   startScene: (sceneKey: string) => void;
