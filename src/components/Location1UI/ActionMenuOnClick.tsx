@@ -16,9 +16,11 @@ interface Props {
 
 export function VillageActionMenu({ onAttack, onLoot, onScout }: Props) {
   const [selected, setSelected] = useState<VillageSelection | null>(null);
+  const [busy, setBusy] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEventBus<VillageSelection | null>('village-selected', setSelected);
+  useEventBus<boolean>('rats-busy', setBusy);
 
   const scaleRef = useRef({ scaleX: 1, scaleY: 1 });
   const posRef = useRef({ x: 0, y: 0 });
@@ -45,11 +47,19 @@ export function VillageActionMenu({ onAttack, onLoot, onScout }: Props) {
 
   return (
     <div ref={containerRef} className={styles.actionMenu}>
-      <Button variant="danger" onClick={() => onAttack(selected.id)}>
+      <Button
+        variant="danger"
+        disabled={busy}
+        onClick={() => onAttack(selected.id)}
+      >
         Attack
       </Button>
-      <Button onClick={() => onLoot(selected.id)}>Loot</Button>
-      <Button onClick={() => onScout(selected.id)}>Scout</Button>
+      <Button disabled={busy} onClick={() => onLoot(selected.id)}>
+        Loot
+      </Button>
+      <Button disabled={busy} onClick={() => onScout(selected.id)}>
+        Scout
+      </Button>
     </div>
   );
 }
