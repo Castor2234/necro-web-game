@@ -47,12 +47,9 @@ export class Preloader extends Scene {
     //  For example, you can define global animations here, so we can use them in other scenes.
 
     // Setup all initial values from imported config
-    for (const [stat, value] of Object.entries(INITIAL_VALUES_CONFIG) as [
-      string,
-      number,
-    ][]) {
-      this.registry.set(stat, value);
-    }
+    Object.entries(INITIAL_VALUES_CONFIG).forEach(([key, value]) => {
+      this.registry.set(key, value);
+    });
 
     //  Move to the MainMenu. You could also swap this for a Scene Transition, such as a camera fade.
     this.scene.start('Location_1');
