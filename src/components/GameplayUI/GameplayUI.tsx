@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const GameplayHUD: React.FC = () => {
+export const GameplayUI: React.FC = () => {
   return (
     <div>
       <button

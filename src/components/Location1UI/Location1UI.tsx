@@ -1,4 +1,5 @@
 import { VillageActionMenu } from './ActionMenuOnClick';
+import { ResourceBar } from '../ResourceBar/ResourceBar';
 import { EventBus } from '../../game/EventBus';
 
 interface Props {
@@ -24,6 +25,7 @@ export function Location1UI({ startScene }: Props) {
         onScout={handleScout}
       />
       {/* startScene is available here too, e.g. for a "back to world map" button */}
+      <ResourceBar />
     </>
   );
 }

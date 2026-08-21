@@ -1,9 +1,9 @@
 import {
-  ExternalHUD,
-  ExternalHUDProps,
-} from './components/ExternalHUD/ExternalHUD';
-import { MainMenuHUD } from './components/MainMenuHUD/MainMenuHUD';
-import { GameplayHUD } from './components/GameplayHUD/GameplayHUD';
+  ExternalUI,
+  ExternalUIProps,
+} from './components/ExternalUI/ExternalUI';
+import { MainMenuUI } from './components/MainMenuUI/MainMenuUI';
+import { GameplayUI } from './components/GameplayUI/GameplayUI';
 import { Location1UI } from './components/Location1UI/Location1UI';
 
 export const SCENE_UI: Record<
@@ -12,18 +12,18 @@ export const SCENE_UI: Record<
     startScene: (sceneKey: string) => void;
   }>
 > = {
-  MainMenu: MainMenuHUD,
-  Base: GameplayHUD,
+  MainMenu: MainMenuUI,
+  Base: GameplayUI,
   Location_1: Location1UI,
-  //Base: BaseHUD,
+  //Base: BaseUI,
 };
 
 export const SCENE_EXTERNAL_UI: Record<
   string,
-  React.ComponentType<ExternalHUDProps>
+  React.ComponentType<ExternalUIProps>
 > = {
-  Base: ExternalHUD,
-  Location_1: ExternalHUD,
-  WorldMap: ExternalHUD,
+  Base: ExternalUI,
+  Location_1: ExternalUI,
+  WorldMap: ExternalUI,
 };
 

@@ -1,7 +1,7 @@
 import React from 'react';
-import styles from './ExternalHUD.module.css';
+import styles from './ExternalUI.module.css';
 
-export interface ExternalHUDProps {
+export interface ExternalUIProps {
   currentSceneKey: string;
   onNavigate: (sceneKey: string) => void;
 }
@@ -13,7 +13,7 @@ const NAV_ITEMS = [
   { key: 'WorldMap', label: 'Карта мира' },
 ] as const;
 
-export const ExternalHUD: React.FC<ExternalHUDProps> = ({
+export const ExternalUI: React.FC<ExternalUIProps> = ({
   currentSceneKey,
   onNavigate,
 }) => {
