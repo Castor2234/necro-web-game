@@ -8,6 +8,9 @@ const SCENE_VALUES = [
   'ratCorpsesAmount',
   'lootDuration',
   'scoutDuration',
+  'village1Population',
+  'village2Population',
+  'village3Population',
 ] as const;
 
 type SceneValueKey = (typeof SCENE_VALUES)[number];
@@ -25,6 +28,8 @@ interface VillageConfig {
   x: number;
   y: number;
   texture: string;
+  maxPopulation: number;
+  growthRate: number;
 }
 
 type Actions = 'attack' | 'loot' | 'scout';
@@ -45,15 +50,42 @@ export class Location_1 extends Phaser.Scene {
   house1: Phaser.Physics.Arcade.Sprite;
   zombieRats: Phaser.Physics.Arcade.Sprite;
   private villages: Phaser.Physics.Arcade.Sprite[] = [];
+  private populationLabels: Map<string, Phaser.GameObjects.Text> = new Map();
   private selectedAnchor: { x: number; y: number } | null = null;
   private ratTask: RatTask | null = null;
   private travelLine: Phaser.GameObjects.Graphics | null = null;
 
   private readonly villageConfigs: VillageConfig[] = [
-    { id: 'village1', x: 130, y: 70, texture: 'village_img' },
-    { id: 'village2', x: 40, y: 160, texture: 'village_img' },
-    { id: 'village3', x: 185, y: 215, texture: 'village_img' },
+    {
+      id: 'village1',
+      x: 130,
+      y: 70,
+      texture: 'village_img',
+      maxPopulation: 300,
+      growthRate: 0.02,
+    },
+    {
+      id: 'village2',
+      x: 40,
+      y: 160,
+      texture: 'village_img',
+      maxPopulation: 700,
+      growthRate: 0.04,
+    },
+    {
+      id: 'village3',
+      x: 185,
+      y: 215,
+      texture: 'village_img',
+      maxPopulation: 2000,
+      growthRate: 0.05,
+    },
   ];
+
+  private readonly DECAY_BASE_CHANCE = 0.2;
+  private readonly DECAY_OVERFLOW_MULTIPLIER = 3; // how much decay chance spikes when over max
+  private readonly DECAY_PERCENT_MIN = 0.01;
+  private readonly DECAY_PERCENT_MAX = 0.06;
 
   // progress bar
   private barBg: Phaser.GameObjects.Rectangle | null = null;
@@ -64,6 +96,12 @@ export class Location_1 extends Phaser.Scene {
 
   // Values sourced from the global registry
   private values: Record<SceneValueKey, number> = { ...DEFAULT_SCENE_VALUES };
+
+  // Resources
+  private resources = {
+    ratCorpses: 0,
+    humanCorpses: 0,
+  };
 
   // Camera zoom and drag
   private cameraController: CameraController;
@@ -102,8 +140,20 @@ export class Location_1 extends Phaser.Scene {
       const sprite = this.physics.add
         .staticSprite(cfg.x, cfg.y, cfg.texture)
         .setData('villageId', cfg.id)
+        .setData('maxPopulation', cfg.maxPopulation)
+        .setData('growthRate', cfg.growthRate)
         .setInteractive({ useHandCursor: true })
         .setDepth(1);
+
+      // --- Hover Enlarge Logic ---
+      sprite.on('pointerover', () => {
+        sprite.setScale(1.05);
+      });
+
+      sprite.on('pointerout', () => {
+        sprite.setScale(1.0);
+      });
+      // ---------------------------
 
       sprite.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
         if (!this.isCanvasClick(pointer)) return;
@@ -112,6 +162,23 @@ export class Location_1 extends Phaser.Scene {
       return sprite;
     });
 
+    // Population labels — one per village, positioned just above each sprite
+    this.villages.forEach((village) => {
+      const villageId = village.getData('villageId') as string;
+
+      const label = this.add
+        .text(village.x, village.y - 28, `???`, {
+          fontFamily: 'Alagard',
+          fontSize: '20px',
+          color: '#ffffff',
+          stroke: '#000000',
+          strokeThickness: 2,
+        })
+        .setOrigin(0.5, 1)
+        .setDepth(22);
+
+      this.populationLabels.set(villageId, label);
+    });
     // Clicking empty space deselects village
     this.input.on(
       'pointerdown',
@@ -156,12 +223,16 @@ export class Location_1 extends Phaser.Scene {
     this.events.once('shutdown', () => {
       EventBus.off('village-action', this.handleVillageAction, this);
       this.cameraController.destroy();
+      this.travelLine?.destroy();
+      this.populationLabels.forEach((label) => label.destroy());
+      this.populationLabels.clear();
     });
     EventBus.emit('current-scene-ready', this);
   }
 
   // Functions
 
+  // Village functons
   private selectVillage(
     sprite: Phaser.Physics.Arcade.Sprite,
     pointer: Phaser.Input.Pointer
@@ -184,6 +255,11 @@ export class Location_1 extends Phaser.Scene {
     EventBus.emit('village-selected', null);
   }
 
+  private getVillagePopulation(villageId: string): number {
+    const key = `${villageId}Population` as SceneValueKey;
+    return this.values[key] ?? 0;
+  }
+
   private handleVillageAction = (payload: {
     action: string;
     villageId: string;
@@ -198,6 +274,7 @@ export class Location_1 extends Phaser.Scene {
     }
   };
 
+  // Rats functions
   private sendRats(
     action: 'attack' | 'loot' | 'scout',
     target: Phaser.Physics.Arcade.Sprite
@@ -347,7 +424,20 @@ export class Location_1 extends Phaser.Scene {
 
   private resolveScout(villageId: string): void {
     EventBus.emit('village-scouted', { villageId });
+
+    const population = this.getVillagePopulation(villageId);
+
+    const label = this.populationLabels.get(villageId);
+    label?.setText(`${Math.trunc(population)}`);
   }
+
+  // Resources functions
+  private updateResources(partial: Partial<typeof this.resources>): void {
+    this.resources = { ...this.resources, ...partial };
+    EventBus.emit('resources-updated', this.resources);
+  }
+
+  private populationGrowthAccumulator = 0;
 
   update(_time: number, delta: number): void {
     // Village ui position
@@ -359,71 +449,117 @@ export class Location_1 extends Phaser.Scene {
       EventBus.emit('village-ui-position', { x, y });
     }
 
-    if (!this.ratTask) return;
+    if (this.ratTask) {
+      if (
+        this.ratTask.state === 'moving-to-target' ||
+        this.ratTask.state === 'returning'
+      ) {
+        const otherSprite =
+          this.ratTask.state === 'moving-to-target'
+            ? this.villages.find(
+                (v) => v.getData('villageId') === this.ratTask!.villageId
+              )
+            : this.necromancer;
 
-    if (
-      this.ratTask.state === 'moving-to-target' ||
-      this.ratTask.state === 'returning'
-    ) {
-      const otherSprite =
-        this.ratTask.state === 'moving-to-target'
-          ? this.villages.find(
-              (v) => v.getData('villageId') === this.ratTask!.villageId
-            )
-          : this.necromancer;
-
-      if (otherSprite) {
-        this.drawTravelLine(
-          this.zombieRats.x,
-          this.zombieRats.y,
-          otherSprite.x,
-          otherSprite.y
-        );
-      }
-    }
-
-    if (this.ratTask.state === 'in-progress') {
-      this.ratTask.timer! -= delta;
-      const duration = this.getActionDuration(this.ratTask.action);
-
-      if (this.barFill && duration > 0) {
-        const progress = 1 - Math.max(this.ratTask.timer!, 0) / duration;
-        this.barFill.scaleX = progress;
+        if (otherSprite) {
+          this.drawTravelLine(
+            this.zombieRats.x,
+            this.zombieRats.y,
+            otherSprite.x,
+            otherSprite.y
+          );
+        }
       }
 
-      if (this.ratTask.timer! <= 0) {
-        switch (this.ratTask.action) {
-          case 'loot':
-            this.resolveLoot(this.ratTask.villageId);
-            break;
-          case 'scout':
-            this.resolveScout(this.ratTask.villageId);
-            break;
+      if (this.ratTask.state === 'in-progress') {
+        this.ratTask.timer! -= delta;
+        const duration = this.getActionDuration(this.ratTask.action);
+
+        if (this.barFill && duration > 0) {
+          const progress = 1 - Math.max(this.ratTask.timer!, 0) / duration;
+          this.barFill.scaleX = progress;
         }
 
-        this.barBg?.destroy();
-        this.barFill?.destroy();
-        this.barBg = null;
-        this.barFill = null;
+        if (this.ratTask.timer! <= 0) {
+          switch (this.ratTask.action) {
+            case 'loot':
+              this.resolveLoot(this.ratTask.villageId);
+              break;
+            case 'scout':
+              this.resolveScout(this.ratTask.villageId);
+              break;
+          }
 
-        this.ratTask.state = 'returning';
-        this.zombieRats.setVisible(true);
+          this.barBg?.destroy();
+          this.barFill?.destroy();
+          this.barBg = null;
+          this.barFill = null;
 
-        this.drawTravelLine(
-          this.ratTask.targetX,
-          this.ratTask.targetY,
-          this.necromancer.x,
-          this.necromancer.y
-        );
+          this.ratTask.state = 'returning';
+          this.zombieRats.setVisible(true);
 
-        this.physics.moveTo(
-          this.zombieRats,
-          this.necromancer.x,
-          this.necromancer.y,
-          this.values.ratSpeed
-        );
+          this.drawTravelLine(
+            this.ratTask.targetX,
+            this.ratTask.targetY,
+            this.necromancer.x,
+            this.necromancer.y
+          );
+
+          this.physics.moveTo(
+            this.zombieRats,
+            this.necromancer.x,
+            this.necromancer.y,
+            this.values.ratSpeed
+          );
+        }
       }
     }
+    this.populationGrowthAccumulator += delta;
+    if (this.populationGrowthAccumulator >= 5000) {
+      this.populationGrowthAccumulator -= 5000; // keep remainder, avoids drift over time
+      this.growVillagePopulation();
+    }
+  }
+
+  private growVillagePopulation(): void {
+    //console.log('--------------');
+    this.villages.forEach((village) => {
+      const villageId = village.getData('villageId') as string;
+      const maxPopulation = village.getData('maxPopulation') as number;
+      const rate = village.getData('growthRate') as number;
+      if (maxPopulation <= 0 || rate <= 0) return;
+
+      const key = `${villageId}Population` as SceneValueKey;
+      let current = this.values[key] ?? 0;
+      //console.log(this.values[key]);
+
+      // Logistic growth — naturally slows near maxPopulation, reverses (shrinks) above it
+      const growth = rate * current * (1 - current / maxPopulation);
+      current = Math.max(current + growth, 0); // only floor at 0, no ceiling
+
+      // Decay — occasional extra dip, chance scales with how far above target
+      const decayChance = this.getDecayChance(current, maxPopulation);
+      if (Math.random() < decayChance) {
+        const decayPercent = Phaser.Math.FloatBetween(
+          this.DECAY_PERCENT_MIN,
+          this.DECAY_PERCENT_MAX
+        );
+        const loss = current * decayPercent;
+        current = Math.max(current - loss, 0);
+      }
+
+      this.values[key] = current;
+    });
+  }
+
+  private getDecayChance(current: number, maxPopulation: number): number {
+    if (maxPopulation <= 0) return this.DECAY_BASE_CHANCE;
+
+    const overflowRatio = Math.max(0, current - maxPopulation) / maxPopulation;
+    return (
+      this.DECAY_BASE_CHANCE *
+      (1 + overflowRatio * this.DECAY_OVERFLOW_MULTIPLIER)
+    );
   }
 }
 
