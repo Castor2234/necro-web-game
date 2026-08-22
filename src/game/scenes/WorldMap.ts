@@ -13,14 +13,14 @@ export class WorldMap extends Phaser.Scene {
   village1: EntityContainer;
 
   // Starting values
-  private ratSpeed = 400;
-  private v1pw = 50;
+  //private ratSpeed = 400;
+  //private v1pw = 50;
 
   constructor() {
     super('WorldMap');
   }
 
-  init(data: number): void {
+  init(_data: number): void {
     // this.score = data.score || 0;
   }
 

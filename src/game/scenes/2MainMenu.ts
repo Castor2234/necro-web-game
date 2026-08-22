@@ -1,5 +1,4 @@
 import * as Phaser from 'phaser';
-
 import { EventBus } from '../EventBus';
 
 export class MainMenu extends Phaser.Scene {
