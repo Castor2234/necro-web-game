@@ -1,0 +1,37 @@
+.wrapper {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 15;
+}
+
+.taskRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.taskBar {
+  flex: 1;
+  height: 4px;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.taskBarFill {
+  height: 100%;
+  background-color: #4caf50;
+  transition: width 0.15s linear; /* smooths the visual step between 1-second updates */
+}
+
+.taskSeconds {
+  font-size: 11px;
+  color: #ffffff;
+  min-width: 24px;
+  text-align: right;
+}
+
