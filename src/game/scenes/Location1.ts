@@ -1,16 +1,18 @@
-import { EventBus } from '../EventBus';
 import * as Phaser from 'phaser';
+import { EventBus } from '../EventBus';
 import { CameraController } from '../controllers/CameraController';
+import { addResources } from '../states/resources';
 
 const SCENE_VALUES = [
   'zombieRatsAmount',
   'ratSpeed',
-  'ratCorpsesAmount',
   'lootDuration',
   'scoutDuration',
   'village1Population',
   'village2Population',
   'village3Population',
+  'ratCorpses',
+  'humanCorpses',
 ] as const;
 
 type SceneValueKey = (typeof SCENE_VALUES)[number];
@@ -22,6 +24,12 @@ const DEFAULT_SCENE_VALUES: Record<SceneValueKey, number> = SCENE_VALUES.reduce(
   },
   {} as Record<SceneValueKey, number>
 );
+
+interface Loot {
+  ratCorpses: number;
+  humanCorpses: number;
+  gold: number;
+}
 
 interface VillageConfig {
   id: string;
@@ -51,7 +59,8 @@ export class Location_1 extends Phaser.Scene {
   zombieRats: Phaser.Physics.Arcade.Sprite;
   private villages: Phaser.Physics.Arcade.Sprite[] = [];
   private populationLabels: Map<string, Phaser.GameObjects.Text> = new Map();
-  private selectedAnchor: { x: number; y: number } | null = null;
+  private villageAnchor: { x: number; y: number } | null = null;
+  private necroAnchor: { x: number; y: number } | null = null;
   private ratTask: RatTask | null = null;
   private travelLine: Phaser.GameObjects.Graphics | null = null;
 
@@ -130,10 +139,19 @@ export class Location_1 extends Phaser.Scene {
     // Necromancer
     this.necromancer = this.physics.add
       .staticSprite(20, 50, 'necro_icon')
-      .setScale(0.5)
       .setDepth(1);
-    this.necromancer.body?.setSize(0.5, 0.5);
-    this.necromancer.refreshBody();
+    this.necromancer.setInteractive({ useHandCursor: true });
+    this.necromancer
+      .on('pointerover', () => {
+        this.necromancer.setScale(1.1);
+      })
+      .on('pointerout', () => {
+        this.necromancer.setScale(1.0);
+      })
+      .on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+        if (!this.isCanvasClick(pointer)) return;
+        this.selectNecromancer(pointer);
+      });
 
     // Villages
     this.villages = this.villageConfigs.map((cfg) => {
@@ -147,7 +165,7 @@ export class Location_1 extends Phaser.Scene {
 
       // --- Hover Enlarge Logic ---
       sprite.on('pointerover', () => {
-        sprite.setScale(1.05);
+        sprite.setScale(1.1);
       });
 
       sprite.on('pointerout', () => {
@@ -179,7 +197,8 @@ export class Location_1 extends Phaser.Scene {
 
       this.populationLabels.set(villageId, label);
     });
-    // Clicking empty space deselects village
+
+    // Clicking empty space deselects
     this.input.on(
       'pointerdown',
       (
@@ -187,7 +206,10 @@ export class Location_1 extends Phaser.Scene {
         currentlyOver: Phaser.GameObjects.GameObject[]
       ) => {
         if (!this.isCanvasClick(pointer)) return;
-        if (currentlyOver.length === 0) this.deselectVillage();
+        if (currentlyOver.length === 0) {
+          this.deselectVillage();
+          this.deselectNecromancer();
+        }
       }
     );
 
@@ -232,14 +254,28 @@ export class Location_1 extends Phaser.Scene {
 
   // Functions
 
+  // Necro functions
+  private selectNecromancer(pointer: Phaser.Input.Pointer): void {
+    this.deselectVillage();
+    this.necroAnchor = { x: pointer.worldX, y: pointer.worldY };
+    EventBus.emit('necromancer-selected', true);
+  }
+
+  private deselectNecromancer(): void {
+    if (!this.necroAnchor) return;
+    this.necroAnchor = null;
+    EventBus.emit('necromancer-selected', false);
+  }
+
   // Village functons
   private selectVillage(
     sprite: Phaser.Physics.Arcade.Sprite,
     pointer: Phaser.Input.Pointer
   ): void {
+    this.deselectNecromancer();
     // pointer.worldX/worldY = click position already converted to world space
     // (accounts for current scroll/zoom at click time)
-    this.selectedAnchor = { x: pointer.worldX, y: pointer.worldY };
+    this.villageAnchor = { x: pointer.worldX, y: pointer.worldY };
     EventBus.emit('village-selected', {
       id: sprite.getData('villageId') as string,
     });
@@ -250,8 +286,8 @@ export class Location_1 extends Phaser.Scene {
   }
 
   private deselectVillage(): void {
-    if (!this.selectedAnchor) return;
-    this.selectedAnchor = null;
+    if (!this.villageAnchor) return;
+    this.villageAnchor = null;
     EventBus.emit('village-selected', null);
   }
 
@@ -416,9 +452,10 @@ export class Location_1 extends Phaser.Scene {
   }
 
   private resolveLoot(villageId: string): void {
+    const lootedCorpses = Phaser.Math.Between(0, 2);
     EventBus.emit('village-looted', {
       villageId,
-      corpses: this.values.ratCorpsesAmount,
+      lootedCorpses: lootedCorpses,
     });
   }
 
@@ -437,18 +474,29 @@ export class Location_1 extends Phaser.Scene {
     EventBus.emit('resources-updated', this.resources);
   }
 
+  // Grow functions and update
   private populationGrowthAccumulator = 0;
 
   update(_time: number, delta: number): void {
     // Village ui position
-    if (this.selectedAnchor) {
+    if (this.villageAnchor) {
       const { x, y } = this.cameraController.worldToScreen(
-        this.selectedAnchor.x,
-        this.selectedAnchor.y
+        this.villageAnchor.x,
+        this.villageAnchor.y
       );
       EventBus.emit('village-ui-position', { x, y });
     }
 
+    // Necro ui position
+    if (this.necroAnchor) {
+      const { x, y } = this.cameraController.worldToScreen(
+        this.necroAnchor.x,
+        this.necroAnchor.y
+      );
+      EventBus.emit('necromancer-ui-position', { x, y });
+    }
+
+    // Rat tasks
     if (this.ratTask) {
       if (
         this.ratTask.state === 'moving-to-target' ||
