@@ -31,11 +31,10 @@
 }
 
 .button {
-  width: 120px;
-  margin: 5px;
-  padding: 8px;
-  font-size: 16px;
-  border-radius: 18px;
+  width: 140px;
+  padding: 4px 8px 8px 8px;
+  font-size: 18px;
+  border-radius: 12px;
   background-color: #000000;
   color: rgb(12, 179, 26);
   border: 2px solid rgba(12, 179, 26, 0.87);
@@ -49,7 +48,7 @@
   }
 
   &:active {
-    background-color: #0fb10f;
+    background-color: #053f00;
   }
 }
 
