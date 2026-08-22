@@ -1,12 +1,13 @@
-import { VillageActionMenu } from './ActionMenuOnClick';
-import { ResourceBar } from '../ResourceBar/ResourceBar';
+import { VillageActionMenu } from './VillageActionMenu';
+//import { Location1HUD } from './Location1HUD';
 import { EventBus } from '../../game/EventBus';
+import { NecromancerActionMenu } from './NecroActionMenu';
 
 interface Props {
   startScene: (sceneKey: string) => void;
 }
 
-export function Location1UI({ startScene }: Props) {
+export const Location1UI = ({ startScene }: Props) => {
   const handleAttack = (villageId: string) => {
     EventBus.emit('village-action', { action: 'attack', villageId });
   };
@@ -17,6 +18,8 @@ export function Location1UI({ startScene }: Props) {
     EventBus.emit('village-action', { action: 'scout', villageId });
   };
 
+  const handleSleep = () => EventBus.emit('necromancer-sleep');
+
   return (
     <>
       <VillageActionMenu
@@ -24,9 +27,11 @@ export function Location1UI({ startScene }: Props) {
         onLoot={handleLoot}
         onScout={handleScout}
       />
-      {/* startScene is available here too, e.g. for a "back to world map" button */}
-      <ResourceBar />
+      <NecromancerActionMenu
+        onGoToBase={() => startScene('Base')}
+        onSleep={handleSleep}
+      />
     </>
   );
-}
+};
 

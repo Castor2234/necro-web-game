@@ -1,8 +1,8 @@
-// components/VillageActionMenu.tsx
 import { useRef, useState } from 'react';
 import { useEventBus } from '../../hooks/useEventBus';
 import styles from './ActionMenu.module.css';
 import { Button } from '../Button/Button';
+import { getCanvasScale } from '../../game/states/canvasScale';
 
 interface VillageSelection {
   id: string;
@@ -14,7 +14,7 @@ interface Props {
   onScout: (villageId: string) => void;
 }
 
-export function VillageActionMenu({ onAttack, onLoot, onScout }: Props) {
+export const VillageActionMenu = ({ onAttack, onLoot, onScout }: Props) => {
   const [selected, setSelected] = useState<VillageSelection | null>(null);
   const [busy, setBusy] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -22,7 +22,7 @@ export function VillageActionMenu({ onAttack, onLoot, onScout }: Props) {
   useEventBus<VillageSelection | null>('village-selected', setSelected);
   useEventBus<boolean>('rats-busy', setBusy);
 
-  const scaleRef = useRef({ scaleX: 1, scaleY: 1 });
+  const scaleRef = useRef(getCanvasScale());
   const posRef = useRef({ x: 0, y: 0 });
 
   const applyTransform = () => {
@@ -62,5 +62,5 @@ export function VillageActionMenu({ onAttack, onLoot, onScout }: Props) {
       </Button>
     </div>
   );
-}
+};
 
