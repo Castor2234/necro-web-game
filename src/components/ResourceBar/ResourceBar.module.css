@@ -1,22 +1,24 @@
 .resourceBar {
   position: absolute;
-  left: 12px;
-  bottom: 12px;
+  left: 6px;
+  bottom: 6px;
   display: flex;
   flex-direction: column;
   background-color: rgba(0, 0, 0, 0.6);
   border-radius: 4px;
-  gap: 2px;
   pointer-events: none;
-  z-index: 15;
-  min-width: 110px;
+  z-index: 10;
+  min-width: 130px;
 }
 
 .resourceLabel {
   display: flex;
-  justify-content: space-between;
   color: #ffffff;
-  padding: 2px 4px;
-  font-size: 14px;
+  padding: 2px 8px;
+  font-size: 16px;
+}
+
+.resourceLabel span:first-child {
+  width: 110px;
 }
 

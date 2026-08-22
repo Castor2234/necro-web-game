@@ -1,10 +1,11 @@
 import { useRef, useState } from 'react';
 import { IRefPhaserGame, PhaserGame } from './PhaserGame';
 import { usePhaserScale } from './hooks/usePhaserScale';
-import { SCENE_UI, SCENE_EXTERNAL_UI } from './sceneUI';
+import { SCENE_UI, SCENE_EXTERNAL_UI, SCENES_WITH_RESOURCES } from './sceneUI';
+import { ResourceBar } from './components/ResourceBar/ResourceBar';
+import { ShowCreatureStatsButton } from './components/ShowCreatureStatsButton/ShowCreatureStatsButton';
 
 function App() {
-  //  References to the PhaserGame component (game and scene are exposed)
   const phaserRef = useRef<IRefPhaserGame | null>(null);
   const uiStyle = usePhaserScale(phaserRef);
 
@@ -22,6 +23,7 @@ function App() {
 
   const SceneUIComponent = SCENE_UI[currentSceneKey];
   const ExternalUIComponent = SCENE_EXTERNAL_UI[currentSceneKey];
+  const showResources = SCENES_WITH_RESOURCES.includes(currentSceneKey);
 
   return (
     // Главный компонент app (сразу под root)
@@ -45,6 +47,12 @@ function App() {
           />
         )
       }
+      {showResources && (
+        <>
+          <ResourceBar phaserRef={phaserRef} />
+          <ShowCreatureStatsButton phaserRef={phaserRef} />
+        </>
+      )}
     </div>
   );
 }
