@@ -1,10 +1,12 @@
+import { AUTO, Game, Scale } from 'phaser';
 import { Boot } from './scenes/0Boot';
 import { Preloader } from './scenes/1Preloader';
 import { MainMenu } from './scenes/2MainMenu';
-import { Base } from './scenes/3Base';
+import { Workshop } from './scenes/Workshop';
 import { Location_1 } from './scenes/Location1';
 import { WorldMap } from './scenes/WorldMap';
-import { AUTO, Game, Scale } from 'phaser';
+import { Cave } from './scenes/3Cave';
+import { Tent } from './scenes/Tent';
 
 //  Find out more information about the Game Config at:
 //  https://docs.phaser.io/api-documentation/typedef/types-core#gameconfig
@@ -28,7 +30,16 @@ const config: Phaser.Types.Core.GameConfig = {
     autoCenter: Scale.CENTER_BOTH,
   },
 
-  scene: [Boot, Preloader, MainMenu, Base, Location_1, WorldMap],
+  scene: [
+    Boot,
+    Preloader,
+    MainMenu,
+    Cave,
+    Workshop,
+    Tent,
+    Location_1,
+    WorldMap,
+  ],
 };
 
 const StartGame = (parent: string) => {

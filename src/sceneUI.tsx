@@ -3,9 +3,10 @@ import {
   ExternalUIProps,
 } from './components/ExternalUI/ExternalUI';
 import { MainMenuUI } from './components/MainMenuUI/MainMenuUI';
+import { CaveUI } from './components/CaveUI/CaveUI';
 //import { GameplayUI } from './components/GameplayUI/GameplayUI';
 import { Location1UI } from './components/Location1UI/Location1UI';
-import { BaseUI } from './components/BaseUI/BaseUI';
+import { WorkshopUI } from './components/WorkshopUI/WorkshopUI';
 
 export const SCENE_UI: Record<
   string,
@@ -14,7 +15,8 @@ export const SCENE_UI: Record<
   }>
 > = {
   MainMenu: MainMenuUI,
-  Base: BaseUI,
+  Cave: CaveUI,
+  Workshop: WorkshopUI,
   Location_1: Location1UI,
 };
 
@@ -22,10 +24,12 @@ export const SCENE_EXTERNAL_UI: Record<
   string,
   React.ComponentType<ExternalUIProps>
 > = {
-  Base: ExternalUI,
+  Cave: ExternalUI,
+  Workshop: ExternalUI,
   Location_1: ExternalUI,
   WorldMap: ExternalUI,
+  Tent: ExternalUI,
 };
 
-export const SCENES_WITH_RESOURCES = ['Location_1', 'Base'];
+export const SCENES_WITH_RESOURCES = ['Location_1', 'Cave', 'Workshop'];
 

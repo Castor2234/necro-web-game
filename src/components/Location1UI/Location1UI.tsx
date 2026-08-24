@@ -28,7 +28,7 @@ export const Location1UI = ({ startScene }: Props) => {
         onScout={handleScout}
       />
       <NecromancerActionMenu
-        onGoToBase={() => startScene('Base')}
+        onGoToCave={() => startScene('Cave')}
         onSleep={handleSleep}
       />
     </>

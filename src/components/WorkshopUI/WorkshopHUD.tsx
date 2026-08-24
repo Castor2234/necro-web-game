@@ -1,4 +1,4 @@
-export const BaseHUD = () => {
+export const WorkshopHUD = () => {
   return (
     <>
       <div style={{ position: 'absolute', top: '20px', right: '20px' }}>

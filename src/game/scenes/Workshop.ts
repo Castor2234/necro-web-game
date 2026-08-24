@@ -8,7 +8,7 @@ interface ConversionTask {
   duration: number;
 }
 
-export class Base extends Phaser.Scene {
+export class Workshop extends Phaser.Scene {
   background: Phaser.GameObjects.Image;
   zombieRatsAmountLabel: Phaser.GameObjects.Text;
 
@@ -16,33 +16,18 @@ export class Base extends Phaser.Scene {
   private nextTaskId = 0;
   private corpseConversionDuration = 0;
   private progressTickAccumulator = 0;
-  private zombieRatsAmount = 0;
 
   constructor() {
-    super('Base');
+    super('Workshop');
   }
 
   init(): void {
     this.corpseConversionDuration =
       this.registry.get('corpseConversionDuration') ?? 100;
-    this.zombieRatsAmount = this.registry.get('zombieRatsAmount') ?? 0;
   }
 
   create(): void {
     this.background = this.add.image(320, 180, 'background').setDepth(-1);
-
-    this.zombieRatsAmountLabel = this.add.text(
-      20,
-      20,
-      this.registry.get('zombieRatsAmount'),
-      {
-        fontFamily: 'Alagard',
-        fontSize: '20px',
-        color: '#ffffff',
-        stroke: '#000000',
-        strokeThickness: 2,
-      }
-    );
 
     EventBus.on('convert-corpse', this.handleConvertCorpse, this);
     this.events.once('shutdown', () => {

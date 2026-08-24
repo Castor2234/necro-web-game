@@ -8,7 +8,7 @@ export const MainMenuUI: React.FC<{
     <div className={styles.overlay}>
       <div className={styles.title}>Главное меню</div>
       <div className={styles.buttons}>
-        <button className={styles.button} onClick={() => startScene('Base')}>
+        <button className={styles.button} onClick={() => startScene('Cave')}>
           Начать игру
         </button>
       </div>

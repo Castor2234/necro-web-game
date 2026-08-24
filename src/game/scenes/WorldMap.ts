@@ -69,7 +69,7 @@ export class WorldMap extends Phaser.Scene {
         this.forestBase.updateLabelColor('rgb(255,255,255)');
       })
       .on('pointerdown', () => {
-        this.scene.start('Base');
+        this.scene.start('Cave');
       });
 
     // Village 1
@@ -96,7 +96,7 @@ export class WorldMap extends Phaser.Scene {
         this.village1.updateLabelColor('rgb(255,255,255)');
       })
       .on('pointerdown', () => {
-        this.scene.start('Base');
+        this.scene.start('Cave');
       });
 
     EventBus.emit('current-scene-ready', this);

@@ -36,6 +36,9 @@ export class Preloader extends Scene {
     this.load.image('village_img', 'village_tile.png');
     this.load.image('house_1_img', 'house1.png');
     this.load.image('dark_tree_img', 'dark_tree.png');
+    this.load.image('cave_lake', 'cave_lake.png');
+    this.load.image('workshop', 'workshop.png');
+    this.load.image('tent', 'tent.png');
 
     // Юниты
     this.load.image('necro_icon', 'necromancer_icon.png');
@@ -52,7 +55,7 @@ export class Preloader extends Scene {
     });
 
     //  Move to the MainMenu. You could also swap this for a Scene Transition, such as a camera fade.
-    this.scene.start('Location_1');
+    this.scene.start('Cave');
   }
 }
 

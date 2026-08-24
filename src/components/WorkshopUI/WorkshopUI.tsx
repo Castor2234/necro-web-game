@@ -1,12 +1,12 @@
 import React from 'react';
-//import styles from './BaseUI.module.css';
-import { BaseHUD } from './BaseHUD';
+import { WorkshopHUD } from './WorkshopHUD';
 import { ConvertCorpseButton } from '../ConvertButtons/ConvertCorpseButton';
+import styles from '../WorkshopUI.module.css';
 
-export const BaseUI: React.FC = () => {
+export const WorkshopUI: React.FC = () => {
   return (
     <div>
-      <BaseHUD />
+      <WorkshopHUD />
       <ConvertCorpseButton />
     </div>
   );

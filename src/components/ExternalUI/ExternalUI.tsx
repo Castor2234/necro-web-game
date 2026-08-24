@@ -8,7 +8,9 @@ export interface ExternalUIProps {
 
 const NAV_ITEMS = [
   { key: 'MainMenu', label: 'Главное меню' },
-  { key: 'Base', label: 'База' },
+  { key: 'Cave', label: 'Пещера' },
+  { key: 'Workshop', label: 'Мастерская' },
+  { key: 'Tent', label: 'Жилище' },
   { key: 'Location_1', label: 'Первая локация' },
   { key: 'WorldMap', label: 'Карта мира' },
 ] as const;

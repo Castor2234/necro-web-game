@@ -1,19 +1,30 @@
 import { useRef, useState } from 'react';
 import { useEventBus } from '../../hooks/useEventBus';
-import styles from './ActionMenu.module.css';
+import styles from '../Location1UI/ActionMenu.module.css'; // reuse existing menu styles
 import { Button } from '../Button/Button';
 import { getCanvasScale } from '../../game/states/canvasScale';
 
-interface Props {
-  onGoToCave: () => void;
-  onSleep: () => void;
+type BuildingType = 'tent' | 'workshop';
+
+interface BuildingSelection {
+  type: BuildingType;
 }
 
-export const NecromancerActionMenu = ({ onGoToCave, onSleep }: Props) => {
-  const [visible, setVisible] = useState(false);
+interface Props {
+  onGoTo: (type: BuildingType) => void;
+  onUpgrade: (type: BuildingType) => void;
+}
+
+const BUILDING_LABELS: Record<BuildingType, string> = {
+  tent: 'Tent',
+  workshop: 'Workshop',
+};
+
+export const BuildingActionMenu = ({ onGoTo, onUpgrade }: Props) => {
+  const [selected, setSelected] = useState<BuildingSelection | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  useEventBus<boolean>('necromancer-selected', setVisible);
+  useEventBus<BuildingSelection | null>('building-selected', setSelected);
 
   const scaleRef = useRef(getCanvasScale());
   const posRef = useRef({ x: 0, y: 0 });
@@ -26,7 +37,7 @@ export const NecromancerActionMenu = ({ onGoToCave, onSleep }: Props) => {
     }
   };
 
-  useEventBus<{ x: number; y: number }>('necromancer-ui-position', (pos) => {
+  useEventBus<{ x: number; y: number }>('building-ui-position', (pos) => {
     posRef.current = pos;
     applyTransform();
   });
@@ -36,14 +47,14 @@ export const NecromancerActionMenu = ({ onGoToCave, onSleep }: Props) => {
     applyTransform();
   });
 
-  if (!visible) return null;
+  if (!selected) return null;
+
+  const label = BUILDING_LABELS[selected.type];
 
   return (
     <div ref={containerRef} className={styles.actionMenu}>
-      <Button onClick={onGoToCave}>To Cave</Button>
-      <Button variant="ghost" onClick={onSleep}>
-        Sleep
-      </Button>
+      <Button onClick={() => onGoTo(selected.type)}>To {label}</Button>
+      <Button onClick={() => onUpgrade(selected.type)}>Upgrade {label}</Button>
     </div>
   );
 };
