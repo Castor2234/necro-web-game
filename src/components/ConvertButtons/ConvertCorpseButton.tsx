@@ -25,12 +25,13 @@ export function ConvertCorpseButton() {
 
   useEventBus<TaskProgress[]>('corpse-conversion-progress', setTasks);
 
-  useEventBus<{ activeCount: number }>(
-    'corpse-conversion-complete',
-    ({ activeCount }) => {
-      setActiveCount(activeCount);
-    }
-  );
+  useEventBus<{
+    activeCount: number;
+    remainingTasks: TaskProgress[];
+  }>('corpse-conversion-complete', ({ activeCount, remainingTasks }) => {
+    setActiveCount(activeCount);
+    setTasks(remainingTasks); // ← explicitly sync the task list, removing finished ones
+  });
 
   const atCapacity = activeCount >= maxConcurrent;
 

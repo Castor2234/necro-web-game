@@ -34,7 +34,7 @@ export const ShowCreatureStatsButton = ({ phaserRef }: Props) => {
   }, [open]);
 
   // Keep stats live if amounts change while panel is open (conversion, combat, etc.)
-  useEventBus('zombie-rats-updated', () => {
+  useEventBus('creature-stats-changed', () => {
     if (open) refreshStats();
   });
 
