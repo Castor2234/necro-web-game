@@ -452,10 +452,11 @@ export class Location_1 extends Phaser.Scene {
   }
 
   private resolveLoot(villageId: string): void {
-    const lootedCorpses = Phaser.Math.Between(0, 2);
+    const looted = Phaser.Math.Between(0, 2);
+    addResources(this.registry, { ratCorpses: looted });
     EventBus.emit('village-looted', {
       villageId,
-      lootedCorpses: lootedCorpses,
+      lootedCorpses: looted,
     });
   }
 
@@ -466,12 +467,6 @@ export class Location_1 extends Phaser.Scene {
 
     const label = this.populationLabels.get(villageId);
     label?.setText(`${Math.trunc(population)}`);
-  }
-
-  // Resources functions
-  private updateResources(partial: Partial<typeof this.resources>): void {
-    this.resources = { ...this.resources, ...partial };
-    EventBus.emit('resources-updated', this.resources);
   }
 
   // Grow functions and update
