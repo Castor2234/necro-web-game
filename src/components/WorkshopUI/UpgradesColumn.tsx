@@ -4,6 +4,7 @@ import { emit } from '../../game/events';
 import {
   getUpgradeState,
   UpgradeState,
+  type WorkshopUpgradeKey,
 } from '../../game/state/helpers/upgrades';
 import styles from './UpgradesColumn.module.css';
 
@@ -12,7 +13,7 @@ export function UpgradesColumn() {
 
   useEventBus('upgrades-updated', setUpgrades);
 
-  const handleUpgrade = (upgradeKey: string) => {
+  const handleUpgrade = (upgradeKey: WorkshopUpgradeKey) => {
     emit('purchase-upgrade', { upgradeKey });
   };
 

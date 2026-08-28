@@ -142,7 +142,7 @@ export class Location_1 extends Phaser.Scene {
       })
       .on('pointerdown', (pointer: Phaser.Input.Pointer) => {
         if (!this.isCanvasClick(pointer)) return;
-        this.selectNecromancer(pointer);
+        this.selectNecromancer();
       });
 
     // Villages
@@ -167,7 +167,7 @@ export class Location_1 extends Phaser.Scene {
 
       sprite.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
         if (!this.isCanvasClick(pointer)) return;
-        this.selectVillage(sprite, pointer);
+        this.selectVillage(sprite);
       });
       return sprite;
     });
@@ -247,9 +247,11 @@ export class Location_1 extends Phaser.Scene {
   // Functions
 
   // Necro functions
-  private selectNecromancer(pointer: Phaser.Input.Pointer): void {
+  private selectNecromancer(): void {
     this.deselectVillage();
-    this.necroAnchor = { x: pointer.worldX, y: pointer.worldY };
+    // Anchor the menu to the necromancer sprite itself (not the click point),
+    // so it always appears in the same spot relative to the necromancer.
+    this.necroAnchor = { x: this.necromancer.x, y: this.necromancer.y };
     emit('necromancer-selected', true);
     // Push the initial menu position right away; update() re-syncs on camera movement.
     this.emitAnchorPosition('necromancer-ui-position', this.necroAnchor);
@@ -262,14 +264,11 @@ export class Location_1 extends Phaser.Scene {
   }
 
   // Village functons
-  private selectVillage(
-    sprite: Phaser.Physics.Arcade.Sprite,
-    pointer: Phaser.Input.Pointer
-  ): void {
+  private selectVillage(sprite: Phaser.Physics.Arcade.Sprite): void {
     this.deselectNecromancer();
-    // pointer.worldX/worldY = click position already converted to world space
-    // (accounts for current scroll/zoom at click time)
-    this.villageAnchor = { x: pointer.worldX, y: pointer.worldY };
+    // Anchor the menu to the village sprite itself (not the click point),
+    // so it always appears in the same spot relative to the village.
+    this.villageAnchor = { x: sprite.x, y: sprite.y };
     emit('village-selected', {
       id: sprite.getData('villageId') as string,
     });
@@ -457,9 +456,6 @@ export class Location_1 extends Phaser.Scene {
   }
 
   private resolveAttack(villageId: string): void {
-    // Attack strength = deployed zombie rats × their power.
-    // Each villager killed yields a human corpse and lowers the village population.
-    // TODO: balance pass — currently rats take no losses.
     const strength = this.values.zombieRatsAmount * this.values.ratPower;
     const population = this.getVillagePopulation(villageId);
     const kills = Math.min(Math.trunc(population), Math.max(0, strength));
@@ -473,7 +469,7 @@ export class Location_1 extends Phaser.Scene {
   }
 
   private resolveLoot(villageId: string): void {
-    const looted = Phaser.Math.Between(0, 2);
+    const looted = Phaser.Math.Between(0, this.values.zombieRatsAmount);
     addResources(this.registry, { ratCorpses: looted });
     emit('village-looted', {
       villageId,
@@ -543,6 +539,9 @@ export class Location_1 extends Phaser.Scene {
               break;
             case 'scout':
               this.resolveScout(this.ratTask.villageId);
+              break;
+            case 'attack':
+              this.resolveAttack(this.ratTask.villageId);
               break;
           }
 

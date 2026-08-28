@@ -1,7 +1,10 @@
 import { EventBus } from './EventBus';
 import type { CanvasScale } from './state/helpers/canvasScale';
 import type { Resources } from './state/helpers/resources';
-import type { UpgradeState } from './state/helpers/upgrades';
+import type {
+  UpgradeState,
+  WorkshopUpgradeKey,
+} from './state/helpers/upgrades';
 
 export type BuildingType = 'tent' | 'workshop';
 export type VillageAction = 'attack' | 'loot' | 'scout';
@@ -10,6 +13,8 @@ export interface ConversionProgress {
   id: number;
   progress: number;
   secondsLeft: number;
+  /** true while the task waits for a free conversion slot */
+  queued: boolean;
 }
 
 /**
@@ -49,14 +54,22 @@ export interface GameEvents {
 
   // --- Workshop ---
   'convert-corpse': void;
-  'corpse-conversion-started': { activeCount: number; maxConcurrent: number };
+  'corpse-conversion-started': {
+    activeCount: number;
+    queuedCount: number;
+    maxConcurrent: number;
+    maxQueue: number;
+  };
   'corpse-conversion-progress': ConversionProgress[];
   'corpse-conversion-complete': {
     completedCount: number;
     activeCount: number;
+    queuedCount: number;
+    maxConcurrent: number;
+    maxQueue: number;
     remainingTasks: ConversionProgress[];
   };
-  'purchase-upgrade': { upgradeKey: string };
+  'purchase-upgrade': { upgradeKey: WorkshopUpgradeKey };
   'upgrades-updated': UpgradeState[];
 }
 

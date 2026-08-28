@@ -42,5 +42,22 @@ export function useAnchoredMenu(positionEvent: UiPositionEvent) {
     applyTransform();
   });
 
-  return containerRef;
+  /**
+   * Callback ref: applies the latest known transform the moment the menu div
+   * mounts. Selection events can fire BEFORE React mounts the div (the scene
+   * emits the position synchronously on select while the component still
+   * renders null), so without this the menu would render unpositioned and
+   * uncounter-scaled — big, in the top-left corner — until the next camera
+   * movement. Callback refs run during the commit phase, before paint, so the
+   * menu is never visible in a broken state.
+   */
+  const setContainerRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      containerRef.current = node;
+      if (node) applyTransform();
+    },
+    [applyTransform]
+  );
+
+  return setContainerRef;
 }

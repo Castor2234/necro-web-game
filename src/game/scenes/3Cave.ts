@@ -43,7 +43,7 @@ export class Cave extends Phaser.Scene {
       })
       .on('pointerdown', (pointer: Phaser.Input.Pointer) => {
         if (!this.isCanvasClick(pointer)) return;
-        this.selectBuilding('tent', pointer);
+        this.selectBuilding('tent');
       });
 
     // Мастерская
@@ -60,7 +60,7 @@ export class Cave extends Phaser.Scene {
       })
       .on('pointerdown', (pointer: Phaser.Input.Pointer) => {
         if (!this.isCanvasClick(pointer)) return;
-        this.selectBuilding('workshop', pointer);
+        this.selectBuilding('workshop');
       });
 
     // Deselect on empty space click
@@ -88,11 +88,11 @@ export class Cave extends Phaser.Scene {
     return pointer.event?.target === this.game.canvas;
   }
 
-  private selectBuilding(
-    type: BuildingType,
-    pointer: Phaser.Input.Pointer
-  ): void {
-    this.selectedBuilding = { type, x: pointer.worldX, y: pointer.worldY };
+  private selectBuilding(type: BuildingType): void {
+    const sprite = type === 'tent' ? this.tent : this.workshop;
+    // Anchor the menu to the building sprite itself (not the click point),
+    // so it always appears in the same spot relative to the building.
+    this.selectedBuilding = { type, x: sprite.x, y: sprite.y };
     emit('building-selected', { type });
     // Push the initial menu position right away; update() re-syncs on camera movement.
     this.emitSelectedBuildingPosition();

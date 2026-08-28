@@ -1,9 +1,14 @@
 import * as Phaser from 'phaser';
 import { SCENE } from './keys';
 import { emit, on, off } from '../events';
+import type { ConversionProgress } from '../events';
 import { getStat, setStat } from '../state/gameState';
 import { getResources, addResources } from '../state/helpers/resources';
-import { WORKSHOP_UPGRADES, setUpgradeState } from '../state/helpers/upgrades';
+import {
+  WORKSHOP_UPGRADES,
+  setUpgradeState,
+  type WorkshopUpgradeKey,
+} from '../state/helpers/upgrades';
 
 interface ConversionTask {
   id: number;
@@ -51,9 +56,41 @@ export class Workshop extends Phaser.Scene {
     return getStat(this.registry, 'maxConcurrentConversions');
   }
 
+  private getMaxConversionQueue(): number {
+    return getStat(this.registry, 'maxConversionQueue');
+  }
+
+  /** Active vs queued split: only the first `maxConcurrent` tasks run. */
+  private getQueueCounts(maxConcurrent: number): {
+    activeCount: number;
+    queuedCount: number;
+  } {
+    const activeCount = Math.min(this.conversionTasks.length, maxConcurrent);
+    return {
+      activeCount,
+      queuedCount: this.conversionTasks.length - activeCount,
+    };
+  }
+
+  private buildProgressList(maxConcurrent: number): ConversionProgress[] {
+    const activeCount = Math.min(this.conversionTasks.length, maxConcurrent);
+    return this.conversionTasks.map((task, index) => {
+      const active = index < activeCount;
+      return {
+        id: task.id,
+        progress: active ? 1 - Math.max(task.timer, 0) / task.duration : 0,
+        secondsLeft: active ? Math.ceil(Math.max(task.timer, 0) / 1000) : 0,
+        queued: !active,
+      };
+    });
+  }
+
   private handleConvertCorpse = (): void => {
     const maxConcurrent = this.getMaxConcurrentConversions();
-    if (this.conversionTasks.length >= maxConcurrent) return;
+    const maxQueue = this.getMaxConversionQueue();
+
+    // Tasks beyond maxConcurrent go into the queue, up to maxQueue slots.
+    if (this.conversionTasks.length >= maxConcurrent + maxQueue) return;
 
     const resources = getResources(this.registry);
     if (resources.ratCorpses < 1) return;
@@ -67,20 +104,25 @@ export class Workshop extends Phaser.Scene {
     };
     this.conversionTasks.push(task);
 
+    const { activeCount, queuedCount } = this.getQueueCounts(maxConcurrent);
     emit('corpse-conversion-started', {
-      activeCount: this.conversionTasks.length,
+      activeCount,
+      queuedCount,
       maxConcurrent,
+      maxQueue,
     });
   };
 
   // Upgrades
-  private getUpgradeCost(upgradeKey: string): number {
+  private getUpgradeCost(upgradeKey: WorkshopUpgradeKey): number {
     const config = WORKSHOP_UPGRADES[upgradeKey];
     const level = this.upgradeLevels[upgradeKey] ?? 0;
     return Math.round(config.baseCost * Math.pow(config.costGrowth, level));
   }
 
-  private handlePurchaseUpgrade = (payload: { upgradeKey: string }): void => {
+  private handlePurchaseUpgrade = (payload: {
+    upgradeKey: WorkshopUpgradeKey;
+  }): void => {
     const config = WORKSHOP_UPGRADES[payload.upgradeKey];
     if (!config) return;
 
@@ -103,7 +145,8 @@ export class Workshop extends Phaser.Scene {
   };
 
   private emitUpgradeState(): void {
-    const state = Object.keys(WORKSHOP_UPGRADES).map((upgradeKey) => {
+    const upgradeKeys = Object.keys(WORKSHOP_UPGRADES) as WorkshopUpgradeKey[];
+    const state = upgradeKeys.map((upgradeKey) => {
       const config = WORKSHOP_UPGRADES[upgradeKey];
       return {
         upgradeKey,
@@ -119,9 +162,15 @@ export class Workshop extends Phaser.Scene {
   update(_time: number, delta: number): void {
     if (this.conversionTasks.length === 0) return;
 
+    const maxConcurrent = this.getMaxConcurrentConversions();
+    // Only the first `maxConcurrent` tasks tick down; queued tasks wait with
+    // full timers and are promoted automatically when a slot frees up.
+    const activeCount = Math.min(this.conversionTasks.length, maxConcurrent);
+
     const completed: ConversionTask[] = [];
 
-    for (const task of this.conversionTasks) {
+    for (let i = 0; i < activeCount; i++) {
+      const task = this.conversionTasks[i];
       task.timer -= delta;
       if (task.timer <= 0) {
         completed.push(task);
@@ -132,32 +181,31 @@ export class Workshop extends Phaser.Scene {
     this.progressTickAccumulator += delta;
     if (this.progressTickAccumulator >= 1000) {
       this.progressTickAccumulator -= 1000;
-
-      const progressList = this.conversionTasks.map((t) => ({
-        id: t.id,
-        progress: 1 - Math.max(t.timer, 0) / t.duration,
-        secondsLeft: Math.ceil(Math.max(t.timer, 0) / 1000),
-      }));
-      emit('corpse-conversion-progress', progressList);
+      emit('corpse-conversion-progress', this.buildProgressList(maxConcurrent));
     }
 
     if (completed.length > 0) {
-      const currentAmount = this.registry.get('zombieRatsAmount') ?? 0;
+      const currentAmount = getStat(this.registry, 'zombieRatsAmount');
       const newAmount = currentAmount + completed.length;
-      this.registry.set('zombieRatsAmount', newAmount);
+      setStat(this.registry, 'zombieRatsAmount', newAmount);
 
       this.conversionTasks = this.conversionTasks.filter(
         (t) => !completed.includes(t)
       );
 
+      // Queued tasks are promoted on the next frame (their timers are still
+      // full), but report the fresh active/queued split right away.
+      const { activeCount: newActiveCount, queuedCount } = this.getQueueCounts(
+        maxConcurrent
+      );
+
       emit('corpse-conversion-complete', {
         completedCount: completed.length,
-        activeCount: this.conversionTasks.length,
-        remainingTasks: this.conversionTasks.map((t) => ({
-          id: t.id,
-          progress: 1 - Math.max(t.timer, 0) / t.duration,
-          secondsLeft: Math.ceil(Math.max(t.timer, 0) / 1000),
-        })),
+        activeCount: newActiveCount,
+        queuedCount,
+        maxConcurrent,
+        maxQueue: this.getMaxConversionQueue(),
+        remainingTasks: this.buildProgressList(maxConcurrent),
       });
       emit('zombie-rats-updated', newAmount);
       emit('creature-stats-changed');

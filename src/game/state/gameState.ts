@@ -17,6 +17,7 @@ export interface GameState {
   // ----------Conversions
   corpseConversionDuration: number;
   maxConcurrentConversions: number;
+  maxConversionQueue: number;
 
   // ----------Creatures
 
@@ -36,8 +37,8 @@ export const INITIAL_VALUES_CONFIG: Record<keyof GameState, number> = {
   // ----------Villages
 
   // Actions
-  lootDuration: 3000,
-  scoutDuration: 2000,
+  lootDuration: 1000,
+  scoutDuration: 1000,
 
   // Populations
   village1Population: 100,
@@ -45,18 +46,19 @@ export const INITIAL_VALUES_CONFIG: Record<keyof GameState, number> = {
   village3Population: 1000,
 
   // ----------Resources
-  ratCorpses: 99,
-  humanCorpses: 50,
+  ratCorpses: 999,
+  humanCorpses: 999,
 
   // ----------Conversions
-  corpseConversionDuration: 5000,
-  maxConcurrentConversions: 7,
+  corpseConversionDuration: 6000,
+  maxConcurrentConversions: 3,
+  maxConversionQueue: 4,
 
   // ----------Creatures
 
   // Rats
   zombieRatsAmount: 0,
-  ratSpeed: 60,
+  ratSpeed: 100,
   ratPower: 1,
 
   // Ghouls

@@ -6,25 +6,45 @@ import styles from './ConvertCorpseButton.module.css';
 
 export function ConvertCorpseButton() {
   const [activeCount, setActiveCount] = useState(0);
+  const [queuedCount, setQueuedCount] = useState(0);
   const [maxConcurrent, setMaxConcurrent] = useState(1);
+  const [maxQueue, setMaxQueue] = useState(1);
   const [tasks, setTasks] = useState<ConversionProgress[]>([]);
 
-  useEventBus('corpse-conversion-started', ({ activeCount, maxConcurrent }) => {
-    setActiveCount(activeCount);
-    setMaxConcurrent(maxConcurrent);
-  });
+  useEventBus(
+    'corpse-conversion-started',
+    ({ activeCount, queuedCount, maxConcurrent, maxQueue }) => {
+      setActiveCount(activeCount);
+      setQueuedCount(queuedCount);
+      setMaxConcurrent(maxConcurrent);
+      setMaxQueue(maxQueue);
+    }
+  );
 
   useEventBus('corpse-conversion-progress', setTasks);
 
   useEventBus(
     'corpse-conversion-complete',
-    ({ activeCount, remainingTasks }) => {
+    ({ activeCount, queuedCount, maxConcurrent, maxQueue, remainingTasks }) => {
       setActiveCount(activeCount);
+      setQueuedCount(queuedCount);
+      setMaxConcurrent(maxConcurrent);
+      setMaxQueue(maxQueue);
       setTasks(remainingTasks); // ← explicitly sync the task list, removing finished ones
     }
   );
 
-  const atCapacity = activeCount >= maxConcurrent;
+  // Keep the capacity display in sync when conversion upgrades are purchased
+  // ('upgrades-updated' fires on purchase and on scene enter).
+  useEventBus('upgrades-updated', (states) => {
+    for (const s of states) {
+      if (s.upgradeKey === 'maxConcurrentConversions')
+        setMaxConcurrent(s.currentValue);
+      if (s.upgradeKey === 'maxConversionQueue') setMaxQueue(s.currentValue);
+    }
+  });
+
+  const atCapacity = activeCount + queuedCount >= maxConcurrent + maxQueue;
 
   const handleClick = () => {
     emit('convert-corpse');
@@ -34,16 +54,19 @@ export function ConvertCorpseButton() {
     <div className={styles.wrapper}>
       <Button disabled={atCapacity} onClick={handleClick}>
         Convert Corpse ({activeCount}/{maxConcurrent})
+        {queuedCount > 0 ? ` +${queuedCount}/${maxQueue}` : ''}
       </Button>
       {tasks.map((t) => (
         <div key={t.id} className={styles.taskRow}>
           <div className={styles.taskBar}>
             <div
               className={styles.taskBarFill}
-              style={{ width: `${t.progress * 100}%` }}
+              style={{ width: t.queued ? '0%' : `${t.progress * 100}%` }}
             />
           </div>
-          <span className={styles.taskSeconds}>{t.secondsLeft}s</span>
+          <span className={styles.taskSeconds}>
+            {t.queued ? 'queued' : `${t.secondsLeft}s`}
+          </span>
         </div>
       ))}
     </div>

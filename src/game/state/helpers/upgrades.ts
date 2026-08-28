@@ -1,4 +1,4 @@
-// game/states/upgrades.ts
+// game/state/helpers/upgrades.ts
 import { emit } from '../../events';
 import type { GameState } from '../gameState';
 
@@ -12,15 +12,20 @@ export interface UpgradeConfig {
   costResource: 'ratCorpses' | 'humanCorpses';
 }
 
+export type WorkshopUpgradeKey =
+  | 'ratSpeed'
+  | 'maxConcurrentConversions'
+  | 'maxConversionQueue';
+
 export interface UpgradeState {
-  upgradeKey: string;
+  upgradeKey: WorkshopUpgradeKey;
   label: string;
   currentValue: number;
   cost: number;
   costResource: 'ratCorpses' | 'humanCorpses';
 }
 
-export const WORKSHOP_UPGRADES: Record<string, UpgradeConfig> = {
+export const WORKSHOP_UPGRADES: Record<WorkshopUpgradeKey, UpgradeConfig> = {
   ratSpeed: {
     key: 'ratSpeed',
     label: 'Rat Speed',
@@ -36,6 +41,14 @@ export const WORKSHOP_UPGRADES: Record<string, UpgradeConfig> = {
     baseCost: 5,
     costGrowth: 1.8,
     costResource: 'humanCorpses', // pays with humanCorpses now
+  },
+  maxConversionQueue: {
+    key: 'maxConversionQueue',
+    label: 'Max Queue',
+    increment: 1,
+    baseCost: 4,
+    costGrowth: 1.6,
+    costResource: 'ratCorpses',
   },
 };
 
