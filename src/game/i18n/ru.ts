@@ -28,12 +28,12 @@ export const ru: Record<TranslationKey, string> = {
   'nav.cave': 'Пещера',
   'nav.workshop': 'Мастерская',
   'nav.tent': 'Жилище',
-  'nav.location1': 'Первая локация',
+  'nav.location1': 'Локация 1',
   'nav.worldMap': 'Карта мира',
 
   // --- Resources ---
-  'resources.humanCorpses': 'Тела людей:',
-  'resources.ratCorpses': 'Тела крыс:',
+  'resources.humanCorpses': 'Трупов людей:',
+  'resources.ratCorpses': 'Трупов крыс:',
 
   // --- Cave building menu ---
   'buildings.tent': 'Жилище',
@@ -55,11 +55,11 @@ export const ru: Record<TranslationKey, string> = {
   'workshop.queued': 'в очереди',
   'workshop.upgradeCost': 'Улучшить ({resource}: {cost})',
   'workshop.score': 'Очки: 100',
-  'cost.humanCorpses': 'тела людей',
-  'cost.ratCorpses': 'тела крыс',
+  'cost.humanCorpses': 'трупы людей',
+  'cost.ratCorpses': 'трупы крыс',
   'upgrades.ratSpeed': 'Скорость крыс',
-  'upgrades.maxConcurrentConversions': 'Макс. преобразований',
-  'upgrades.maxConversionQueue': 'Макс. очередь',
+  'upgrades.maxConcurrentConversions': 'Макс. Преобразований',
+  'upgrades.maxConversionQueue': 'Макс. Очередь',
 
   // --- Creature stats ---
   'stats.title': 'Статистика существ',
@@ -72,3 +72,4 @@ export const ru: Record<TranslationKey, string> = {
   'worldMap.title': 'Карта мира... В разработке...',
   'worldMap.backToBase': 'Вернуться на базу',
 };
+

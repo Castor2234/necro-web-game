@@ -30,12 +30,12 @@ export const en = {
   'nav.cave': 'Cave',
   'nav.workshop': 'Workshop',
   'nav.tent': 'Tent',
-  'nav.location1': 'First Location',
+  'nav.location1': 'Location 1',
   'nav.worldMap': 'World Map',
 
   // --- Resources ---
-  'resources.humanCorpses': 'Human Bodies:',
-  'resources.ratCorpses': 'Rat Bodies:',
+  'resources.humanCorpses': 'Human corpses:',
+  'resources.ratCorpses': 'Rat corpses:',
 
   // --- Cave building menu ---
   'buildings.tent': 'Tent',
@@ -76,3 +76,4 @@ export const en = {
 } as const;
 
 export type TranslationKey = keyof typeof en;
+
