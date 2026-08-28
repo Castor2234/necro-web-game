@@ -34,7 +34,7 @@
     "@eslint/compat": "^2.1.0",
     "@eslint/eslintrc": "^0.1.0",
     "@eslint/js": "^9.39.5",
-    "@types/node": "^26.1.2",
+    "@types/node": "^26.4.0",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@vitejs/plugin-react": "^4.3.4",
@@ -59,3 +59,4 @@
     "minimatch": "^10.2.4"
   }
 }
+
