@@ -1,18 +1,19 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import process from 'node:process';
 
 const phasermsg = () => {
   return {
     name: 'phasermsg',
     buildStart() {
-      import.meta.stdout.write(`Building for production...\n`);
+      process.stdout.write(`Building for production...\n`);
     },
     buildEnd() {
       const line = '---------------------------------------------------------';
       const msg = `❤️❤️❤️ Tell us about your game! - games@phaser.io ❤️❤️❤️`;
-      import.meta.stdout.write(`${line}\n${msg}\n${line}\n`);
+      process.stdout.write(`${line}\n${msg}\n${line}\n`);
 
-      import.meta.stdout.write(`✨ Done ✨\n`);
+      process.stdout.write(`✨ Done ✨\n`);
     },
   };
 };
