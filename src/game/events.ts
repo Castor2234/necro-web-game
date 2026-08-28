@@ -71,6 +71,10 @@ export interface GameEvents {
   };
   'purchase-upgrade': { upgradeKey: WorkshopUpgradeKey };
   'upgrades-updated': UpgradeState[];
+
+  // --- Save system ---
+  /** Wipes the save file and resets every stat to its initial value. */
+  'reset-game': void;
 }
 
 type EmitArgs<E extends keyof GameEvents> = GameEvents[E] extends void

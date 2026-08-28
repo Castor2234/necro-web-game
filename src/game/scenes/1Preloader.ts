@@ -1,7 +1,11 @@
 import { Scene } from 'phaser';
 import { SCENE } from './keys';
 import { emit } from '../events';
-import { INITIAL_VALUES_CONFIG } from '../state/gameState';
+import {
+  getResumeScene,
+  initGameStateFromSave,
+  installAutoSave,
+} from '../state/save';
 import { getResources } from '../state/helpers/resources';
 
 export class Preloader extends Scene {
@@ -54,16 +58,18 @@ export class Preloader extends Scene {
     //  When all the assets have loaded, it's often worth creating global objects here that the rest of the game can use.
     //  For example, you can define global animations here, so we can use them in other scenes.
 
-    // Setup all initial values from imported config
-    Object.entries(INITIAL_VALUES_CONFIG).forEach(([key, value]) => {
-      this.registry.set(key, value);
-    });
+    // Restore the saved game, or fall back to INITIAL_VALUES_CONFIG defaults.
+    const save = initGameStateFromSave(this.registry);
 
-    // Notify the React UI (ResourceBar, etc.) about the starting resource values
+    // Keep the save file in sync from here on: debounced writes on every
+    // registry change + a flush when the page is hidden or closed.
+    installAutoSave(this.game, save?.scene ?? null);
+
+    // Notify the React UI (ResourceBar, etc.) about the (possibly restored) values
     emit('resources-updated', getResources(this.registry));
 
-    //  Move to the MainMenu. You could also swap this for a Scene Transition, such as a camera fade.
-    this.scene.start(SCENE.Workshop);
+    // Continue where the player left off; fresh games start in the Workshop.
+    this.scene.start(getResumeScene(save));
   }
 }
 

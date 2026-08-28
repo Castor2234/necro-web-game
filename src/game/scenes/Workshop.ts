@@ -2,8 +2,12 @@ import * as Phaser from 'phaser';
 import { SCENE } from './keys';
 import { emit, on, off } from '../events';
 import type { ConversionProgress } from '../events';
-import { getStat, setStat } from '../state/gameState';
+import { getStat, setStat, INITIAL_VALUES_CONFIG } from '../state/gameState';
 import { getResources, addResources } from '../state/helpers/resources';
+import {
+  getConversionSaveData,
+  setConversionSaveData,
+} from '../state/save';
 import {
   WORKSHOP_UPGRADES,
   setUpgradeState,
@@ -24,7 +28,6 @@ export class Workshop extends Phaser.Scene {
   private nextTaskId = 0;
   private corpseConversionDuration = 0;
   private progressTickAccumulator = 0;
-  private upgradeLevels: Record<string, number> = {};
 
   constructor() {
     super(SCENE.Workshop);
@@ -47,6 +50,9 @@ export class Workshop extends Phaser.Scene {
       off('purchase-upgrade', this.handlePurchaseUpgrade, this);
     });
 
+    // Rebuild in-flight conversions saved before the page was refreshed, so
+    // corpses already spent on them are not lost.
+    this.restoreConversionTasks();
     this.emitUpgradeState();
     emit('current-scene-ready', this);
   }
@@ -103,6 +109,7 @@ export class Workshop extends Phaser.Scene {
       duration: this.corpseConversionDuration,
     };
     this.conversionTasks.push(task);
+    this.syncConversionSaveData();
 
     const { activeCount, queuedCount } = this.getQueueCounts(maxConcurrent);
     emit('corpse-conversion-started', {
@@ -114,9 +121,19 @@ export class Workshop extends Phaser.Scene {
   };
 
   // Upgrades
+  /** The upgrade level is derived from the stat itself (initial value → each
+   *  purchase adds `increment`), so purchased upgrades survive a page refresh:
+   *  the stat value is what gets saved and restored. */
+  private getUpgradeLevel(upgradeKey: WorkshopUpgradeKey): number {
+    const config = WORKSHOP_UPGRADES[upgradeKey];
+    const initial = INITIAL_VALUES_CONFIG[config.key];
+    const current = getStat(this.registry, config.key);
+    return Math.max(0, Math.round((current - initial) / config.increment));
+  }
+
   private getUpgradeCost(upgradeKey: WorkshopUpgradeKey): number {
     const config = WORKSHOP_UPGRADES[upgradeKey];
-    const level = this.upgradeLevels[upgradeKey] ?? 0;
+    const level = this.getUpgradeLevel(upgradeKey);
     return Math.round(config.baseCost * Math.pow(config.costGrowth, level));
   }
 
@@ -137,12 +154,43 @@ export class Workshop extends Phaser.Scene {
     const currentValue = getStat(this.registry, config.key);
     setStat(this.registry, config.key, currentValue + config.increment);
 
-    this.upgradeLevels[payload.upgradeKey] =
-      (this.upgradeLevels[payload.upgradeKey] ?? 0) + 1;
-
     this.emitUpgradeState();
     emit('creature-stats-changed');
   };
+
+  /** Reports the conversion queue to the save system so in-flight tasks (and
+   *  the corpses already paid for them) survive a page refresh. */
+  private syncConversionSaveData(): void {
+    setConversionSaveData(this.conversionTasks, this.nextTaskId);
+  }
+
+  /** Rebuilds the conversion queue saved before the page was refreshed and
+   *  pushes it to the React UI. */
+  private restoreConversionTasks(): void {
+    const { tasks, nextTaskId } = getConversionSaveData();
+    this.conversionTasks = tasks.map((task) => ({ ...task }));
+
+    // Never hand out an id that is still referenced by a restored task.
+    const maxSavedId = this.conversionTasks.reduce(
+      (max, task) => Math.max(max, task.id),
+      -1
+    );
+    this.nextTaskId = Math.max(nextTaskId, maxSavedId + 1);
+
+    if (this.conversionTasks.length > 0) {
+      const maxConcurrent = this.getMaxConcurrentConversions();
+      const { activeCount, queuedCount } = this.getQueueCounts(maxConcurrent);
+      emit('corpse-conversion-started', {
+        activeCount,
+        queuedCount,
+        maxConcurrent,
+        maxQueue: this.getMaxConversionQueue(),
+      });
+      emit('corpse-conversion-progress', this.buildProgressList(maxConcurrent));
+    }
+
+    this.syncConversionSaveData();
+  }
 
   private emitUpgradeState(): void {
     const upgradeKeys = Object.keys(WORKSHOP_UPGRADES) as WorkshopUpgradeKey[];
@@ -192,6 +240,7 @@ export class Workshop extends Phaser.Scene {
       this.conversionTasks = this.conversionTasks.filter(
         (t) => !completed.includes(t)
       );
+      this.syncConversionSaveData();
 
       // Queued tasks are promoted on the next frame (their timers are still
       // full), but report the fresh active/queued split right away.
