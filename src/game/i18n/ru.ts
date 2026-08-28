@@ -51,7 +51,7 @@ export const ru: Record<TranslationKey, string> = {
   'necro.sleep': 'Спать',
 
   // --- Workshop ---
-  'workshop.convert': 'Преобразовать тело ({active}/{max})',
+  'workshop.convert': 'Создать зомби ({active}/{max})',
   'workshop.queued': 'в очереди',
   'workshop.upgradeCost': 'Улучшить ({resource}: {cost})',
   'workshop.score': 'Очки: 100',

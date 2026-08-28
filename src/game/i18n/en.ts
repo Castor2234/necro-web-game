@@ -53,7 +53,7 @@ export const en = {
   'necro.sleep': 'Sleep',
 
   // --- Workshop ---
-  'workshop.convert': 'Convert Corpse ({active}/{max})',
+  'workshop.convert': 'Raise Dead ({active}/{max})',
   'workshop.queued': 'queued',
   'workshop.upgradeCost': 'Upgrade ({cost} {resource})',
   'workshop.score': 'Score: 100',
