@@ -105,11 +105,11 @@ export class Cave extends Phaser.Scene {
   update(): void {
     if (!this.selectedBuilding) return;
 
-    // If Cave doesn't have camera pan/zoom, just use world coords directly (no conversion needed)
-    EventBus.emit('building-ui-position', {
-      x: this.selectedBuilding.x,
-      y: this.selectedBuilding.y,
-    });
+    const { x, y } = this.cameraController.worldToScreen(
+      this.selectedBuilding.x,
+      this.selectedBuilding.y
+    );
+    EventBus.emit('building-ui-position', { x, y });
   }
 }
 
