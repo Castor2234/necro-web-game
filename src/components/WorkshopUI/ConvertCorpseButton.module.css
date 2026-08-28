@@ -8,10 +8,22 @@
   z-index: 15;
 }
 
+.controlsRow {
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+}
+
 .taskRow {
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+.taskCreature {
+  font-size: 11px;
+  color: #ffffff;
+  white-space: nowrap;
 }
 
 .taskBar {
@@ -24,8 +36,15 @@
 
 .taskBarFill {
   height: 100%;
-  background-color: #4caf50;
   transition: width 0.15s linear; /* smooths the visual step between 1-second updates */
+}
+
+.fillRats {
+  background-color: #4caf50;
+}
+
+.fillGhouls {
+  background-color: #b44caf;
 }
 
 .taskSeconds {

@@ -5,7 +5,7 @@ export const WorkshopHUD = () => {
 
   return (
     <>
-      <div style={{ position: 'absolute', top: '20px', right: '20px' }}>
+      <div style={{ position: 'absolute', bottom: '20px', right: '20px' }}>
         {t('workshop.score')}
       </div>
     </>

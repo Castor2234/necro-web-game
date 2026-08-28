@@ -13,6 +13,16 @@ export interface AllCreatureStats {
   ghouls: CreatureStats;
 }
 
+/** The creature types that can be raised in the workshop. */
+export type CreatureType = keyof AllCreatureStats;
+
+/** Runtime guard for raw values (e.g. read back from a save file). */
+const CREATURE_TYPES: readonly CreatureType[] = ['zombieRats', 'ghouls'];
+
+export function isCreatureType(value: unknown): value is CreatureType {
+  return (CREATURE_TYPES as readonly unknown[]).includes(value);
+}
+
 export function getCreatureStats(
   registry: Phaser.Data.DataManager
 ): AllCreatureStats {

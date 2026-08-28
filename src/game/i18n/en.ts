@@ -55,6 +55,11 @@ export const en = {
   // --- Workshop ---
   'workshop.convert': 'Raise Dead ({active}/{max})',
   'workshop.queued': 'queued',
+  'workshop.ratesTitle': 'Convert Rates',
+  // Rate strings must match CONVERSION_RECIPES in
+  // src/game/state/secondary/conversions.ts
+  'workshop.rateRats': '1 rat corpse → 1',
+  'workshop.rateGhouls': '2 human corpses → 1',
   'workshop.upgradeCost': 'Upgrade ({cost} {resource})',
   'workshop.score': 'Score: 100',
   'cost.humanCorpses': 'human corpses',

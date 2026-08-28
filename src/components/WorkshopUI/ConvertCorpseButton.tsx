@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useEventBus } from '../../hooks/useEventBus';
 import { useTranslation } from '../../hooks/useTranslation';
 import { emit, ConversionProgress } from '../../game/helpers/events';
+import type { CreatureType } from '../../game/state/secondary/creatures';
+import { CreatureDropdown } from './CreatureDropdown';
 import { Button } from '../!shared/Button/Button';
 import styles from './ConvertCorpseButton.module.css';
 
@@ -11,6 +13,7 @@ export function ConvertCorpseButton() {
   const [maxConcurrent, setMaxConcurrent] = useState(1);
   const [maxQueue, setMaxQueue] = useState(1);
   const [tasks, setTasks] = useState<ConversionProgress[]>([]);
+  const [creatureType, setCreatureType] = useState<CreatureType>('zombieRats');
   const { t } = useTranslation();
 
   useEventBus(
@@ -49,20 +52,30 @@ export function ConvertCorpseButton() {
   const atCapacity = activeCount + queuedCount >= maxConcurrent + maxQueue;
 
   const handleClick = () => {
-    emit('convert-corpse');
+    emit('convert-corpse', { creatureType });
   };
 
   return (
     <div className={styles.wrapper}>
-      <Button disabled={atCapacity} onClick={handleClick}>
-        {t('workshop.convert', { active: activeCount, max: maxConcurrent })}
-        {queuedCount > 0 ? ` +${queuedCount}/${maxQueue}` : ''}
-      </Button>
+      <div className={styles.controlsRow}>
+        <Button disabled={atCapacity} onClick={handleClick}>
+          {t('workshop.convert', { active: activeCount, max: maxConcurrent })}
+          {queuedCount > 0 ? ` +${queuedCount}/${maxQueue}` : ''}
+        </Button>
+        <CreatureDropdown value={creatureType} onChange={setCreatureType} />
+      </div>
       {tasks.map((task) => (
         <div key={task.id} className={styles.taskRow}>
+          <span className={styles.taskCreature}>
+            {t(task.creatureType === 'zombieRats' ? 'stats.rats' : 'stats.ghouls')}
+          </span>
           <div className={styles.taskBar}>
             <div
-              className={styles.taskBarFill}
+              className={`${styles.taskBarFill} ${
+                task.creatureType === 'zombieRats'
+                  ? styles.fillRats
+                  : styles.fillGhouls
+              }`}
               style={{ width: task.queued ? '0%' : `${task.progress * 100}%` }}
             />
           </div>

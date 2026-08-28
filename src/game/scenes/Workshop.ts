@@ -10,11 +10,15 @@ import {
   setUpgradeState,
   type WorkshopUpgradeKey,
 } from '../state/secondary/upgrades';
+import { CONVERSION_RECIPES } from '../state/secondary/conversions';
+import type { CreatureType } from '../state/secondary/creatures';
 
 interface ConversionTask {
   id: number;
   timer: number;
   duration: number;
+  /** Which creature this task produces (per CONVERSION_RECIPES). */
+  creatureType: CreatureType;
 }
 
 export class Workshop extends Phaser.Scene {
@@ -84,11 +88,17 @@ export class Workshop extends Phaser.Scene {
         progress: active ? 1 - Math.max(task.timer, 0) / task.duration : 0,
         secondsLeft: active ? Math.ceil(Math.max(task.timer, 0) / 1000) : 0,
         queued: !active,
+        creatureType: task.creatureType,
       };
     });
   }
 
-  private handleConvertCorpse = (): void => {
+  private handleConvertCorpse = (payload: {
+    creatureType: CreatureType;
+  }): void => {
+    const recipe = CONVERSION_RECIPES[payload.creatureType];
+    if (!recipe) return;
+
     const maxConcurrent = this.getMaxConcurrentConversions();
     const maxQueue = this.getMaxConversionQueue();
 
@@ -96,14 +106,15 @@ export class Workshop extends Phaser.Scene {
     if (this.conversionTasks.length >= maxConcurrent + maxQueue) return;
 
     const resources = getResources(this.registry);
-    if (resources.ratCorpses < 1) return;
+    if (resources[recipe.costResource] < recipe.costAmount) return;
 
-    addResources(this.registry, { ratCorpses: -1 });
+    addResources(this.registry, { [recipe.costResource]: -recipe.costAmount });
 
     const task: ConversionTask = {
       id: this.nextTaskId++,
       timer: this.corpseConversionDuration,
       duration: this.corpseConversionDuration,
+      creatureType: payload.creatureType,
     };
     this.conversionTasks.push(task);
     this.syncConversionSaveData();
@@ -230,9 +241,30 @@ export class Workshop extends Phaser.Scene {
     }
 
     if (completed.length > 0) {
-      const currentAmount = getStat(this.registry, 'zombieRatsAmount');
-      const newAmount = currentAmount + completed.length;
-      setStat(this.registry, 'zombieRatsAmount', newAmount);
+      // A mixed queue can complete several creature types in one frame —
+      // group them and apply each recipe to its own stat.
+      const completedByType = new Map<CreatureType, number>();
+      for (const task of completed) {
+        completedByType.set(
+          task.creatureType,
+          (completedByType.get(task.creatureType) ?? 0) + 1
+        );
+      }
+      completedByType.forEach((count, creatureType) => {
+        const recipe = CONVERSION_RECIPES[creatureType];
+        const currentAmount = getStat(this.registry, recipe.amountStat);
+        setStat(
+          this.registry,
+          recipe.amountStat,
+          currentAmount + count * recipe.yieldAmount
+        );
+        if (creatureType === 'zombieRats') {
+          emit(
+            'zombie-rats-updated',
+            getStat(this.registry, 'zombieRatsAmount')
+          );
+        }
+      });
 
       this.conversionTasks = this.conversionTasks.filter(
         (t) => !completed.includes(t)
@@ -252,7 +284,6 @@ export class Workshop extends Phaser.Scene {
         maxQueue: this.getMaxConversionQueue(),
         remainingTasks: this.buildProgressList(maxConcurrent),
       });
-      emit('zombie-rats-updated', newAmount);
       emit('creature-stats-changed');
     }
   }

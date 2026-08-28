@@ -51,8 +51,13 @@ export const ru: Record<TranslationKey, string> = {
   'necro.sleep': 'Спать',
 
   // --- Workshop ---
-  'workshop.convert': 'Создать зомби ({active}/{max})',
+  'workshop.convert': 'Поднять мёртвых ({active}/{max})',
   'workshop.queued': 'в очереди',
+  'workshop.ratesTitle': 'Скорость создания',
+  // Строки скорости должны соответствовать CONVERSION_RECIPES в
+  // src/game/state/secondary/conversions.ts
+  'workshop.rateRats': '1 труп крысы → 1',
+  'workshop.rateGhouls': '2 трупа людей → 1',
   'workshop.upgradeCost': 'Улучшить ({resource}: {cost})',
   'workshop.score': 'Очки: 100',
   'cost.humanCorpses': 'Труп человека',

@@ -1,0 +1,36 @@
+.column {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  display: flex;
+  flex-direction: column;
+  background-color: rgba(0, 0, 0, 0.7);
+  border-radius: 4px;
+  pointer-events: none;
+  z-index: 15;
+  min-width: 150px;
+}
+
+.title {
+  font-weight: bold;
+  color: #ffffff;
+  font-size: 12px;
+  padding: 4px 8px 2px 8px;
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 3px 8px;
+  color: #ffffff;
+  font-size: 12px;
+}
+
+.name {
+  font-weight: bold;
+}
+
+.rate {
+  white-space: nowrap;
+}

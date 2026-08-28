@@ -3,6 +3,7 @@ import * as Phaser from 'phaser';
 import { EventBus } from '../EventBus';
 import { SCENE, isSceneKey, type SceneKey } from '../helpers/keys';
 import { INITIAL_VALUES_CONFIG, type GameState } from './gameState';
+import { isCreatureType, type CreatureType } from './secondary/creatures';
 
 /**
  * localStorage-backed save system.
@@ -20,7 +21,7 @@ import { INITIAL_VALUES_CONFIG, type GameState } from './gameState';
 const SAVE_STORAGE_KEY = 'necro-web-game.save';
 
 /** Bump when SavedGameData changes shape; older saves are discarded. */
-const SAVE_VERSION = 1;
+const SAVE_VERSION = 2;
 
 /** How long registry changes are debounced before writing to localStorage. */
 const AUTO_SAVE_DEBOUNCE_MS = 500;
@@ -30,6 +31,8 @@ export interface SavedConversionTask {
   id: number;
   timer: number;
   duration: number;
+  /** Which creature this task produces. */
+  creatureType: CreatureType;
 }
 
 export interface SavedGameData {
@@ -130,11 +133,13 @@ function sanitizeConversionTasks(raw: unknown): SavedConversionTask[] {
 
   return raw.flatMap((task) => {
     if (typeof task !== 'object' || task === null) return [];
-    const { id, timer, duration } = task as Record<string, unknown>;
+    const { id, timer, duration, creatureType } =
+      task as Record<string, unknown>;
     if (
       !isFiniteNumber(id) ||
       !isFiniteNumber(timer) ||
-      !isFiniteNumber(duration)
+      !isFiniteNumber(duration) ||
+      !isCreatureType(creatureType)
     ) {
       return [];
     }
@@ -143,6 +148,7 @@ function sanitizeConversionTasks(raw: unknown): SavedConversionTask[] {
         id,
         timer: Math.max(0, timer),
         duration: Math.max(0, duration),
+        creatureType,
       },
     ];
   });

@@ -5,6 +5,7 @@ import type {
   UpgradeState,
   WorkshopUpgradeKey,
 } from '../state/secondary/upgrades';
+import type { CreatureType } from '../state/secondary/creatures';
 import type { Language } from '../i18n/languages';
 
 export type BuildingType = 'tent' | 'workshop';
@@ -16,6 +17,8 @@ export interface ConversionProgress {
   secondsLeft: number;
   /** true while the task waits for a free conversion slot */
   queued: boolean;
+  /** Which creature this conversion produces. */
+  creatureType: CreatureType;
 }
 
 /**
@@ -54,7 +57,9 @@ export interface GameEvents {
   'village-scouted': { villageId: string };
 
   // --- Workshop ---
-  'convert-corpse': void;
+  /** Raises a creature from corpses; the recipe per creature type lives in
+   *  CONVERSION_RECIPES (state/secondary/conversions.ts). */
+  'convert-corpse': { creatureType: CreatureType };
   'corpse-conversion-started': {
     activeCount: number;
     queuedCount: number;
