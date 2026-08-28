@@ -2,8 +2,7 @@ import { useState, useEffect, useRef, useCallback, RefObject } from 'react';
 import * as Phaser from 'phaser';
 import { IRefPhaserGame } from '../PhaserGame';
 import { useEventBus } from './useEventBus';
-import { EventBus } from '../game/EventBus';
-import { setCanvasScale } from '../game/states/canvasScale';
+import { setCanvasScale } from '../game/state/helpers/canvasScale';
 
 export const usePhaserScale = (phaserRef: RefObject<IRefPhaserGame | null>) => {
   const [uiStyle, setUiStyle] = useState<React.CSSProperties>({
@@ -31,13 +30,19 @@ export const usePhaserScale = (phaserRef: RefObject<IRefPhaserGame | null>) => {
     const scaleX = dispWidth / gameWidth;
     const scaleY = dispHeight / gameHeight;
     const rect = canvas.getBoundingClientRect();
+    // The overlay is absolutely positioned inside #app, so compute the canvas
+    // offset relative to #app (not the viewport) — otherwise the overlay
+    // misaligns when #app is shifted by page centering (viewports taller
+    // than 16:9).
+    const appRect =
+      canvas.closest('#app')?.getBoundingClientRect() ?? new DOMRect();
 
     setCanvasScale({ scaleX, scaleY });
 
     setUiStyle({
       position: 'absolute',
-      left: `${rect.left}px`,
-      top: 0,
+      left: `${rect.left - appRect.left}px`,
+      top: `${rect.top - appRect.top}px`,
       width: `${gameWidth}px`,
       height: `${gameHeight}px`,
       transform: `scale(${scaleX}, ${scaleY})`,
@@ -74,7 +79,7 @@ export const usePhaserScale = (phaserRef: RefObject<IRefPhaserGame | null>) => {
   );
 
   // EventBus subscription — useEventBus owns subscribe/unsubscribe entirely
-  useEventBus<Phaser.Scene>('current-scene-ready', () => {
+  useEventBus('current-scene-ready', () => {
     const game = phaserRef.current?.game as Phaser.Game | undefined;
     if (!game || !game.canvas) return;
 

@@ -3,7 +3,7 @@ import { Boot } from './scenes/0Boot';
 import { Preloader } from './scenes/1Preloader';
 import { MainMenu } from './scenes/2MainMenu';
 import { Workshop } from './scenes/Workshop';
-import { Location_1 } from './scenes/Location1';
+import { Location_1 } from './scenes/Location_1';
 import { WorldMap } from './scenes/WorldMap';
 import { Cave } from './scenes/3Cave';
 import { Tent } from './scenes/Tent';

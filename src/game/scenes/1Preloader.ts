@@ -1,10 +1,13 @@
 import { Scene } from 'phaser';
-import { INITIAL_VALUES_CONFIG } from '../VALUES_CONFIG';
+import { SCENE } from './keys';
+import { emit } from '../events';
+import { INITIAL_VALUES_CONFIG } from '../state/gameState';
+import { getResources } from '../state/helpers/resources';
 
 export class Preloader extends Scene {
   agr: Phaser.GameObjects.Container;
   constructor() {
-    super('Preloader');
+    super(SCENE.Preloader);
   }
 
   init() {
@@ -14,12 +17,15 @@ export class Preloader extends Scene {
     //  A simple progress bar. This is the outline of the bar.
     this.add.rectangle(320, 180, 240, 32).setStrokeStyle(1, 0xffffff);
 
-    //  This is the progress bar itself. It will increase in size from the left based on the % of progress.
-    const bar = this.add.rectangle(200, 180, 4, 28, 0xffffff);
+    //  This is the progress bar itself. Left-anchored (origin 0, 0.5) so it
+    //  grows from the outline's left edge inward instead of spilling out.
+    const bar = this.add
+      .rectangle(200, 180, 240, 28, 0xffffff)
+      .setOrigin(0, 0.5);
 
     //  Use the 'progress' event emitted by the LoaderPlugin to update the loading bar
     this.load.on('progress', (p: number) => {
-      bar.width = 236 * p;
+      bar.width = 240 * p;
     });
   }
 
@@ -53,8 +59,11 @@ export class Preloader extends Scene {
       this.registry.set(key, value);
     });
 
+    // Notify the React UI (ResourceBar, etc.) about the starting resource values
+    emit('resources-updated', getResources(this.registry));
+
     //  Move to the MainMenu. You could also swap this for a Scene Transition, such as a camera fade.
-    this.scene.start('Workshop');
+    this.scene.start(SCENE.Workshop);
   }
 }
 

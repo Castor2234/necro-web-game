@@ -31,6 +31,11 @@ export class CameraController {
   private zoomAnchorX = GAME_WIDTH / 2;
   private zoomAnchorY = GAME_HEIGHT / 2;
 
+  // Snapshot used by hasCameraChanged() to detect camera movement between frames
+  private lastScrollX: number | null = null;
+  private lastScrollY: number | null = null;
+  private lastZoom: number | null = null;
+
   private readonly minZoom: number;
   private readonly maxZoom: number;
   private readonly zoomSpeed: number;
@@ -157,6 +162,22 @@ export class CameraController {
       x: halfW + (worldX - this.cam.scrollX - halfW) * this.cam.zoom,
       y: halfH + (worldY - this.cam.scrollY - halfH) * this.cam.zoom,
     };
+  }
+
+  /**
+   * Returns true if the camera has scrolled or zoomed since the previous call.
+   * Lets scenes skip per-frame work (e.g. syncing anchored UI menus) while the
+   * camera is idle.
+   */
+  hasCameraChanged(): boolean {
+    const changed =
+      this.cam.scrollX !== this.lastScrollX ||
+      this.cam.scrollY !== this.lastScrollY ||
+      this.cam.zoom !== this.lastZoom;
+    this.lastScrollX = this.cam.scrollX;
+    this.lastScrollY = this.cam.scrollY;
+    this.lastZoom = this.cam.zoom;
+    return changed;
   }
 }
 

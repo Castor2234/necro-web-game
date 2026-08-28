@@ -36,7 +36,7 @@ export const PhaserGame = forwardRef<IRefPhaserGame, IProps>(
       };
     }, [ref]);
 
-    useEventBus<Phaser.Scene>('current-scene-ready', (scene_instance) => {
+    useEventBus('current-scene-ready', (scene_instance) => {
       currentActiveScene?.(scene_instance);
       if (typeof ref === 'function') {
         ref({ game: game.current, scene: scene_instance });

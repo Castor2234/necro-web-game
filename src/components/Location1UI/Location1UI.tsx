@@ -1,24 +1,24 @@
 import { VillageActionMenu } from './VillageActionMenu';
-//import { Location1HUD } from './Location1HUD';
-import { EventBus } from '../../game/EventBus';
+import { emit } from '../../game/events';
 import { NecromancerActionMenu } from './NecroActionMenu';
+import { SCENE, type SceneKey } from '../../game/scenes/keys';
 
 interface Props {
-  startScene: (sceneKey: string) => void;
+  startScene: (sceneKey: SceneKey) => void;
 }
 
 export const Location1UI = ({ startScene }: Props) => {
   const handleAttack = (villageId: string) => {
-    EventBus.emit('village-action', { action: 'attack', villageId });
+    emit('village-action', { action: 'attack', villageId });
   };
   const handleLoot = (villageId: string) => {
-    EventBus.emit('village-action', { action: 'loot', villageId });
+    emit('village-action', { action: 'loot', villageId });
   };
   const handleScout = (villageId: string) => {
-    EventBus.emit('village-action', { action: 'scout', villageId });
+    emit('village-action', { action: 'scout', villageId });
   };
 
-  const handleSleep = () => EventBus.emit('necromancer-sleep');
+  const handleSleep = () => emit('necromancer-sleep');
 
   return (
     <>
@@ -28,7 +28,7 @@ export const Location1UI = ({ startScene }: Props) => {
         onScout={handleScout}
       />
       <NecromancerActionMenu
-        onGoToCave={() => startScene('Cave')}
+        onGoToCave={() => startScene(SCENE.Cave)}
         onSleep={handleSleep}
       />
     </>

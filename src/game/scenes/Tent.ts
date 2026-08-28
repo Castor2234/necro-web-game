@@ -1,11 +1,12 @@
 import * as Phaser from 'phaser';
-import { EventBus } from '../EventBus';
+import { SCENE } from './keys';
+import { emit } from '../events';
 
 export class Tent extends Phaser.Scene {
   background: Phaser.GameObjects.Image;
 
   constructor() {
-    super('Tent');
+    super(SCENE.Tent);
   }
 
   create() {
@@ -14,7 +15,7 @@ export class Tent extends Phaser.Scene {
     this.background.setAlpha(0.7);
 
     // Сцена готова к использованию
-    EventBus.emit('current-scene-ready', this);
+    emit('current-scene-ready', this);
   }
 }
 

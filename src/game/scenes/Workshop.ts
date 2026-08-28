@@ -1,7 +1,9 @@
-import { EventBus } from '../EventBus';
 import * as Phaser from 'phaser';
-import { getResources, addResources } from '../states/resources';
-import { WORKSHOP_UPGRADES, setUpgradeState } from '../states/upgrades';
+import { SCENE } from './keys';
+import { emit, on, off } from '../events';
+import { getStat, setStat } from '../state/gameState';
+import { getResources, addResources } from '../state/helpers/resources';
+import { WORKSHOP_UPGRADES, setUpgradeState } from '../state/helpers/upgrades';
 
 interface ConversionTask {
   id: number;
@@ -20,31 +22,33 @@ export class Workshop extends Phaser.Scene {
   private upgradeLevels: Record<string, number> = {};
 
   constructor() {
-    super('Workshop');
+    super(SCENE.Workshop);
   }
 
   init(): void {
-    this.corpseConversionDuration =
-      this.registry.get('corpseConversionDuration') ?? 100;
+    this.corpseConversionDuration = getStat(
+      this.registry,
+      'corpseConversionDuration'
+    );
   }
 
   create(): void {
     this.background = this.add.image(320, 180, 'background').setDepth(-1);
 
-    EventBus.on('convert-corpse', this.handleConvertCorpse, this);
-    EventBus.on('purchase-upgrade', this.handlePurchaseUpgrade, this);
+    on('convert-corpse', this.handleConvertCorpse, this);
+    on('purchase-upgrade', this.handlePurchaseUpgrade, this);
     this.events.once('shutdown', () => {
-      EventBus.off('convert-corpse', this.handleConvertCorpse, this);
-      EventBus.off('purchase-upgrade', this.handlePurchaseUpgrade, this);
+      off('convert-corpse', this.handleConvertCorpse, this);
+      off('purchase-upgrade', this.handlePurchaseUpgrade, this);
     });
 
     this.emitUpgradeState();
-    EventBus.emit('current-scene-ready', this);
+    emit('current-scene-ready', this);
   }
 
   // Converts
   private getMaxConcurrentConversions(): number {
-    return this.registry.get('maxConcurrentConversions') ?? 1;
+    return getStat(this.registry, 'maxConcurrentConversions');
   }
 
   private handleConvertCorpse = (): void => {
@@ -63,7 +67,7 @@ export class Workshop extends Phaser.Scene {
     };
     this.conversionTasks.push(task);
 
-    EventBus.emit('corpse-conversion-started', {
+    emit('corpse-conversion-started', {
       activeCount: this.conversionTasks.length,
       maxConcurrent,
     });
@@ -88,14 +92,14 @@ export class Workshop extends Phaser.Scene {
 
     addResources(this.registry, { [config.costResource]: -cost });
 
-    const currentValue = this.registry.get(config.key) ?? 0;
-    this.registry.set(config.key, currentValue + config.increment);
+    const currentValue = getStat(this.registry, config.key);
+    setStat(this.registry, config.key, currentValue + config.increment);
 
     this.upgradeLevels[payload.upgradeKey] =
       (this.upgradeLevels[payload.upgradeKey] ?? 0) + 1;
 
     this.emitUpgradeState();
-    EventBus.emit('creature-stats-changed');
+    emit('creature-stats-changed');
   };
 
   private emitUpgradeState(): void {
@@ -104,7 +108,7 @@ export class Workshop extends Phaser.Scene {
       return {
         upgradeKey,
         label: config.label,
-        currentValue: this.registry.get(config.key) ?? 0,
+        currentValue: getStat(this.registry, config.key),
         cost: this.getUpgradeCost(upgradeKey),
         costResource: config.costResource,
       };
@@ -134,7 +138,7 @@ export class Workshop extends Phaser.Scene {
         progress: 1 - Math.max(t.timer, 0) / t.duration,
         secondsLeft: Math.ceil(Math.max(t.timer, 0) / 1000),
       }));
-      EventBus.emit('corpse-conversion-progress', progressList);
+      emit('corpse-conversion-progress', progressList);
     }
 
     if (completed.length > 0) {
@@ -146,7 +150,7 @@ export class Workshop extends Phaser.Scene {
         (t) => !completed.includes(t)
       );
 
-      EventBus.emit('corpse-conversion-complete', {
+      emit('corpse-conversion-complete', {
         completedCount: completed.length,
         activeCount: this.conversionTasks.length,
         remainingTasks: this.conversionTasks.map((t) => ({
@@ -155,8 +159,8 @@ export class Workshop extends Phaser.Scene {
           secondsLeft: Math.ceil(Math.max(t.timer, 0) / 1000),
         })),
       });
-      EventBus.emit('zombie-rats-updated', newAmount);
-      EventBus.emit('creature-stats-changed');
+      emit('zombie-rats-updated', newAmount);
+      emit('creature-stats-changed');
     }
   }
 }

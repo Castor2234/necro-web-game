@@ -1,18 +1,20 @@
 import React from 'react';
 import styles from './ExternalUI.module.css';
+import { SCENE, type SceneKey } from '../../game/scenes/keys';
 
 export interface ExternalUIProps {
-  currentSceneKey: string;
-  onNavigate: (sceneKey: string) => void;
+  /** Currently active scene, or null before the first scene reports ready. */
+  currentSceneKey: SceneKey | null;
+  onNavigate: (sceneKey: SceneKey) => void;
 }
 
 const NAV_ITEMS = [
-  { key: 'MainMenu', label: 'Главное меню' },
-  { key: 'Cave', label: 'Пещера' },
-  { key: 'Workshop', label: 'Мастерская' },
-  { key: 'Tent', label: 'Жилище' },
-  { key: 'Location_1', label: 'Первая локация' },
-  { key: 'WorldMap', label: 'Карта мира' },
+  { key: SCENE.MainMenu, label: 'Главное меню' },
+  { key: SCENE.Cave, label: 'Пещера' },
+  { key: SCENE.Workshop, label: 'Мастерская' },
+  { key: SCENE.Tent, label: 'Жилище' },
+  { key: SCENE.Location_1, label: 'Первая локация' },
+  { key: SCENE.WorldMap, label: 'Карта мира' },
 ] as const;
 
 export const ExternalUI: React.FC<ExternalUIProps> = ({

@@ -1,19 +1,20 @@
 import { BuildingActionMenu } from './BuildingActionMenu';
-import { EventBus } from '../../game/EventBus';
-import styles from './CaveUI.module.css';
+import { emit } from '../../game/events';
+import type { BuildingType } from '../../game/events';
+import { SCENE, type SceneKey } from '../../game/scenes/keys';
 
 interface Props {
-  startScene: (sceneKey: string) => void;
+  startScene: (sceneKey: SceneKey) => void;
 }
 
 export function CaveUI({ startScene }: Props) {
-  const handleGoTo = (type: 'tent' | 'workshop') => {
-    if (type === 'tent') startScene('Tent'); // whichever scene key represents entering the tent
-    if (type === 'workshop') startScene('Workshop');
+  const handleGoTo = (type: BuildingType) => {
+    if (type === 'tent') startScene(SCENE.Tent);
+    if (type === 'workshop') startScene(SCENE.Workshop);
   };
 
-  const handleUpgrade = (type: 'tent' | 'workshop') => {
-    EventBus.emit('building-upgrade', { type });
+  const handleUpgrade = (type: BuildingType) => {
+    emit('building-upgrade', { type });
   };
 
   return <BuildingActionMenu onGoTo={handleGoTo} onUpgrade={handleUpgrade} />;

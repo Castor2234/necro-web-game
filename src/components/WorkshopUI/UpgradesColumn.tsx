@@ -1,16 +1,19 @@
 import { useState } from 'react';
 import { useEventBus } from '../../hooks/useEventBus';
-import { EventBus } from '../../game/EventBus';
-import { getUpgradeState, UpgradeState } from '../../game/states/upgrades';
+import { emit } from '../../game/events';
+import {
+  getUpgradeState,
+  UpgradeState,
+} from '../../game/state/helpers/upgrades';
 import styles from './UpgradesColumn.module.css';
 
 export function UpgradesColumn() {
   const [upgrades, setUpgrades] = useState<UpgradeState[]>(getUpgradeState);
 
-  useEventBus<UpgradeState[]>('upgrades-updated', setUpgrades);
+  useEventBus('upgrades-updated', setUpgrades);
 
   const handleUpgrade = (upgradeKey: string) => {
-    EventBus.emit('purchase-upgrade', { upgradeKey });
+    emit('purchase-upgrade', { upgradeKey });
   };
 
   return (

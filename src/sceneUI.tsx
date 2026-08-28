@@ -4,32 +4,38 @@ import {
 } from './components/ExternalUI/ExternalUI';
 import { MainMenuUI } from './components/MainMenuUI/MainMenuUI';
 import { CaveUI } from './components/CaveUI/CaveUI';
-//import { GameplayUI } from './components/GameplayUI/GameplayUI';
 import { Location1UI } from './components/Location1UI/Location1UI';
 import { WorkshopUI } from './components/WorkshopUI/WorkshopUI';
+import { SCENE, type SceneKey } from './game/scenes/keys';
 
-export const SCENE_UI: Record<
-  string,
-  React.ComponentType<{
-    startScene: (sceneKey: string) => void;
-  }>
+export interface SceneUIProps {
+  startScene: (sceneKey: SceneKey) => void;
+}
+
+/** Scene-specific overlay rendered inside the scaled canvas area. */
+export const SCENE_UI: Partial<
+  Record<SceneKey, React.ComponentType<SceneUIProps>>
 > = {
-  MainMenu: MainMenuUI,
-  Cave: CaveUI,
-  Workshop: WorkshopUI,
-  Location_1: Location1UI,
+  [SCENE.MainMenu]: MainMenuUI,
+  [SCENE.Cave]: CaveUI,
+  [SCENE.Workshop]: WorkshopUI,
+  [SCENE.Location_1]: Location1UI,
 };
 
-export const SCENE_EXTERNAL_UI: Record<
-  string,
-  React.ComponentType<ExternalUIProps>
+/** Screen-fixed overlay (navigation), rendered per scene. */
+export const SCENE_EXTERNAL_UI: Partial<
+  Record<SceneKey, React.ComponentType<ExternalUIProps>>
 > = {
-  Cave: ExternalUI,
-  Workshop: ExternalUI,
-  Location_1: ExternalUI,
-  WorldMap: ExternalUI,
-  Tent: ExternalUI,
+  [SCENE.Cave]: ExternalUI,
+  [SCENE.Workshop]: ExternalUI,
+  [SCENE.Location_1]: ExternalUI,
+  [SCENE.WorldMap]: ExternalUI,
+  [SCENE.Tent]: ExternalUI,
 };
 
-export const SCENES_WITH_RESOURCES = ['Location_1', 'Cave', 'Workshop'];
+export const SCENES_WITH_RESOURCES: SceneKey[] = [
+  SCENE.Location_1,
+  SCENE.Cave,
+  SCENE.Workshop,
+];
 

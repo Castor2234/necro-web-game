@@ -1,5 +1,6 @@
-import { EventBus } from '../EventBus';
 import * as Phaser from 'phaser';
+import { SCENE } from './keys';
+import { emit } from '../events';
 import { EntityContainer } from '../objects/EntityContainer';
 
 export class WorldMap extends Phaser.Scene {
@@ -17,7 +18,7 @@ export class WorldMap extends Phaser.Scene {
   //private v1pw = 50;
 
   constructor() {
-    super('WorldMap');
+    super(SCENE.WorldMap);
   }
 
   init(_data: number): void {
@@ -69,7 +70,7 @@ export class WorldMap extends Phaser.Scene {
         this.forestBase.updateLabelColor('rgb(255,255,255)');
       })
       .on('pointerdown', () => {
-        this.scene.start('Cave');
+        this.scene.start(SCENE.Cave);
       });
 
     // Village 1
@@ -96,10 +97,10 @@ export class WorldMap extends Phaser.Scene {
         this.village1.updateLabelColor('rgb(255,255,255)');
       })
       .on('pointerdown', () => {
-        this.scene.start('Cave');
+        this.scene.start(SCENE.Cave);
       });
 
-    EventBus.emit('current-scene-ready', this);
+    emit('current-scene-ready', this);
   }
 }
 

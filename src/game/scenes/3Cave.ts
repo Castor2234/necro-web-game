@@ -1,8 +1,8 @@
 import * as Phaser from 'phaser';
-import { EventBus } from '../EventBus';
+import { SCENE } from './keys';
+import { emit } from '../events';
+import type { BuildingType } from '../events';
 import { CameraController } from '../controllers/CameraController';
-
-type BuildingType = 'tent' | 'workshop';
 
 export class Cave extends Phaser.Scene {
   background: Phaser.GameObjects.Image;
@@ -19,7 +19,7 @@ export class Cave extends Phaser.Scene {
   private cameraController: CameraController;
 
   constructor() {
-    super('Cave');
+    super(SCENE.Cave);
   }
 
   create() {
@@ -80,7 +80,7 @@ export class Cave extends Phaser.Scene {
       this.cameraController.destroy();
     });
 
-    EventBus.emit('current-scene-ready', this);
+    emit('current-scene-ready', this);
   }
 
   // Functions
@@ -93,23 +93,32 @@ export class Cave extends Phaser.Scene {
     pointer: Phaser.Input.Pointer
   ): void {
     this.selectedBuilding = { type, x: pointer.worldX, y: pointer.worldY };
-    EventBus.emit('building-selected', { type });
+    emit('building-selected', { type });
+    // Push the initial menu position right away; update() re-syncs on camera movement.
+    this.emitSelectedBuildingPosition();
   }
 
   private deselectBuilding(): void {
     if (!this.selectedBuilding) return;
     this.selectedBuilding = null;
-    EventBus.emit('building-selected', null);
+    emit('building-selected', null);
   }
 
-  update(): void {
+  private emitSelectedBuildingPosition(): void {
     if (!this.selectedBuilding) return;
-
     const { x, y } = this.cameraController.worldToScreen(
       this.selectedBuilding.x,
       this.selectedBuilding.y
     );
-    EventBus.emit('building-ui-position', { x, y });
+    emit('building-ui-position', { x, y });
+  }
+
+  update(): void {
+    if (!this.selectedBuilding) return;
+    // The menu tracks the camera, so only re-sync when the camera actually moved
+    if (this.cameraController.hasCameraChanged()) {
+      this.emitSelectedBuildingPosition();
+    }
   }
 }
 
