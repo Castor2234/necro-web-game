@@ -1,7 +1,7 @@
 .wrapper {
   position: absolute;
-  top: 12px;
-  left: 12px;
+  top: 50%;
+  left: 6px;
   display: flex;
   flex-direction: column;
   gap: 2px;
