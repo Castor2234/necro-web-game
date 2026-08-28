@@ -1,4 +1,4 @@
-import { EventBus } from '../EventBus';
+import { emit } from '../../events';
 
 export interface CanvasScale {
   scaleX: number;
@@ -9,9 +9,10 @@ let currentScale: CanvasScale = { scaleX: 1, scaleY: 1 };
 
 export function setCanvasScale(scale: CanvasScale): void {
   currentScale = scale;
-  EventBus.emit('canvas-scale', scale);
+  emit('canvas-scale', scale);
 }
 
 export function getCanvasScale(): CanvasScale {
   return currentScale;
 }
+

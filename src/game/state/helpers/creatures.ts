@@ -1,5 +1,6 @@
 // game/states/creatures.ts
 import * as Phaser from 'phaser';
+import { getStat } from '../gameState';
 
 export interface CreatureStats {
   amount: number;
@@ -17,14 +18,15 @@ export function getCreatureStats(
 ): AllCreatureStats {
   return {
     zombieRats: {
-      amount: registry.get('zombieRatsAmount') ?? 0,
-      speed: registry.get('ratSpeed') ?? 0,
-      power: registry.get('ratPower') ?? 0,
+      amount: getStat(registry, 'zombieRatsAmount'),
+      speed: getStat(registry, 'ratSpeed'),
+      power: getStat(registry, 'ratPower'),
     },
     ghouls: {
-      amount: registry.get('ghoulsAmount') ?? 0,
-      speed: registry.get('ghoulSpeed') ?? 0,
-      power: registry.get('ghoulPower') ?? 0,
+      amount: getStat(registry, 'ghoulsAmount'),
+      speed: getStat(registry, 'ghoulSpeed'),
+      power: getStat(registry, 'ghoulPower'),
     },
   };
 }
+

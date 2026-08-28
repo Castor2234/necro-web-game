@@ -1,11 +1,11 @@
 // components/ShowCreatureStatsButton/ShowCreatureStatsButton.tsx
 import { useEffect, useState, RefObject } from 'react';
-import { useEventBus } from '../../hooks/useEventBus';
-import { IRefPhaserGame } from '../../PhaserGame';
+import { useEventBus } from '../../../hooks/useEventBus';
+import { IRefPhaserGame } from '../../../PhaserGame';
 import {
   getCreatureStats,
   AllCreatureStats,
-} from '../../game/states/creatures';
+} from '../../../game/state/helpers/creatures';
 import { Button } from '../Button/Button';
 import styles from './CreatureStatsButton.module.css';
 

@@ -1,42 +1,33 @@
 import { useState } from 'react';
 import { useEventBus } from '../../hooks/useEventBus';
-import { EventBus } from '../../game/EventBus';
-import { Button } from '../Button/Button';
+import { emit, ConversionProgress } from '../../game/events';
+import { Button } from '../!shared/Button/Button';
 import styles from './ConvertCorpseButton.module.css';
-
-interface TaskProgress {
-  id: number;
-  progress: number;
-  secondsLeft: number;
-}
 
 export function ConvertCorpseButton() {
   const [activeCount, setActiveCount] = useState(0);
   const [maxConcurrent, setMaxConcurrent] = useState(1);
-  const [tasks, setTasks] = useState<TaskProgress[]>([]);
+  const [tasks, setTasks] = useState<ConversionProgress[]>([]);
 
-  useEventBus<{ activeCount: number; maxConcurrent: number }>(
-    'corpse-conversion-started',
-    ({ activeCount, maxConcurrent }) => {
+  useEventBus('corpse-conversion-started', ({ activeCount, maxConcurrent }) => {
+    setActiveCount(activeCount);
+    setMaxConcurrent(maxConcurrent);
+  });
+
+  useEventBus('corpse-conversion-progress', setTasks);
+
+  useEventBus(
+    'corpse-conversion-complete',
+    ({ activeCount, remainingTasks }) => {
       setActiveCount(activeCount);
-      setMaxConcurrent(maxConcurrent);
+      setTasks(remainingTasks); // ← explicitly sync the task list, removing finished ones
     }
   );
-
-  useEventBus<TaskProgress[]>('corpse-conversion-progress', setTasks);
-
-  useEventBus<{
-    activeCount: number;
-    remainingTasks: TaskProgress[];
-  }>('corpse-conversion-complete', ({ activeCount, remainingTasks }) => {
-    setActiveCount(activeCount);
-    setTasks(remainingTasks); // ← explicitly sync the task list, removing finished ones
-  });
 
   const atCapacity = activeCount >= maxConcurrent;
 
   const handleClick = () => {
-    EventBus.emit('convert-corpse');
+    emit('convert-corpse');
   };
 
   return (

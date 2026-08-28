@@ -1,7 +1,7 @@
 import { useEffect, useState, RefObject } from 'react';
-import { useEventBus } from '../../hooks/useEventBus';
-import { IRefPhaserGame } from '../../PhaserGame';
-import { getResources, Resources } from '../../game/states/resources';
+import { useEventBus } from '../../../hooks/useEventBus';
+import { IRefPhaserGame } from '../../../PhaserGame';
+import { getResources, Resources } from '../../../game/state/helpers/resources';
 import styles from './ResourceBar.module.css';
 
 interface Props {
@@ -21,7 +21,7 @@ export const ResourceBar = ({ phaserRef }: Props) => {
     }
   }, [phaserRef]);
 
-  useEventBus<Resources>('resources-updated', setResources);
+  useEventBus('resources-updated', setResources);
 
   return (
     <div className={styles.resourceBar}>

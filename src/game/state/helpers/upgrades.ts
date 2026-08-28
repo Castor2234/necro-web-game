@@ -1,8 +1,10 @@
-// game/state/upgrades.ts
-import { EventBus } from '../EventBus';
+// game/states/upgrades.ts
+import { emit } from '../../events';
+import type { GameState } from '../gameState';
 
 export interface UpgradeConfig {
-  key: string;
+  /** GameState stat this upgrade modifies (typed so a typo can't compile). */
+  key: keyof GameState;
   label: string;
   increment: number;
   baseCost: number;
@@ -41,7 +43,7 @@ let currentUpgradeState: UpgradeState[] = [];
 
 export function setUpgradeState(state: UpgradeState[]): void {
   currentUpgradeState = state;
-  EventBus.emit('upgrades-updated', state);
+  emit('upgrades-updated', state);
 }
 
 export function getUpgradeState(): UpgradeState[] {
