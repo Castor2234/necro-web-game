@@ -1,6 +1,7 @@
 import * as Phaser from 'phaser';
 import { SCENE } from '../helpers/keys';
-import { emit } from '../helpers/events';
+import { emit, on, off } from '../helpers/events';
+import { t } from '../i18n';
 import { EntityContainer } from '../objects/EntityContainer';
 
 export class WorldMap extends Phaser.Scene {
@@ -31,7 +32,7 @@ export class WorldMap extends Phaser.Scene {
 
     // Scene title (Карта пока что показывается в зуме x2)
     this.gameText = this.add
-      .text(250, 50, 'Карта мира... В разработке...', {
+      .text(250, 50, t('worldMap.title'), {
         fontFamily: 'Pixelify Sans',
         fontSize: 32,
         color: '#b98ba0',
@@ -50,7 +51,7 @@ export class WorldMap extends Phaser.Scene {
     this.forestBase = new EntityContainer(
       this,
       'forest_img',
-      'Вернуться на базу',
+      t('worldMap.backToBase'),
       160,
       140
     );
@@ -73,7 +74,18 @@ export class WorldMap extends Phaser.Scene {
         this.scene.start(SCENE.Cave);
       });
 
+    // Re-translate visible text when the language changes in the settings.
+    on('language-changed', this.handleLanguageChanged, this);
+    this.events.once('shutdown', () => {
+      off('language-changed', this.handleLanguageChanged, this);
+    });
+
     emit('current-scene-ready', this);
+  }
+
+  private handleLanguageChanged(): void {
+    this.gameText.setText(t('worldMap.title'));
+    this.forestBase.updateLabel(t('worldMap.backToBase'));
   }
 }
 

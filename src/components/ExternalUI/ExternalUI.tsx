@@ -1,6 +1,7 @@
 import React from 'react';
 import styles from './ExternalUI.module.css';
 import { SCENE, type SceneKey } from '../../game/helpers/keys';
+import { useTranslation } from '../../hooks/useTranslation';
 
 export interface ExternalUIProps {
   /** Currently active scene, or null before the first scene reports ready. */
@@ -9,28 +10,30 @@ export interface ExternalUIProps {
 }
 
 const NAV_ITEMS = [
-  { key: SCENE.MainMenu, label: 'Главное меню' },
-  { key: SCENE.Cave, label: 'Пещера' },
-  { key: SCENE.Workshop, label: 'Мастерская' },
-  { key: SCENE.Tent, label: 'Жилище' },
-  { key: SCENE.Location_1, label: 'Первая локация' },
-  { key: SCENE.WorldMap, label: 'Карта мира' },
+  { key: SCENE.MainMenu, labelKey: 'nav.mainMenu' },
+  { key: SCENE.Cave, labelKey: 'nav.cave' },
+  { key: SCENE.Workshop, labelKey: 'nav.workshop' },
+  { key: SCENE.Tent, labelKey: 'nav.tent' },
+  { key: SCENE.Location_1, labelKey: 'nav.location1' },
+  { key: SCENE.WorldMap, labelKey: 'nav.worldMap' },
 ] as const;
 
 export const ExternalUI: React.FC<ExternalUIProps> = ({
   currentSceneKey,
   onNavigate,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <div className={styles.navPanel}>
-      {NAV_ITEMS.map(({ key, label }) => (
+      {NAV_ITEMS.map(({ key, labelKey }) => (
         <button
           key={key}
           className={styles.button}
           onClick={() => onNavigate(key)}
           disabled={currentSceneKey === key}
         >
-          {label}
+          {t(labelKey)}
         </button>
       ))}
     </div>

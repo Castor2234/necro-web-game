@@ -1,6 +1,7 @@
 // components/ShowCreatureStatsButton/ShowCreatureStatsButton.tsx
 import { useEffect, useState, RefObject } from 'react';
 import { useEventBus } from '../../../hooks/useEventBus';
+import { useTranslation } from '../../../hooks/useTranslation';
 import { IRefPhaserGame } from '../../../PhaserGame';
 import {
   getCreatureStats,
@@ -21,6 +22,7 @@ const EMPTY_STATS: AllCreatureStats = {
 export const ShowCreatureStatsButton = ({ phaserRef }: Props) => {
   const [open, setOpen] = useState(false);
   const [stats, setStats] = useState<AllCreatureStats>(EMPTY_STATS);
+  const { t } = useTranslation();
 
   const refreshStats = () => {
     const game = phaserRef.current?.game;
@@ -44,20 +46,24 @@ export const ShowCreatureStatsButton = ({ phaserRef }: Props) => {
         <div className={styles.panel}>
           <div className={styles.grid}>
             <div className={styles.corner} />
-            <div className={styles.header}>Rats: {stats.zombieRats.amount}</div>
-            <div className={styles.header}>Ghouls: {stats.ghouls.amount}</div>
+            <div className={styles.header}>
+              {t('stats.rats')}: {stats.zombieRats.amount}
+            </div>
+            <div className={styles.header}>
+              {t('stats.ghouls')}: {stats.ghouls.amount}
+            </div>
 
-            <div className={styles.rowLabel}>Power:</div>
+            <div className={styles.rowLabel}>{t('stats.power')}:</div>
             <div className={styles.cell}>{stats.zombieRats.power}</div>
             <div className={styles.cell}>{stats.ghouls.power}</div>
 
-            <div className={styles.rowLabel}>Speed:</div>
+            <div className={styles.rowLabel}>{t('stats.speed')}:</div>
             <div className={styles.cell}>{stats.zombieRats.speed}</div>
             <div className={styles.cell}>{stats.ghouls.speed}</div>
           </div>
         </div>
       )}
-      <Button onClick={() => setOpen((o) => !o)}>Creature Stats</Button>
+      <Button onClick={() => setOpen((o) => !o)}>{t('stats.title')}</Button>
     </div>
   );
 };

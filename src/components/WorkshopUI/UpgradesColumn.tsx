@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useEventBus } from '../../hooks/useEventBus';
+import { useTranslation } from '../../hooks/useTranslation';
 import { emit } from '../../game/helpers/events';
 import {
   getUpgradeState,
@@ -10,6 +11,7 @@ import styles from './UpgradesColumn.module.css';
 
 export function UpgradesColumn() {
   const [upgrades, setUpgrades] = useState<UpgradeState[]>(getUpgradeState);
+  const { t } = useTranslation();
 
   useEventBus('upgrades-updated', setUpgrades);
 
@@ -22,17 +24,20 @@ export function UpgradesColumn() {
       {upgrades.map((u) => (
         <div key={u.upgradeKey} className={styles.row}>
           <span className={styles.label}>
-            {u.label}: {u.currentValue}
+            {t(`upgrades.${u.upgradeKey}`)}: {u.currentValue}
           </span>
           <button
             className={styles.UpgradeButton}
             onClick={() => handleUpgrade(u.upgradeKey)}
           >
-            Upgrade ({u.cost}{' '}
-            {u.costResource === 'humanCorpses'
-              ? 'human corpses'
-              : 'rat corpses'}
-            )
+            {t('workshop.upgradeCost', {
+              cost: u.cost,
+              resource: t(
+                u.costResource === 'humanCorpses'
+                  ? 'cost.humanCorpses'
+                  : 'cost.ratCorpses'
+              ),
+            })}
           </button>
         </div>
       ))}

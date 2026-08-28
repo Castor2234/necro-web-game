@@ -5,6 +5,7 @@ import type {
   UpgradeState,
   WorkshopUpgradeKey,
 } from '../state/secondary/upgrades';
+import type { Language } from '../i18n/languages';
 
 export type BuildingType = 'tent' | 'workshop';
 export type VillageAction = 'attack' | 'loot' | 'scout';
@@ -75,6 +76,10 @@ export interface GameEvents {
   // --- Save system ---
   /** Wipes the save file and resets every stat to its initial value. */
   'reset-game': void;
+
+  // --- Settings ---
+  /** Fired after the UI language changed; payload is the new language. */
+  'language-changed': Language;
 }
 
 type EmitArgs<E extends keyof GameEvents> = GameEvents[E] extends void

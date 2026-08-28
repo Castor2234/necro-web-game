@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Button } from '../Button/Button';
+import { useTranslation } from '../../../hooks/useTranslation';
 import styles from './ConfirmDialog.module.css';
 
 interface ConfirmDialogProps {
@@ -23,12 +24,15 @@ export const ConfirmDialog = ({
   open,
   title,
   message,
-  confirmLabel = 'Подтвердить',
-  cancelLabel = 'Отмена',
+  confirmLabel,
+  cancelLabel,
   danger = false,
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) => {
+  const { t } = useTranslation();
+  const resolvedConfirmLabel = confirmLabel ?? t('dialog.confirm');
+  const resolvedCancelLabel = cancelLabel ?? t('dialog.cancel');
   // Escape closes the dialog without confirming.
   useEffect(() => {
     if (!open) return;
@@ -57,10 +61,10 @@ export const ConfirmDialog = ({
             onClick={onConfirm}
             autoFocus
           >
-            {confirmLabel}
+            {resolvedConfirmLabel}
           </Button>
           <Button variant="ghost" onClick={onCancel}>
-            {cancelLabel}
+            {resolvedCancelLabel}
           </Button>
         </div>
       </div>

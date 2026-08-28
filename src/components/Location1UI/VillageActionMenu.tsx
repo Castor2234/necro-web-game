@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useEventBus } from '../../hooks/useEventBus';
+import { useTranslation } from '../../hooks/useTranslation';
 import { useAnchoredMenu } from '../../hooks/useAnchoredMenu';
 import styles from './ActionMenu.module.css';
 import { Button } from '../!shared/Button/Button';
@@ -13,6 +14,7 @@ interface Props {
 export const VillageActionMenu = ({ onAttack, onLoot, onScout }: Props) => {
   const [selected, setSelected] = useState<{ id: string } | null>(null);
   const [busy, setBusy] = useState(false);
+  const { t } = useTranslation();
   const containerRef = useAnchoredMenu('village-ui-position');
 
   useEventBus('village-selected', setSelected);
@@ -27,13 +29,13 @@ export const VillageActionMenu = ({ onAttack, onLoot, onScout }: Props) => {
         disabled={busy}
         onClick={() => onAttack(selected.id)}
       >
-        Attack
+        {t('village.attack')}
       </Button>
       <Button disabled={busy} onClick={() => onLoot(selected.id)}>
-        Loot
+        {t('village.loot')}
       </Button>
       <Button disabled={busy} onClick={() => onScout(selected.id)}>
-        Scout
+        {t('village.scout')}
       </Button>
     </div>
   );

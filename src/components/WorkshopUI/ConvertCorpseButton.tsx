@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useEventBus } from '../../hooks/useEventBus';
+import { useTranslation } from '../../hooks/useTranslation';
 import { emit, ConversionProgress } from '../../game/helpers/events';
 import { Button } from '../!shared/Button/Button';
 import styles from './ConvertCorpseButton.module.css';
@@ -10,6 +11,7 @@ export function ConvertCorpseButton() {
   const [maxConcurrent, setMaxConcurrent] = useState(1);
   const [maxQueue, setMaxQueue] = useState(1);
   const [tasks, setTasks] = useState<ConversionProgress[]>([]);
+  const { t } = useTranslation();
 
   useEventBus(
     'corpse-conversion-started',
@@ -53,19 +55,19 @@ export function ConvertCorpseButton() {
   return (
     <div className={styles.wrapper}>
       <Button disabled={atCapacity} onClick={handleClick}>
-        Convert Corpse ({activeCount}/{maxConcurrent})
+        {t('workshop.convert', { active: activeCount, max: maxConcurrent })}
         {queuedCount > 0 ? ` +${queuedCount}/${maxQueue}` : ''}
       </Button>
-      {tasks.map((t) => (
-        <div key={t.id} className={styles.taskRow}>
+      {tasks.map((task) => (
+        <div key={task.id} className={styles.taskRow}>
           <div className={styles.taskBar}>
             <div
               className={styles.taskBarFill}
-              style={{ width: t.queued ? '0%' : `${t.progress * 100}%` }}
+              style={{ width: task.queued ? '0%' : `${task.progress * 100}%` }}
             />
           </div>
           <span className={styles.taskSeconds}>
-            {t.queued ? 'queued' : `${t.secondsLeft}s`}
+            {task.queued ? t('workshop.queued') : `${task.secondsLeft}s`}
           </span>
         </div>
       ))}
