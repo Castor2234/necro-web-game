@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useEventBus } from '../../hooks/useEventBus';
-import { emit } from '../../game/events';
+import { emit } from '../../game/helpers/events';
 import {
   getUpgradeState,
   UpgradeState,
   type WorkshopUpgradeKey,
-} from '../../game/state/helpers/upgrades';
+} from '../../game/state/secondary/upgrades';
 import styles from './UpgradesColumn.module.css';
 
 export function UpgradesColumn() {

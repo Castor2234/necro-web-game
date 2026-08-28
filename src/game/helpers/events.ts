@@ -1,10 +1,10 @@
-import { EventBus } from './EventBus';
-import type { CanvasScale } from './state/helpers/canvasScale';
-import type { Resources } from './state/helpers/resources';
+import { EventBus } from '../EventBus';
+import type { CanvasScale } from '../state/secondary/canvasScale';
+import type { Resources } from '../state/secondary/resources';
 import type {
   UpgradeState,
   WorkshopUpgradeKey,
-} from './state/helpers/upgrades';
+} from '../state/secondary/upgrades';
 
 export type BuildingType = 'tent' | 'workshop';
 export type VillageAction = 'attack' | 'loot' | 'scout';

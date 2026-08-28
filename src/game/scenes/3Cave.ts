@@ -1,7 +1,7 @@
 import * as Phaser from 'phaser';
-import { SCENE } from './keys';
-import { emit } from '../events';
-import type { BuildingType } from '../events';
+import { SCENE } from '../helpers/keys';
+import { emit } from '../helpers/events';
+import type { BuildingType } from '../helpers/events';
 import { CameraController } from '../controllers/CameraController';
 
 export class Cave extends Phaser.Scene {

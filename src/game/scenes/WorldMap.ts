@@ -1,6 +1,6 @@
 import * as Phaser from 'phaser';
-import { SCENE } from './keys';
-import { emit } from '../events';
+import { SCENE } from '../helpers/keys';
+import { emit } from '../helpers/events';
 import { EntityContainer } from '../objects/EntityContainer';
 
 export class WorldMap extends Phaser.Scene {

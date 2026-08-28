@@ -5,7 +5,7 @@ import { IRefPhaserGame } from '../../../PhaserGame';
 import {
   getCreatureStats,
   AllCreatureStats,
-} from '../../../game/state/helpers/creatures';
+} from '../../../game/state/secondary/creatures';
 import { Button } from '../Button/Button';
 import styles from './CreatureStatsButton.module.css';
 

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useEventBus } from '../../hooks/useEventBus';
-import { emit, ConversionProgress } from '../../game/events';
+import { emit, ConversionProgress } from '../../game/helpers/events';
 import { Button } from '../!shared/Button/Button';
 import styles from './ConvertCorpseButton.module.css';
 

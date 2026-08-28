@@ -1,12 +1,12 @@
 import { Scene } from 'phaser';
-import { SCENE } from './keys';
-import { emit } from '../events';
+import { SCENE } from '../helpers/keys';
+import { emit } from '../helpers/events';
 import {
   getResumeScene,
   initGameStateFromSave,
   installAutoSave,
 } from '../state/save';
-import { getResources } from '../state/helpers/resources';
+import { getResources } from '../state/secondary/resources';
 
 export class Preloader extends Scene {
   agr: Phaser.GameObjects.Container;

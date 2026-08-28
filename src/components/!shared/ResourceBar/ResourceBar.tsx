@@ -1,7 +1,10 @@
 import { useEffect, useState, RefObject } from 'react';
 import { useEventBus } from '../../../hooks/useEventBus';
 import { IRefPhaserGame } from '../../../PhaserGame';
-import { getResources, Resources } from '../../../game/state/helpers/resources';
+import {
+  getResources,
+  Resources,
+} from '../../../game/state/secondary/resources';
 import styles from './ResourceBar.module.css';
 
 interface Props {

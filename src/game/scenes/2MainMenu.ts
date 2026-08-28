@@ -1,8 +1,8 @@
 import * as Phaser from 'phaser';
-import { SCENE } from './keys';
-import { emit, on, off } from '../events';
+import { SCENE } from '../helpers/keys';
+import { emit, on, off } from '../helpers/events';
 import { clearSavedGame, resetGameState } from '../state/save';
-import { getResources } from '../state/helpers/resources';
+import { getResources } from '../state/secondary/resources';
 
 export class MainMenu extends Phaser.Scene {
   background: Phaser.GameObjects.Image;

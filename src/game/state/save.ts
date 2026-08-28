@@ -1,7 +1,7 @@
 // game/state/save.ts
 import * as Phaser from 'phaser';
 import { EventBus } from '../EventBus';
-import { SCENE, isSceneKey, type SceneKey } from '../scenes/keys';
+import { SCENE, isSceneKey, type SceneKey } from '../helpers/keys';
 import { INITIAL_VALUES_CONFIG, type GameState } from './gameState';
 
 /**
@@ -205,11 +205,11 @@ export function clearSavedGame(): void {
 export function initGameStateFromSave(
   registry: Phaser.Data.DataManager
 ): SavedGameData | null {
-  (Object.entries(INITIAL_VALUES_CONFIG) as [keyof GameState, number][]).forEach(
-    ([key, value]) => {
-      registry.set(key, value);
-    }
-  );
+  (
+    Object.entries(INITIAL_VALUES_CONFIG) as [keyof GameState, number][]
+  ).forEach(([key, value]) => {
+    registry.set(key, value);
+  });
 
   const save = loadSavedGame();
   if (!save) return null;
@@ -226,11 +226,11 @@ export function initGameStateFromSave(
 /** Resets every stat back to INITIAL_VALUES_CONFIG ("new game"). Scenes
  *  re-read the registry when they start, so this takes effect immediately. */
 export function resetGameState(registry: Phaser.Data.DataManager): void {
-  (Object.entries(INITIAL_VALUES_CONFIG) as [keyof GameState, number][]).forEach(
-    ([key, value]) => {
-      registry.set(key, value);
-    }
-  );
+  (
+    Object.entries(INITIAL_VALUES_CONFIG) as [keyof GameState, number][]
+  ).forEach(([key, value]) => {
+    registry.set(key, value);
+  });
   // A reset game must not resurrect the old conversion queue.
   setConversionSaveData([], 0);
 }
@@ -279,7 +279,10 @@ export function installAutoSave(
   let debounceHandle: ReturnType<typeof setTimeout> | undefined;
   const scheduleSave = (): void => {
     clearTimeout(debounceHandle);
-    debounceHandle = setTimeout(() => saveGame(registry), AUTO_SAVE_DEBOUNCE_MS);
+    debounceHandle = setTimeout(
+      () => saveGame(registry),
+      AUTO_SAVE_DEBOUNCE_MS
+    );
   };
   const onRegistryChange = (): void => scheduleSave();
   registry.events.on(Phaser.Data.Events.CHANGE_DATA, onRegistryChange);

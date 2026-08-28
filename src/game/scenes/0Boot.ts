@@ -1,5 +1,5 @@
 import { Scene } from 'phaser';
-import { SCENE } from './keys';
+import { SCENE } from '../helpers/keys';
 
 export class Boot extends Scene {
   constructor() {

@@ -1,5 +1,5 @@
 import * as Phaser from 'phaser';
-import { emit } from '../../events';
+import { emit } from '../../helpers/events';
 import { getStat, setStat } from '../gameState';
 import type { GameState } from '../gameState';
 

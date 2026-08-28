@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './ExternalUI.module.css';
-import { SCENE, type SceneKey } from '../../game/scenes/keys';
+import { SCENE, type SceneKey } from '../../game/helpers/keys';
 
 export interface ExternalUIProps {
   /** Currently active scene, or null before the first scene reports ready. */

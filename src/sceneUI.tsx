@@ -6,7 +6,7 @@ import { MainMenuUI } from './components/MainMenuUI/MainMenuUI';
 import { CaveUI } from './components/CaveUI/CaveUI';
 import { Location1UI } from './components/Location1UI/Location1UI';
 import { WorkshopUI } from './components/WorkshopUI/WorkshopUI';
-import { SCENE, type SceneKey } from './game/scenes/keys';
+import { SCENE, type SceneKey } from './game/helpers/keys';
 
 export interface SceneUIProps {
   startScene: (sceneKey: SceneKey) => void;

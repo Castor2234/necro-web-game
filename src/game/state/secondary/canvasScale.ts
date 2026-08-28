@@ -1,4 +1,4 @@
-import { emit } from '../../events';
+import { emit } from '../../helpers/events';
 
 export interface CanvasScale {
   scaleX: number;

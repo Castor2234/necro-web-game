@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback, RefObject } from 'react';
 import * as Phaser from 'phaser';
 import { IRefPhaserGame } from '../PhaserGame';
 import { useEventBus } from './useEventBus';
-import { setCanvasScale } from '../game/state/helpers/canvasScale';
+import { setCanvasScale } from '../game/state/secondary/canvasScale';
 
 export const usePhaserScale = (phaserRef: RefObject<IRefPhaserGame | null>) => {
   const [uiStyle, setUiStyle] = useState<React.CSSProperties>({

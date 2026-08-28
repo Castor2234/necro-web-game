@@ -1,10 +1,10 @@
 import * as Phaser from 'phaser';
-import { SCENE } from './keys';
-import { emit, on, off } from '../events';
-import type { VillageAction } from '../events';
+import { SCENE } from '../helpers/keys';
+import { emit, on, off } from '../helpers/events';
+import type { VillageAction } from '../helpers/events';
 import { CameraController } from '../controllers/CameraController';
 import { getStat, setStat } from '../state/gameState';
-import { addResources } from '../state/helpers/resources';
+import { addResources } from '../state/secondary/resources';
 
 const SCENE_VALUES = [
   'zombieRatsAmount',

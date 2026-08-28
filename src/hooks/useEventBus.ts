@@ -1,7 +1,7 @@
 // hooks/useEventBus.ts
 import { useEffect, useRef } from 'react';
 import { EventBus } from '../game/EventBus';
-import type { GameEvents } from '../game/events';
+import type { GameEvents } from '../game/helpers/events';
 
 /** Typed React hook for GameEvents. The payload type is inferred from the
  *  event name, so call sites need no explicit generic parameter. */
@@ -20,3 +20,4 @@ export function useEventBus<E extends keyof GameEvents>(
     };
   }, [event]);
 }
+

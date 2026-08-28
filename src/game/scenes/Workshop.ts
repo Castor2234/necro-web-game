@@ -1,18 +1,15 @@
 import * as Phaser from 'phaser';
-import { SCENE } from './keys';
-import { emit, on, off } from '../events';
-import type { ConversionProgress } from '../events';
+import { SCENE } from '../helpers/keys';
+import { emit, on, off } from '../helpers/events';
+import type { ConversionProgress } from '../helpers/events';
 import { getStat, setStat, INITIAL_VALUES_CONFIG } from '../state/gameState';
-import { getResources, addResources } from '../state/helpers/resources';
-import {
-  getConversionSaveData,
-  setConversionSaveData,
-} from '../state/save';
+import { getResources, addResources } from '../state/secondary/resources';
+import { getConversionSaveData, setConversionSaveData } from '../state/save';
 import {
   WORKSHOP_UPGRADES,
   setUpgradeState,
   type WorkshopUpgradeKey,
-} from '../state/helpers/upgrades';
+} from '../state/secondary/upgrades';
 
 interface ConversionTask {
   id: number;
@@ -244,9 +241,8 @@ export class Workshop extends Phaser.Scene {
 
       // Queued tasks are promoted on the next frame (their timers are still
       // full), but report the fresh active/queued split right away.
-      const { activeCount: newActiveCount, queuedCount } = this.getQueueCounts(
-        maxConcurrent
-      );
+      const { activeCount: newActiveCount, queuedCount } =
+        this.getQueueCounts(maxConcurrent);
 
       emit('corpse-conversion-complete', {
         completedCount: completed.length,

@@ -1,7 +1,7 @@
 import { VillageActionMenu } from './VillageActionMenu';
-import { emit } from '../../game/events';
+import { emit } from '../../game/helpers/events';
 import { NecromancerActionMenu } from './NecroActionMenu';
-import { SCENE, type SceneKey } from '../../game/scenes/keys';
+import { SCENE, type SceneKey } from '../../game/helpers/keys';
 
 interface Props {
   startScene: (sceneKey: SceneKey) => void;

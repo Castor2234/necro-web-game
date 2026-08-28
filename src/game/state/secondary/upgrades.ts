@@ -1,5 +1,5 @@
 // game/state/helpers/upgrades.ts
-import { emit } from '../../events';
+import { emit } from '../../helpers/events';
 import type { GameState } from '../gameState';
 
 export interface UpgradeConfig {
@@ -13,9 +13,7 @@ export interface UpgradeConfig {
 }
 
 export type WorkshopUpgradeKey =
-  | 'ratSpeed'
-  | 'maxConcurrentConversions'
-  | 'maxConversionQueue';
+  'ratSpeed' | 'maxConcurrentConversions' | 'maxConversionQueue';
 
 export interface UpgradeState {
   upgradeKey: WorkshopUpgradeKey;

@@ -1,7 +1,7 @@
 // hooks/useAnchoredMenu.ts
 import { useCallback, useRef } from 'react';
 import { useEventBus } from './useEventBus';
-import { getCanvasScale } from '../game/state/helpers/canvasScale';
+import { getCanvasScale } from '../game/state/secondary/canvasScale';
 
 /** Events whose payload is a screen-space { x, y } anchor pushed by a scene. */
 export type UiPositionEvent =
@@ -61,3 +61,4 @@ export function useAnchoredMenu(positionEvent: UiPositionEvent) {
 
   return setContainerRef;
 }
+

@@ -1,7 +1,7 @@
 import { BuildingActionMenu } from './BuildingActionMenu';
-import { emit } from '../../game/events';
-import type { BuildingType } from '../../game/events';
-import { SCENE, type SceneKey } from '../../game/scenes/keys';
+import { emit } from '../../game/helpers/events';
+import type { BuildingType } from '../../game/helpers/events';
+import { SCENE, type SceneKey } from '../../game/helpers/keys';
 
 interface Props {
   startScene: (sceneKey: SceneKey) => void;

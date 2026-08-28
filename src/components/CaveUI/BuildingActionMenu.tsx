@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useEventBus } from '../../hooks/useEventBus';
 import { useAnchoredMenu } from '../../hooks/useAnchoredMenu';
-import type { BuildingType } from '../../game/events';
+import type { BuildingType } from '../../game/helpers/events';
 import styles from '../Location1UI/ActionMenu.module.css'; // reuse existing menu styles
 import { Button } from '../!shared/Button/Button';
 
