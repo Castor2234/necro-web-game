@@ -27,15 +27,15 @@
   bottom: 50%;
   left: 50%;
   transform: translateX(-50%);
+  gap: 5px;
   pointer-events: auto;
 }
 
-.button {
-  width: 140px;
+.button1 {
+  width: 200px;
   padding: 4px 8px 8px 8px;
   font-size: 18px;
-  border-radius: 12px;
-  background-color: #000000;
+  background-color: #b31414;
   color: rgb(12, 179, 26);
   border: 2px solid rgba(12, 179, 26, 0.87);
   cursor: pointer;

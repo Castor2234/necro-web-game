@@ -3,6 +3,7 @@ import styles from './MainMenuUI.module.css';
 import { SCENE, type SceneKey } from '../../game/helpers/keys';
 import { emit } from '../../game/helpers/events';
 import { ConfirmDialog } from '../!shared/ConfirmDialog/ConfirmDialog';
+import { Button } from '../!shared/Button/Button';
 
 export const MainMenuUI: React.FC<{
   startScene: (sceneKey: SceneKey) => void;
@@ -13,18 +14,10 @@ export const MainMenuUI: React.FC<{
     <div className={styles.overlay}>
       <div className={styles.title}>Главное меню</div>
       <div className={styles.buttons}>
-        <button
-          className={styles.button}
-          onClick={() => startScene(SCENE.Cave)}
-        >
-          Начать игру
-        </button>
-        <button
-          className={styles.button}
-          onClick={() => setConfirmingReset(true)}
-        >
+        <Button onClick={() => startScene(SCENE.Cave)}>Начать игру</Button>
+        <Button variant="danger" onClick={() => setConfirmingReset(true)}>
           Сбросить прогресс
-        </button>
+        </Button>
       </div>
 
       <ConfirmDialog

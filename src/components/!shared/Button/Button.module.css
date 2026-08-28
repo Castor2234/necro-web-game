@@ -5,25 +5,29 @@
   opacity: 0.9;
   border: 2px solid #080808;
   border-radius: 6px;
-  padding: 2px 12px;
+  padding: 4px 8px;
   font-family: inherit;
   font-size: 20px;
   filter: brightness(1);
-  transition: filter 0.3s ease;
+  transition:
+    filter 0.05s ease,
+    opacity 0.05s ease,
+    transform 0.05s ease;
 }
 
 .btn:hover {
   opacity: 1;
-  scale: 1.05;
+  transform: scale(1.05);
 }
 
 .btn:active {
   opacity: 1;
-  filter: brightness(0.8);
+  filter: brightness(0.7);
 }
 
 .btn:disabled {
   opacity: 0.65;
+  pointer-events: none;
 }
 
 .primary {

@@ -31,7 +31,7 @@ export class WorldMap extends Phaser.Scene {
 
     // Scene title (Карта пока что показывается в зуме x2)
     this.gameText = this.add
-      .text(220, 50, 'Карта мира', {
+      .text(250, 50, 'Карта мира... В разработке...', {
         fontFamily: 'Pixelify Sans',
         fontSize: 32,
         color: '#b98ba0',
@@ -68,33 +68,6 @@ export class WorldMap extends Phaser.Scene {
         this.forestBase.setScale(1);
         this.forestBase.setAlpha(1);
         this.forestBase.updateLabelColor('rgb(255,255,255)');
-      })
-      .on('pointerdown', () => {
-        this.scene.start(SCENE.Cave);
-      });
-
-    // Village 1
-    this.village1 = new EntityContainer(
-      this,
-      'village_img',
-      'Атаковать деревню',
-      280,
-      140
-    );
-    this.village1
-      .setInteractive(
-        new Phaser.Geom.Circle(0, 0, this.forestBase.getRadius()),
-        Phaser.Geom.Circle.Contains
-      )
-      .on('pointerover', () => {
-        this.village1.setScale(1.1);
-        this.village1.setAlpha(0.95);
-        this.village1.updateLabelColor('rgb(161, 19, 19)');
-      })
-      .on('pointerout', () => {
-        this.village1.setScale(1);
-        this.village1.setAlpha(1);
-        this.village1.updateLabelColor('rgb(255,255,255)');
       })
       .on('pointerdown', () => {
         this.scene.start(SCENE.Cave);
