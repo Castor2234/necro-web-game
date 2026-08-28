@@ -49,6 +49,7 @@ export class Preloader extends Scene {
     this.load.image('workshop', 'workshop.png');
     this.load.image('tent', 'tent.png');
     this.load.image('inside_workshop', 'inside_workshop.png');
+    this.load.image('inside_tent', 'inside_tent.png');
 
     // Юниты
     this.load.image('necro_icon', 'necromancer_icon.png');

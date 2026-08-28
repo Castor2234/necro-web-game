@@ -11,8 +11,7 @@ export class Tent extends Phaser.Scene {
 
   create() {
     // Делаем фон и затемняем
-    this.background = this.add.image(320, 180, 'background');
-    this.background.setAlpha(0.7);
+    this.background = this.add.image(320, 180, 'inside_tent');
 
     // Сцена готова к использованию
     emit('current-scene-ready', this);

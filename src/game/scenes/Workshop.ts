@@ -42,7 +42,7 @@ export class Workshop extends Phaser.Scene {
   }
 
   create(): void {
-    this.background = this.add.image(320, 180, 'background').setDepth(-1);
+    this.background = this.add.image(320, 180, 'inside_workshop').setDepth(-1);
 
     on('convert-corpse', this.handleConvertCorpse, this);
     on('purchase-upgrade', this.handlePurchaseUpgrade, this);
