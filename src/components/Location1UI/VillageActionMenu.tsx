@@ -1,12 +1,8 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { useEventBus } from '../../hooks/useEventBus';
+import { useAnchoredMenu } from '../../hooks/useAnchoredMenu';
 import styles from './ActionMenu.module.css';
-import { Button } from '../Button/Button';
-import { getCanvasScale } from '../../game/states/canvasScale';
-
-interface VillageSelection {
-  id: string;
-}
+import { Button } from '../!shared/Button/Button';
 
 interface Props {
   onAttack: (villageId: string) => void;
@@ -15,33 +11,12 @@ interface Props {
 }
 
 export const VillageActionMenu = ({ onAttack, onLoot, onScout }: Props) => {
-  const [selected, setSelected] = useState<VillageSelection | null>(null);
+  const [selected, setSelected] = useState<{ id: string } | null>(null);
   const [busy, setBusy] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useAnchoredMenu('village-ui-position');
 
-  useEventBus<VillageSelection | null>('village-selected', setSelected);
-  useEventBus<boolean>('rats-busy', setBusy);
-
-  const scaleRef = useRef(getCanvasScale());
-  const posRef = useRef({ x: 0, y: 0 });
-
-  const applyTransform = () => {
-    const { x, y } = posRef.current;
-    const { scaleX, scaleY } = scaleRef.current;
-    if (containerRef.current) {
-      containerRef.current.style.transform = `translate(${x}px, ${y}px) scale(${1 / scaleX}, ${1 / scaleY})`;
-    }
-  };
-
-  useEventBus<{ x: number; y: number }>('village-ui-position', (pos) => {
-    posRef.current = pos;
-    applyTransform();
-  });
-
-  useEventBus<{ scaleX: number; scaleY: number }>('canvas-scale', (s) => {
-    scaleRef.current = s;
-    applyTransform();
-  });
+  useEventBus('village-selected', setSelected);
+  useEventBus('rats-busy', setBusy);
 
   if (!selected) return null;
 

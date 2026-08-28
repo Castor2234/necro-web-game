@@ -1,8 +1,8 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { useEventBus } from '../../hooks/useEventBus';
+import { useAnchoredMenu } from '../../hooks/useAnchoredMenu';
 import styles from './ActionMenu.module.css';
-import { Button } from '../Button/Button';
-import { getCanvasScale } from '../../game/states/canvasScale';
+import { Button } from '../!shared/Button/Button';
 
 interface Props {
   onGoToCave: () => void;
@@ -11,30 +11,9 @@ interface Props {
 
 export const NecromancerActionMenu = ({ onGoToCave, onSleep }: Props) => {
   const [visible, setVisible] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useAnchoredMenu('necromancer-ui-position');
 
-  useEventBus<boolean>('necromancer-selected', setVisible);
-
-  const scaleRef = useRef(getCanvasScale());
-  const posRef = useRef({ x: 0, y: 0 });
-
-  const applyTransform = () => {
-    const { x, y } = posRef.current;
-    const { scaleX, scaleY } = scaleRef.current;
-    if (containerRef.current) {
-      containerRef.current.style.transform = `translate(${x}px, ${y}px) scale(${1 / scaleX}, ${1 / scaleY})`;
-    }
-  };
-
-  useEventBus<{ x: number; y: number }>('necromancer-ui-position', (pos) => {
-    posRef.current = pos;
-    applyTransform();
-  });
-
-  useEventBus<{ scaleX: number; scaleY: number }>('canvas-scale', (s) => {
-    scaleRef.current = s;
-    applyTransform();
-  });
+  useEventBus('necromancer-selected', setVisible);
 
   if (!visible) return null;
 
