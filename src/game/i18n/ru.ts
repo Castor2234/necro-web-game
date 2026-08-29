@@ -60,6 +60,7 @@ export const ru: Record<TranslationKey, string> = {
   'workshop.rateRats': '1 труп крысы → 1',
   'workshop.rateGhouls': '2 трупа людей → 1',
   'workshop.upgradeCost': 'Улучшить ({resource}: {cost})',
+  'workshop.upgrades': 'Улучшения',
   'workshop.score': 'Очки: 100',
   'cost.humanCorpses': 'Труп человека',
   'cost.ratCorpses': 'Труп крысы',

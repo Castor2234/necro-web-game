@@ -62,6 +62,7 @@ export const en = {
   'workshop.rateRats': '1 rat corpse → 1',
   'workshop.rateGhouls': '2 human corpses → 1',
   'workshop.upgradeCost': 'Upgrade ({cost} {resource})',
+  'workshop.upgrades': 'Upgrades',
   'workshop.score': 'Score: 100',
   'cost.humanCorpses': 'human corpses',
   'cost.ratCorpses': 'rat corpses',
