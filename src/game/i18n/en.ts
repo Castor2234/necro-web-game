@@ -55,6 +55,7 @@ export const en = {
   // --- Workshop ---
   'workshop.convert': 'Raise Dead ({active}/{max})',
   'workshop.queued': 'queued',
+  'workshop.notEnoughResources': 'Not enough resources',
   'workshop.ratesTitle': 'Convert Rates',
   // Rate strings must match CONVERSION_RECIPES in
   // src/game/state/secondary/conversions.ts

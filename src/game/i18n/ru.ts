@@ -53,6 +53,7 @@ export const ru: Record<TranslationKey, string> = {
   // --- Workshop ---
   'workshop.convert': 'Поднять мёртвых ({active}/{max})',
   'workshop.queued': 'в очереди',
+  'workshop.notEnoughResources': 'Недостаточно ресурсов',
   'workshop.ratesTitle': 'Скорость создания',
   // Строки скорости должны соответствовать CONVERSION_RECIPES в
   // src/game/state/secondary/conversions.ts

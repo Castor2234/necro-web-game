@@ -1,3 +1,4 @@
+import type { RefObject } from 'react';
 import {
   ExternalUI,
   ExternalUIProps,
@@ -7,9 +8,12 @@ import { CaveUI } from './components/CaveUI/CaveUI';
 import { Location1UI } from './components/Location1UI/Location1UI';
 import { WorkshopUI } from './components/WorkshopUI/WorkshopUI';
 import { SCENE, type SceneKey } from './game/helpers/keys';
+import type { IRefPhaserGame } from './PhaserGame';
 
 export interface SceneUIProps {
   startScene: (sceneKey: SceneKey) => void;
+  /** Phaser game ref, so scene UIs can read live values from the registry. */
+  phaserRef: RefObject<IRefPhaserGame | null>;
 }
 
 /** Scene-specific overlay rendered inside the scaled canvas area. */

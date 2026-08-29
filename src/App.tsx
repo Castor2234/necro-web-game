@@ -42,7 +42,7 @@ function App() {
         // Overlay над phaser canvas (Зависит от сцены)
         SceneUIComponent && (
           <div style={uiStyle}>
-            <SceneUIComponent startScene={startScene} />
+            <SceneUIComponent startScene={startScene} phaserRef={phaserRef} />
           </div>
         )
       }
