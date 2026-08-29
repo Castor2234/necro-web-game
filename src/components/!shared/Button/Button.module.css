@@ -7,7 +7,7 @@
   border-radius: 6px;
   padding: 4px 8px;
   font-family: inherit;
-  font-size: 20px;
+  font-size: 24px;
   filter: brightness(1);
   transition:
     filter 0.05s ease,
@@ -43,4 +43,3 @@
   background-color: transparent;
   border: 1px solid #ffffff;
 }
-
