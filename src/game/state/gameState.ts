@@ -2,6 +2,7 @@ export interface GameState {
   // ----------Villages
 
   // Actions
+  attackDuration: number;
   lootDuration: number;
   scoutDuration: number;
 
@@ -37,6 +38,7 @@ export const INITIAL_VALUES_CONFIG: Record<keyof GameState, number> = {
   // ----------Villages
 
   // Actions
+  attackDuration: 1000,
   lootDuration: 1000,
   scoutDuration: 1000,
 
@@ -76,4 +78,3 @@ export const setStat = <K extends keyof GameState>(
   k: K,
   v: GameState[K]
 ) => r.set(k, v);
-
