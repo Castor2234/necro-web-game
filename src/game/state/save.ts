@@ -4,6 +4,7 @@ import { EventBus } from '../EventBus';
 import { SCENE, isSceneKey, type SceneKey } from '../helpers/keys';
 import { INITIAL_VALUES_CONFIG, type GameState } from './gameState';
 import { isCreatureType, type CreatureType } from './secondary/creatures';
+import type { VillageAction } from '../helpers/events';
 
 /**
  * localStorage-backed save system.
@@ -35,6 +36,25 @@ export interface SavedConversionTask {
   creatureType: CreatureType;
 }
 
+/** In-flight Location_1 rat raid, persisted so the journey survives a scene
+ *  switch or a page refresh. `timer` is only meaningful for in-progress raids. */
+export interface SavedRatTask {
+  action: VillageAction;
+  villageId: string;
+  targetX: number;
+  targetY: number;
+  state: 'moving-to-target' | 'in-progress' | 'returning';
+  /** Remaining ms for in-progress raids; 0 otherwise. */
+  timer: number;
+  /** Progress-bar fill (0..1) captured for in-progress raids. */
+  barFillScale: number;
+  /** Current horde position, so travel resumes from the same spot. */
+  ratsX: number;
+  ratsY: number;
+  /** Whether the horde sprite was visible when saving. */
+  ratsVisible: boolean;
+}
+
 export interface SavedGameData {
   version: number;
   /** Epoch ms of the last write. */
@@ -45,6 +65,8 @@ export interface SavedGameData {
   stats: Partial<Record<keyof GameState, number>>;
   conversionTasks: SavedConversionTask[];
   nextTaskId: number;
+  /** In-flight rat raid, or null when the horde is idle. */
+  ratTask: SavedRatTask | null;
 }
 
 // --- Shared extras that live outside the registry ----------------------------
@@ -56,6 +78,9 @@ let trackedSceneKey: SceneKey | null = null;
 /** Workshop conversion queue snapshot, kept in sync by the Workshop scene. */
 let conversionTasksSnapshot: SavedConversionTask[] = [];
 let conversionNextTaskIdSnapshot = 0;
+
+/** In-flight Location_1 rat raid snapshot, kept in sync by that scene. */
+let ratTaskSnapshot: SavedRatTask | null = null;
 
 /** Workshop reports its conversion queue here after every change. */
 export function setConversionSaveData(
@@ -74,6 +99,15 @@ export function getConversionSaveData(): {
     tasks: conversionTasksSnapshot.map((task) => ({ ...task })),
     nextTaskId: conversionNextTaskIdSnapshot,
   };
+}
+
+/** Location_1 reports the current raid here on every state change. */
+export function setRatTaskSaveData(task: SavedRatTask | null): void {
+  ratTaskSnapshot = task ? { ...task } : null;
+}
+
+export function getRatTaskSaveData(): SavedRatTask | null {
+  return ratTaskSnapshot ? { ...ratTaskSnapshot } : null;
 }
 
 // --- Serialization -----------------------------------------------------------
@@ -100,6 +134,7 @@ export function saveGame(registry: Phaser.Data.DataManager): boolean {
     stats: collectStats(registry),
     conversionTasks: conversionTasksSnapshot.map((task) => ({ ...task })),
     nextTaskId: conversionNextTaskIdSnapshot,
+    ratTask: ratTaskSnapshot ? { ...ratTaskSnapshot } : null,
   };
 
   try {
@@ -154,6 +189,55 @@ function sanitizeConversionTasks(raw: unknown): SavedConversionTask[] {
   });
 }
 
+const RAT_TASK_STATES = [
+  'moving-to-target',
+  'in-progress',
+  'returning',
+] as const;
+
+function sanitizeRatTask(raw: unknown): SavedRatTask | null {
+  if (typeof raw !== 'object' || raw === null) return null;
+
+  const {
+    action,
+    villageId,
+    targetX,
+    targetY,
+    state,
+    timer,
+    barFillScale,
+    ratsX,
+    ratsY,
+    ratsVisible,
+  } = raw as Record<string, unknown>;
+
+  if (
+    (action !== 'attack' && action !== 'loot' && action !== 'scout') ||
+    typeof villageId !== 'string' ||
+    !isFiniteNumber(targetX) ||
+    !isFiniteNumber(targetY) ||
+    typeof state !== 'string' ||
+    !(RAT_TASK_STATES as readonly string[]).includes(state)
+  ) {
+    return null;
+  }
+
+  return {
+    action,
+    villageId,
+    targetX,
+    targetY,
+    state: state as SavedRatTask['state'],
+    timer: isFiniteNumber(timer) ? Math.max(0, timer) : 0,
+    barFillScale: isFiniteNumber(barFillScale)
+      ? Math.min(1, Math.max(0, barFillScale))
+      : 0,
+    ratsX: isFiniteNumber(ratsX) ? ratsX : 0,
+    ratsY: isFiniteNumber(ratsY) ? ratsY : 0,
+    ratsVisible: ratsVisible === true,
+  };
+}
+
 /** Reads and validates the save file. Returns null when absent or invalid
  *  (corrupted JSON, wrong version, …) so the game falls back to defaults. */
 export function loadSavedGame(): SavedGameData | null {
@@ -180,6 +264,7 @@ export function loadSavedGame(): SavedGameData | null {
       nextTaskId: isFiniteNumber(parsed.nextTaskId)
         ? Math.max(0, Math.trunc(parsed.nextTaskId))
         : 0,
+      ratTask: sanitizeRatTask(parsed.ratTask),
     };
   } catch (error) {
     console.warn('[save] Could not read save from localStorage:', error);
@@ -207,6 +292,8 @@ export function clearSavedGame(): void {
 
 /** Applies INITIAL_VALUES_CONFIG defaults first, then overlays the saved stats
  *  on top — so stats added after the save was written still get a value.
+ *  Also repopulates the in-memory conversion/rat-task snapshots from the save,
+ *  so in-flight conversions and raids survive a full page refresh.
  *  Returns the loaded save (or null for a fresh game). */
 export function initGameStateFromSave(
   registry: Phaser.Data.DataManager
@@ -226,6 +313,11 @@ export function initGameStateFromSave(
     }
   );
 
+  // The registry is the source of truth for stats; the module-level
+  // snapshots are the source of truth for the in-flight task queues.
+  setConversionSaveData(save.conversionTasks, save.nextTaskId);
+  setRatTaskSaveData(save.ratTask);
+
   return save;
 }
 
@@ -237,8 +329,9 @@ export function resetGameState(registry: Phaser.Data.DataManager): void {
   ).forEach(([key, value]) => {
     registry.set(key, value);
   });
-  // A reset game must not resurrect the old conversion queue.
+  // A reset game must not resurrect the old conversion queue or rat raids.
   setConversionSaveData([], 0);
+  setRatTaskSaveData(null);
 }
 
 /** The scene to continue from: the saved scene, unless it's missing or a
