@@ -4,7 +4,7 @@ import { useTranslation } from '../../hooks/useTranslation';
 import { useAnchoredMenu } from '../../hooks/useAnchoredMenu';
 import type { BuildingType } from '../../game/helpers/events';
 import type { TranslationKey } from '../../game/i18n';
-import styles from '../Location1UI/ActionMenu.module.css'; // reuse existing menu styles
+import styles from '../Location_1UI/ActionMenu.module.css'; // reuse existing menu styles
 import { Button } from '../!shared/Button/Button';
 
 interface Props {
@@ -42,4 +42,3 @@ export const BuildingActionMenu = ({ onGoTo, onUpgrade }: Props) => {
     </div>
   );
 };
-

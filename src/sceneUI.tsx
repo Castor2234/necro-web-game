@@ -5,7 +5,7 @@ import {
 } from './components/ExternalUI/ExternalUI';
 import { MainMenuUI } from './components/MainMenuUI/MainMenuUI';
 import { CaveUI } from './components/CaveUI/CaveUI';
-import { Location1UI } from './components/Location1UI/Location1UI';
+import { Location1UI } from './components/Location_1UI/Location_1UI';
 import { WorkshopUI } from './components/WorkshopUI/WorkshopUI';
 import { SCENE, type SceneKey } from './game/helpers/keys';
 import type { IRefPhaserGame } from './PhaserGame';
@@ -42,4 +42,3 @@ export const SCENES_WITH_RESOURCES: SceneKey[] = [
   SCENE.Cave,
   SCENE.Workshop,
 ];
-

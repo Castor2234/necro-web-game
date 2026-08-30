@@ -10,6 +10,7 @@ const SCENE_VALUES = [
   'zombieRatsAmount',
   'ratSpeed',
   'ratPower',
+  'attackDuration',
   'lootDuration',
   'scoutDuration',
   'village1Population',
@@ -323,6 +324,7 @@ export class Location_1 extends Phaser.Scene {
     action: Actions,
     target: Phaser.Physics.Arcade.Sprite
   ): void {
+    if (this.values.zombieRatsAmount < 1) return;
     this.zombieRats.setPosition(this.necromancer.x, this.necromancer.y);
     this.zombieRats.setVisible(true);
 
@@ -388,9 +390,9 @@ export class Location_1 extends Phaser.Scene {
 
       switch (this.ratTask.action) {
         case 'attack':
-          this.resolveAttack(this.ratTask.villageId);
-          this.ratTask = null;
-          emit('rats-busy', false);
+          this.ratTask.state = 'in-progress';
+          this.ratTask.timer = this.values.attackDuration;
+          this.createProgressBar(village.x, village.y);
           break;
 
         case 'loot':
@@ -450,26 +452,37 @@ export class Location_1 extends Phaser.Scene {
         return this.values.lootDuration;
       case 'scout':
         return this.values.scoutDuration;
-      default:
-        return 0; // 'attack' resolves instantly, no timer needed
+      case 'attack':
+        return this.values.attackDuration;
     }
   }
 
   private resolveAttack(villageId: string): void {
-    const strength = this.values.zombieRatsAmount * this.values.ratPower;
-    const population = this.getVillagePopulation(villageId);
-    const kills = Math.min(Math.trunc(population), Math.max(0, strength));
+    const strength = Math.max(
+      0,
+      this.values.zombieRatsAmount * this.values.ratPower
+    );
+    const possibleKills = Math.trunc(strength / 10);
 
-    if (kills > 0) {
-      this.setVillagePopulation(villageId, population - kills);
-      addResources(this.registry, { humanCorpses: kills });
+    if (possibleKills < 1) {
+      this.values.zombieRatsAmount = 0;
+      return;
     }
+
+    const population = Math.trunc(this.getVillagePopulation(villageId));
+    const kills = Math.min(population, Phaser.Math.Between(1, possibleKills));
+    const unitDeaths = Phaser.Math.Between(1, this.values.zombieRatsAmount);
+
+    this.setVillagePopulation(villageId, population - kills);
+    addResources(this.registry, { humanCorpses: kills });
+
+    this.values.zombieRatsAmount = this.values.zombieRatsAmount - unitDeaths;
 
     emit('village-attacked', { villageId, kills });
   }
 
   private resolveLoot(villageId: string): void {
-    const looted = Phaser.Math.Between(0, this.values.zombieRatsAmount);
+    const looted = Phaser.Math.Between(1, this.values.zombieRatsAmount);
     addResources(this.registry, { ratCorpses: looted });
     emit('village-looted', {
       villageId,
@@ -550,6 +563,12 @@ export class Location_1 extends Phaser.Scene {
           this.barBg = null;
           this.barFill = null;
 
+          if (this.values.zombieRatsAmount < 1) {
+            this.ratTask = null;
+            emit('rats-busy', false);
+            return;
+          }
+
           this.ratTask.state = 'returning';
           this.zombieRats.setVisible(true);
 
@@ -617,4 +636,3 @@ export class Location_1 extends Phaser.Scene {
     );
   }
 }
-
