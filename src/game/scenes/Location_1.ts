@@ -6,19 +6,20 @@ import { CameraController } from '../controllers/CameraController';
 import { getStat, setStat } from '../state/gameState';
 import type { GameState } from '../state/gameState';
 import { addResources } from '../state/secondary/resources';
-import {
-  getRatTaskSaveData,
-  setRatTaskSaveData,
-} from '../state/save';
+import { getRatTaskSaveData, setRatTaskSaveData } from '../state/save';
 
 /** Village ids, matching the `village{N}Population` registry keys. */
-type VillageId = 'village1' | 'village2' | 'village3';
+type VillageId =
+  'village1' | 'village2' | 'village3' | 'village4' | 'village5' | 'village6';
 
 /** Maps a village id to its persisted population stat key. */
 const VILLAGE_POPULATION_KEYS: Record<VillageId, keyof GameState> = {
   village1: 'village1Population',
   village2: 'village2Population',
   village3: 'village3Population',
+  village4: 'village4Population',
+  village5: 'village5Population',
+  village6: 'village6Population',
 };
 
 const isVillageId = (value: string): value is VillageId =>
@@ -88,6 +89,30 @@ export class Location_1 extends Phaser.Scene {
       texture: 'village_img',
       maxPopulation: 2000,
       growthRate: 0.05,
+    },
+    {
+      id: 'village4',
+      x: 350,
+      y: 140,
+      texture: 'village_img',
+      maxPopulation: 20000,
+      growthRate: 0.1,
+    },
+    {
+      id: 'village5',
+      x: 350,
+      y: 230,
+      texture: 'village_img',
+      maxPopulation: 50000,
+      growthRate: 0.1,
+    },
+    {
+      id: 'village6',
+      x: 500,
+      y: 150,
+      texture: 'village_img',
+      maxPopulation: 100000,
+      growthRate: 0.1,
     },
   ];
 
@@ -197,7 +222,7 @@ export class Location_1 extends Phaser.Scene {
     );
 
     // Houses
-    this.house1 = this.physics.add.sprite(350, 160, 'house_1_img');
+    this.house1 = this.physics.add.sprite(600, 40, 'house_1_img');
 
     // Rats
     this.zombieRats = this.physics.add
@@ -356,7 +381,12 @@ export class Location_1 extends Phaser.Scene {
       target.y
     );
 
-    this.physics.moveTo(this.zombieRats, target.x, target.y, this.getRatSpeed());
+    this.physics.moveTo(
+      this.zombieRats,
+      target.x,
+      target.y,
+      this.getRatSpeed()
+    );
   }
 
   /** Reuses one Graphics object instead of allocating a fresh one per frame. */
@@ -561,7 +591,9 @@ export class Location_1 extends Phaser.Scene {
       } else {
         const otherSprite =
           task.state === 'moving-to-target'
-            ? this.villages.find((v) => v.getData('villageId') === task.villageId)
+            ? this.villages.find(
+                (v) => v.getData('villageId') === task.villageId
+              )
             : this.necromancer;
 
         if (otherSprite) {
@@ -576,7 +608,9 @@ export class Location_1 extends Phaser.Scene {
     }
 
     this.populationGrowthAccumulator += delta;
-    if (this.populationGrowthAccumulator >= this.POPULATION_GROWTH_INTERVAL_MS) {
+    if (
+      this.populationGrowthAccumulator >= this.POPULATION_GROWTH_INTERVAL_MS
+    ) {
       // keep remainder, avoids drift over time
       this.populationGrowthAccumulator -= this.POPULATION_GROWTH_INTERVAL_MS;
       this.growVillagePopulation();
@@ -725,3 +759,4 @@ export class Location_1 extends Phaser.Scene {
     }
   }
 }
+

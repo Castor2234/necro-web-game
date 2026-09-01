@@ -10,6 +10,9 @@ export interface GameState {
   village1Population: number;
   village2Population: number;
   village3Population: number;
+  village4Population: number;
+  village5Population: number;
+  village6Population: number;
 
   // ----------Resources
   ratCorpses: number;
@@ -46,6 +49,9 @@ export const INITIAL_VALUES_CONFIG: Record<keyof GameState, number> = {
   village1Population: 100,
   village2Population: 300,
   village3Population: 1000,
+  village4Population: 5000,
+  village5Population: 5000,
+  village6Population: 5000,
 
   // ----------Resources
   ratCorpses: 999,
