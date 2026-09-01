@@ -69,6 +69,12 @@ export const en = {
   'upgrades.ratSpeed': 'Rat Speed',
   'upgrades.maxConcurrentConversions': 'Max Conversions',
   'upgrades.maxConversionQueue': 'Max Queue',
+  'upgrades.tree.necromancer': 'Necromancer',
+  'upgrades.tree.simple': 'Simple creatures',
+  'upgrades.tree.advanced': 'Advanced creatures',
+  'upgrades.tree.workshop': 'Workshop',
+  'upgrades.back': 'Back to trees',
+  'upgrades.empty': 'No upgrades here yet',
 
   // --- Creature stats ---
   'stats.title': 'Creature Stats',
@@ -83,4 +89,3 @@ export const en = {
 } as const;
 
 export type TranslationKey = keyof typeof en;
-

@@ -210,6 +210,7 @@ export class Workshop extends Phaser.Scene {
         currentValue: getStat(this.registry, config.key),
         cost: this.getUpgradeCost(upgradeKey),
         costResource: config.costResource,
+        tree: config.tree,
       };
     });
     setUpgradeState(state);

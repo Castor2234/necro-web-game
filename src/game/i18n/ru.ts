@@ -32,8 +32,8 @@ export const ru: Record<TranslationKey, string> = {
   'nav.worldMap': 'Карта мира',
 
   // --- Resources ---
-  'resources.humanCorpses': 'Трупов людей:',
-  'resources.ratCorpses': 'Трупов крыс:',
+  'resources.humanCorpses': 'Тела людей:',
+  'resources.ratCorpses': 'Тела крыс:',
 
   // --- Cave building menu ---
   'buildings.tent': 'Жилище',
@@ -67,6 +67,12 @@ export const ru: Record<TranslationKey, string> = {
   'upgrades.ratSpeed': 'Скорость крыс',
   'upgrades.maxConcurrentConversions': 'Макс. Преобразований',
   'upgrades.maxConversionQueue': 'Макс. Очередь',
+  'upgrades.tree.necromancer': 'Некромант',
+  'upgrades.tree.simple': 'Простые создания',
+  'upgrades.tree.advanced': 'Продвинутые создания',
+  'upgrades.tree.workshop': 'Мастерская',
+  'upgrades.back': 'Назад к деревьям',
+  'upgrades.empty': 'Пока нет улучшений',
 
   // --- Creature stats ---
   'stats.title': 'Статистика существ',
@@ -79,4 +85,3 @@ export const ru: Record<TranslationKey, string> = {
   'worldMap.title': 'Карта мира... В разработке...',
   'worldMap.backToBase': 'Вернуться на базу',
 };
-

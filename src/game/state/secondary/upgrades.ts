@@ -2,6 +2,9 @@
 import { emit } from '../../helpers/events';
 import type { GameState } from '../gameState';
 
+/** The four upgrade trees shown in the Upgrades window. */
+export type UpgradeTree = 'necromancer' | 'simple' | 'advanced' | 'workshop';
+
 export interface UpgradeConfig {
   /** GameState stat this upgrade modifies (typed so a typo can't compile). */
   key: keyof GameState;
@@ -10,6 +13,8 @@ export interface UpgradeConfig {
   baseCost: number;
   costGrowth: number;
   costResource: 'ratCorpses' | 'humanCorpses';
+  /** Which upgrade tree this upgrade belongs to. */
+  tree: UpgradeTree;
 }
 
 export type WorkshopUpgradeKey =
@@ -21,6 +26,7 @@ export interface UpgradeState {
   currentValue: number;
   cost: number;
   costResource: 'ratCorpses' | 'humanCorpses';
+  tree: UpgradeTree;
 }
 
 export const WORKSHOP_UPGRADES: Record<WorkshopUpgradeKey, UpgradeConfig> = {
@@ -31,6 +37,7 @@ export const WORKSHOP_UPGRADES: Record<WorkshopUpgradeKey, UpgradeConfig> = {
     baseCost: 3,
     costGrowth: 1.4,
     costResource: 'ratCorpses',
+    tree: 'simple',
   },
   maxConcurrentConversions: {
     key: 'maxConcurrentConversions',
@@ -39,6 +46,7 @@ export const WORKSHOP_UPGRADES: Record<WorkshopUpgradeKey, UpgradeConfig> = {
     baseCost: 5,
     costGrowth: 1.8,
     costResource: 'humanCorpses', // pays with humanCorpses now
+    tree: 'workshop',
   },
   maxConversionQueue: {
     key: 'maxConversionQueue',
@@ -47,6 +55,7 @@ export const WORKSHOP_UPGRADES: Record<WorkshopUpgradeKey, UpgradeConfig> = {
     baseCost: 4,
     costGrowth: 1.6,
     costResource: 'ratCorpses',
+    tree: 'workshop',
   },
 };
 
@@ -60,4 +69,3 @@ export function setUpgradeState(state: UpgradeState[]): void {
 export function getUpgradeState(): UpgradeState[] {
   return currentUpgradeState;
 }
-

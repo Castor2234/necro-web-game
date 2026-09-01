@@ -1,7 +1,7 @@
 .resourceBar {
   position: absolute;
   left: 6px;
-  bottom: 6px;
+  top: 6px;
   display: flex;
   flex-direction: column;
   background-color: rgba(0, 0, 0, 0.6);
@@ -19,5 +19,5 @@
 }
 
 .resourceLabel span:first-child {
-  width: 140px;
+  width: 120px;
 }

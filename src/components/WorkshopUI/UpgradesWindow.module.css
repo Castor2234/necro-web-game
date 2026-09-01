@@ -1,19 +1,19 @@
 .backdrop {
   position: absolute;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.4);
+  /* Fully opaque so the workshop underneath is hidden while Upgrades is open. */
+  background-color: rgba(10, 8, 16, 0.97);
   pointer-events: auto;
   z-index: 50;
 }
 
 .window {
   position: absolute;
-  top: 6px;
-  left: 70%;
-  transform: translateX(-50%);
-  min-width: 180px;
+  inset: 6px;
+  display: flex;
+  flex-direction: column;
   padding: 10px 12px 12px 12px;
-  background-color: rgba(0, 0, 0, 0.85);
+  background-color: rgba(0, 0, 0, 0.6);
   border: 2px solid #291436;
   border-radius: 8px;
   box-shadow: 0 0 16px rgba(0, 0, 0, 0.8);
@@ -51,5 +51,106 @@
 }
 
 .closeButton:active {
+  filter: brightness(0.8);
+}
+
+/* --- Tree menu (a +-shaped cross of 4 buttons) --- */
+.menu {
+  flex: 1;
+  display: grid;
+  /* 3 rows x 2 columns: top row spans both for Necromancer, the middle row
+   * holds Animal (left) and Human (right), the bottom row spans both for
+   * Workshop — so the buttons form a + cross. */
+  grid-template-rows: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  align-items: center;
+  justify-items: center;
+}
+
+.treeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  width: 110px;
+  height: 34px;
+  padding: 4px 8px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: bold;
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.08);
+  border: 2px solid #291436;
+  border-radius: 6px;
+  transition: filter 0.2s ease, scale 0.2s ease;
+}
+
+.treeButton:hover {
+  scale: 1.08;
+  background-color: rgba(255, 255, 255, 0.16);
+}
+
+.treeButton:active {
+  filter: brightness(0.8);
+}
+
+.necromancer {
+  grid-row: 1;
+  grid-column: 1 / -1;
+}
+
+.animal {
+  grid-row: 2;
+  grid-column: 1;
+}
+
+.human {
+  grid-row: 2;
+  grid-column: 2;
+}
+
+.workshop {
+  grid-row: 3;
+  grid-column: 1 / -1;
+}
+
+/* --- Tree panel (upgrades for one tree) --- */
+.treePanel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 12px;
+}
+
+.treeTitle {
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.treeContent {
+  flex: 1;
+}
+
+.backButton {
+  align-self: center;
+  cursor: pointer;
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 3px 12px;
+}
+
+.backButton:hover {
+  scale: 1.05;
+  background-color: rgba(255, 255, 255, 0.18);
+}
+
+.backButton:active {
   filter: brightness(0.8);
 }

@@ -31,14 +31,13 @@ export const ResourceBar = ({ phaserRef }: Props) => {
   return (
     <div className={styles.resourceBar}>
       <div className={styles.resourceLabel}>
-        <span>{t('resources.humanCorpses')}</span>
-        <span>{resources.humanCorpses}</span>
-      </div>
-      <div className={styles.resourceLabel}>
         <span>{t('resources.ratCorpses')}</span>
         <span>{resources.ratCorpses}</span>
+      </div>
+      <div className={styles.resourceLabel}>
+        <span>{t('resources.humanCorpses')}</span>
+        <span>{resources.humanCorpses}</span>
       </div>
     </div>
   );
 };
-
