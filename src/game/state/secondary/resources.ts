@@ -32,4 +32,3 @@ export function addResources(
 
   emit('resources-updated', next);
 }
-

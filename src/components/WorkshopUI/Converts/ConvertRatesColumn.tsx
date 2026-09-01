@@ -1,4 +1,4 @@
-import { useTranslation } from '../../hooks/useTranslation';
+import { useTranslation } from '../../../hooks/useTranslation';
 import styles from './ConvertRatesColumn.module.css';
 
 /** Rows of the rates column, in display order. The rate strings must match

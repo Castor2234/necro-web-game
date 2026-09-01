@@ -1,17 +1,17 @@
 import { useEffect, useState } from 'react';
 import type { RefObject } from 'react';
-import { useEventBus } from '../../hooks/useEventBus';
-import { useTranslation } from '../../hooks/useTranslation';
-import { emit, ConversionProgress } from '../../game/helpers/events';
-import type { CreatureType } from '../../game/state/secondary/creatures';
-import { CONVERSION_RECIPES } from '../../game/state/secondary/conversions';
+import { useEventBus } from '../../../hooks/useEventBus';
+import { useTranslation } from '../../../hooks/useTranslation';
+import { emit, ConversionProgress } from '../../../game/helpers/events';
+import type { CreatureType } from '../../../game/state/secondary/creatures';
+import { CONVERSION_RECIPES } from '../../../game/state/secondary/conversions';
 import {
   getResources,
   type Resources,
-} from '../../game/state/secondary/resources';
-import type { IRefPhaserGame } from '../../PhaserGame';
-import { CreatureDropdown } from './CreatureDropdown';
-import { Button } from '../!shared/Button/Button';
+} from '../../../game/state/secondary/resources';
+import type { IRefPhaserGame } from '../../../PhaserGame';
+import { CreatureDropdown } from '../CreatureDropdown';
+import { Button } from '../../!shared/Button/Button';
 import styles from './ConvertCorpseButton.module.css';
 
 interface Props {
@@ -107,7 +107,9 @@ export function ConvertCorpseButton({ phaserRef }: Props) {
       {tasks.map((task) => (
         <div key={task.id} className={styles.taskRow}>
           <span className={styles.taskCreature}>
-            {t(task.creatureType === 'zombieRats' ? 'stats.rats' : 'stats.ghouls')}
+            {t(
+              task.creatureType === 'zombieRats' ? 'stats.rats' : 'stats.ghouls'
+            )}
           </span>
           <div className={styles.taskBar}>
             <div
@@ -127,4 +129,3 @@ export function ConvertCorpseButton({ phaserRef }: Props) {
     </div>
   );
 }
-
