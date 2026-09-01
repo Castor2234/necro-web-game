@@ -18,7 +18,12 @@ export const MainMenuUI: React.FC<{
     <div className={styles.overlay}>
       <div className={styles.title}>{t('menu.title')}</div>
       <div className={styles.buttons}>
-        <Button onClick={() => startScene(SCENE.Cave)}>{t('menu.start')}</Button>
+        <Button
+          style={{ backgroundColor: '#00911f' }}
+          onClick={() => startScene(SCENE.Cave)}
+        >
+          {t('menu.start')}
+        </Button>
         <Button onClick={() => setSettingsOpen(true)}>
           {t('menu.settings')}
         </Button>
@@ -48,4 +53,3 @@ export const MainMenuUI: React.FC<{
     </div>
   );
 };
-
