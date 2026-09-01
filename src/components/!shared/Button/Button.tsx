@@ -3,7 +3,7 @@ import styles from './Button.module.css';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
-  variant?: 'primary' | 'danger' | 'ghost';
+  variant?: 'primary' | 'danger' | 'ghost' | 'green' | 'gold';
 }
 
 export const Button = ({
@@ -21,4 +21,3 @@ export const Button = ({
     </button>
   );
 };
-

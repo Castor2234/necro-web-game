@@ -35,11 +35,18 @@
   background-color: #333333;
 }
 
+.gold {
+  background-color: #e7eb03;
+}
+
+.green {
+  background-color: #1b7c74;
+}
+
 .danger {
   background-color: #7c0000;
 }
 
 .ghost {
   background-color: transparent;
-  border: 1px solid #ffffff;
 }

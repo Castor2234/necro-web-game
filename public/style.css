@@ -6,16 +6,10 @@ body {
   background-color: #002400;
 }
 
-body {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
 #app {
   position: relative;
   width: 100vw;
-  max-height: 100vh;
+  height: 100vh;
   aspect-ratio: 16 / 9;
   overflow: hidden;
   color: rgba(255, 255, 255);

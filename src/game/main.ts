@@ -26,7 +26,7 @@ const config: Phaser.Types.Core.GameConfig = {
   },
 
   scale: {
-    mode: Scale.HEIGHT_CONTROLS_WIDTH,
+    mode: Scale.FIT,
     autoCenter: Scale.CENTER_BOTH,
   },
 
@@ -47,4 +47,3 @@ const StartGame = (parent: string) => {
 };
 
 export default StartGame;
-
