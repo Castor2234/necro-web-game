@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { useTranslation } from '../../hooks/useTranslation';
+import { useTranslation } from '@/hooks/useTranslation';
 import { UpgradesColumn } from './UpgradesColumn';
-import type { UpgradeTree } from '../../game/state/secondary/upgrades';
-import type { TranslationKey } from '../../game/i18n';
+import type { UpgradeTree } from '@/game/state/secondary/upgrades';
+import type { TranslationKey } from '@/game/i18n';
 import styles from './UpgradesWindow.module.css';
 
 interface UpgradesWindowProps {

@@ -1,13 +1,13 @@
 import { useState } from 'react';
-import { useEventBus } from '../../hooks/useEventBus';
-import { useTranslation } from '../../hooks/useTranslation';
-import { emit } from '../../game/helpers/events';
+import { useEventBus } from '@/hooks/useEventBus';
+import { useTranslation } from '@/hooks/useTranslation';
+import { emit } from '@/game/helpers/events';
 import {
   getUpgradeState,
   UpgradeState,
   type UpgradeTree,
   type WorkshopUpgradeKey,
-} from '../../game/state/secondary/upgrades';
+} from '@/game/state/secondary/upgrades';
 import styles from './UpgradesColumn.module.css';
 
 interface UpgradesColumnProps {
@@ -58,4 +58,3 @@ export function UpgradesColumn({ tree }: UpgradesColumnProps) {
     </div>
   );
 }
-

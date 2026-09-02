@@ -2,7 +2,7 @@
   position: absolute;
   inset: 0;
   /* Fully opaque so the workshop underneath is hidden while Upgrades is open. */
-  background-color: rgba(10, 8, 16, 0.97);
+  background-color: rgba(10, 8, 16);
   pointer-events: auto;
   z-index: 50;
 }
@@ -83,7 +83,9 @@
   background-color: rgba(255, 255, 255, 0.08);
   border: 2px solid #291436;
   border-radius: 6px;
-  transition: filter 0.2s ease, scale 0.2s ease;
+  transition:
+    filter 0.2s ease,
+    scale 0.2s ease;
 }
 
 .treeButton:hover {
@@ -100,12 +102,12 @@
   grid-column: 1 / -1;
 }
 
-.animal {
+.simple {
   grid-row: 2;
   grid-column: 1;
 }
 
-.human {
+.advanced {
   grid-row: 2;
   grid-column: 2;
 }
