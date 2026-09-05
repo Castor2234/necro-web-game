@@ -9,7 +9,6 @@ import {
 import { getResources } from '../state/secondary/resources';
 
 export class Preloader extends Scene {
-  agr: Phaser.GameObjects.Container;
   constructor() {
     super(SCENE.Preloader);
   }
