@@ -3,8 +3,8 @@ import { IRefPhaserGame, PhaserGame } from './PhaserGame';
 import { usePhaserScale } from './hooks/usePhaserScale';
 import { SCENE_UI, SCENE_EXTERNAL_UI, SCENES_WITH_RESOURCES } from './sceneUI';
 import { isSceneKey, type SceneKey } from './game/helpers/keys';
-import { ResourceBar } from './components/!shared/ResourceBar/ResourceBar';
-import { ShowCreatureStatsButton } from './components/!shared/ShowCreatureStatsButton/ShowCreatureStatsButton';
+import { ResourceBar } from './components/1shared/ResourceBar/ResourceBar';
+import { ShowCreatureStatsButton } from './components/1shared/ShowCreatureStatsButton/ShowCreatureStatsButton';
 
 function App() {
   const phaserRef = useRef<IRefPhaserGame | null>(null);
@@ -66,4 +66,3 @@ function App() {
 }
 
 export default App;
-

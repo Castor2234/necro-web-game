@@ -3,7 +3,7 @@ import { useEventBus } from '../../hooks/useEventBus';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useAnchoredMenu } from '../../hooks/useAnchoredMenu';
 import styles from './ActionMenu.module.css';
-import { Button } from '../!shared/Button/Button';
+import { Button } from '../1shared/Button/Button';
 
 interface Props {
   onGoToCave: () => void;
@@ -28,4 +28,3 @@ export const NecromancerActionMenu = ({ onGoToCave, onSleep }: Props) => {
     </div>
   );
 };
-

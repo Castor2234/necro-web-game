@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import styles from './MainMenuUI.module.css';
 import { SCENE, type SceneKey } from '../../game/helpers/keys';
 import { emit } from '../../game/helpers/events';
-import { ConfirmDialog } from '../!shared/ConfirmDialog/ConfirmDialog';
-import { SettingsWindow } from '../!shared/SettingsWindow/SettingsWindow';
-import { Button } from '../!shared/Button/Button';
+import { ConfirmDialog } from '../1shared/ConfirmDialog/ConfirmDialog';
+import { SettingsWindow } from '../1shared/SettingsWindow/SettingsWindow';
+import { Button } from '../1shared/Button/Button';
 import { useTranslation } from '../../hooks/useTranslation';
 
 export const MainMenuUI: React.FC<{

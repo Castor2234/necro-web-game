@@ -11,7 +11,7 @@ import {
 } from '../../../game/state/secondary/resources';
 import type { IRefPhaserGame } from '../../../PhaserGame';
 import { CreatureDropdown } from '../CreatureDropdown';
-import { Button } from '../../!shared/Button/Button';
+import { Button } from '../../1shared/Button/Button';
 import styles from './ConvertCorpseButton.module.css';
 
 interface Props {

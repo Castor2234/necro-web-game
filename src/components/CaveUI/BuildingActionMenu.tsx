@@ -5,7 +5,7 @@ import { useAnchoredMenu } from '../../hooks/useAnchoredMenu';
 import type { BuildingType } from '../../game/helpers/events';
 import type { TranslationKey } from '../../game/i18n';
 import styles from '../Location_1UI/ActionMenu.module.css'; // reuse existing menu styles
-import { Button } from '../!shared/Button/Button';
+import { Button } from '../1shared/Button/Button';
 
 interface Props {
   onGoTo: (type: BuildingType) => void;

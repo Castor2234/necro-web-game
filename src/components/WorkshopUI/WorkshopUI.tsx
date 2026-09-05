@@ -4,7 +4,7 @@ import { WorkshopHUD } from './WorkshopHUD';
 import { ConvertRatesColumn } from './Converts/ConvertRatesColumn';
 import { ConvertCorpseButton } from './Converts/ConvertCorpseButton';
 import { UpgradesWindow } from './Upgrades/UpgradesWindow';
-import { Button } from '../!shared/Button/Button';
+import { Button } from '../1shared/Button/Button';
 import styles from './WorkshopUI.module.css';
 import type { SceneUIProps } from '../../sceneUI';
 
