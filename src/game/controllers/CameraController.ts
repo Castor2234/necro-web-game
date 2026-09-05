@@ -93,7 +93,7 @@ export class CameraController {
     this.cam = scene.cameras.main;
 
     this.minZoom = options.minZoom ?? 1;
-    this.maxZoom = options.maxZoom ?? 5;
+    this.maxZoom = options.maxZoom ?? 4;
     this.zoomSpeed = options.zoomSpeed ?? 0.001;
     this.zoomSmoothing = options.zoomSmoothing ?? 0.5;
     this.dragButton = options.dragButton ?? 1; // middle by default
@@ -180,4 +180,3 @@ export class CameraController {
     return changed;
   }
 }
-

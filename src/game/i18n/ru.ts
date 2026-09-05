@@ -71,7 +71,7 @@ export const ru: Record<TranslationKey, string> = {
   'upgrades.tree.simple': 'Простые создания',
   'upgrades.tree.advanced': 'Продвинутые создания',
   'upgrades.tree.workshop': 'Мастерская',
-  'upgrades.back': 'Назад к деревьям',
+  'upgrades.back': 'Назад к выбору древа',
   'upgrades.empty': 'Пока нет улучшений',
 
   // --- Creature stats ---

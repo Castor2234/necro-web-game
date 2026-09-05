@@ -59,7 +59,8 @@ export class Location_1 extends Phaser.Scene {
   house1: Phaser.Physics.Arcade.Sprite;
   zombieRats: Phaser.Physics.Arcade.Sprite;
   private villages: Phaser.Physics.Arcade.Sprite[] = [];
-  private populationLabels: Map<string, Phaser.GameObjects.Text> = new Map();
+  private populationLabels: Map<string, Phaser.GameObjects.BitmapText> =
+    new Map();
   private villageAnchor: { x: number; y: number } | null = null;
   private necroAnchor: { x: number; y: number } | null = null;
   private ratTask: RatTask | null = null;
@@ -193,13 +194,7 @@ export class Location_1 extends Phaser.Scene {
       const villageId = village.getData('villageId') as VillageId;
 
       const label = this.add
-        .text(village.x, village.y - 28, '???', {
-          fontFamily: 'Alagard',
-          fontSize: '20px',
-          color: '#ffffff',
-          stroke: '#000000',
-          strokeThickness: 2,
-        })
+        .bitmapText(village.x, village.y - 30, 'font1', '???', 16)
         .setOrigin(0.5, 1)
         .setDepth(22);
 

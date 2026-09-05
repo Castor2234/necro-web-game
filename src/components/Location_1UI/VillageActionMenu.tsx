@@ -32,13 +32,17 @@ export const VillageActionMenu = ({ onAttack, onLoot, onScout }: Props) => {
         {t('village.attack')}
       </Button>
       <Button
-        variant="gold"
+        variant="green"
         disabled={busy}
         onClick={() => onLoot(selected.id)}
       >
         {t('village.loot')}
       </Button>
-      <Button disabled={busy} onClick={() => onScout(selected.id)}>
+      <Button
+        variant="blue"
+        disabled={busy}
+        onClick={() => onScout(selected.id)}
+      >
         {t('village.scout')}
       </Button>
     </div>

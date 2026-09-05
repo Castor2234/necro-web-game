@@ -168,8 +168,10 @@ function sanitizeConversionTasks(raw: unknown): SavedConversionTask[] {
 
   return raw.flatMap((task) => {
     if (typeof task !== 'object' || task === null) return [];
-    const { id, timer, duration, creatureType } =
-      task as Record<string, unknown>;
+    const { id, timer, duration, creatureType } = task as Record<
+      string,
+      unknown
+    >;
     if (
       !isFiniteNumber(id) ||
       !isFiniteNumber(timer) ||
@@ -346,7 +348,7 @@ export function getResumeScene(save: SavedGameData | null): SceneKey {
   ) {
     return scene;
   }
-  return SCENE.Workshop;
+  return SCENE.MainMenu;
 }
 
 // --- Auto-save ---------------------------------------------------------------

@@ -34,6 +34,9 @@ export class Preloader extends Scene {
   }
 
   preload() {
+    // Load bitmap font
+    this.load.bitmapFont('font1', 'fonts/BMPix.png', 'fonts/BMPix.xml');
+
     //  Load the assets for the game - Replace with your own assets
     this.load.setPath('assets');
 
@@ -74,4 +77,3 @@ export class Preloader extends Scene {
     this.scene.start(getResumeScene(save));
   }
 }
-
