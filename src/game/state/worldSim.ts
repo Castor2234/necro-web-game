@@ -85,6 +85,8 @@ export interface RatRaid {
   actionEndAt: number;
   /** Action duration, in ms (only meaningful while 'in-progress'). */
   actionDurationMs: number;
+  /** For attack: villagers killed at the village, subtracted from population when rats return. */
+  pendingKills?: number;
 }
 
 /** What the UI needs to render the raid on any given frame. */
@@ -532,7 +534,7 @@ function tickRaid(now: number): void {
 
     case 'in-progress':
       if (now >= raid.actionEndAt) {
-        const wiped = resolveRaidAction(raid.action, raid.villageId);
+        const wiped = checkWipe(raid);
         if (wiped) {
           // Horde wiped out mid-raid (attack) — no return trip.
           ratRaid = null;
@@ -547,6 +549,7 @@ function tickRaid(now: number): void {
     case 'returning':
       if (now >= raid.moveStartAt + raid.moveDurationMs) {
         const villageId = raid.villageId;
+        applyRaidAction(raid);
         ratRaid = null;
         emit('rats-returned', { villageId });
         emit('rats-busy', false);
@@ -572,13 +575,50 @@ function beginReturnTrip(raid: RatRaid, now: number): void {
   persistRaid();
 }
 
-/** Runs the raid's action when the in-progress timer elapses. Returns true
- *  when the horde was wiped out and must not return home. */
-function resolveRaidAction(
-  action: VillageAction,
-  villageId: VillageId
-): boolean {
+/** Checks whether the horde is wiped out at the village (attack only). Returns true
+ *  when the horde was destroyed and must not return home. For attack, also applies
+ *  horde losses (unitDeaths) immediately and stores pending population kills. */
+function checkWipe(raid: RatRaid): boolean {
   if (!registry) return false;
+
+  const { action, villageId } = raid;
+
+  // Only attack can wipe the horde; scout and loot never do.
+  if (action !== 'attack') return false;
+
+  const strength = Math.max(0, getRatCount() * getStat(registry, 'ratPower'));
+  const possibleKills = Math.trunc(strength / 10);
+
+  if (possibleKills < 1) {
+    // Attack too weak — the whole horde dies at the village.
+    setStat(registry, 'zombieRatsAmount', 0);
+    emit('creature-stats-changed');
+    return true;
+  }
+
+  // Horde survives but takes losses. Compute kills now (based on current horde
+  // strength) but defer their application to the population until return.
+  const population = Math.trunc(
+    getStat(registry, VILLAGE_POPULATION_KEYS[villageId])
+  );
+  const kills = Math.min(population, Phaser.Math.Between(1, possibleKills));
+  const unitDeaths = Phaser.Math.Between(1, getRatCount());
+
+  setStat(registry, 'zombieRatsAmount', getRatCount() - unitDeaths);
+  emit('creature-stats-changed');
+
+  // Store kills to apply to population when rats return home.
+  raid.pendingKills = kills;
+
+  return getRatCount() < 1;
+}
+
+/** Applies the raid's effects when the rats successfully return home. Deferred
+ *  from checkWipe so the player sees the outcome when the horde arrives back. */
+function applyRaidAction(raid: RatRaid): void {
+  if (!registry) return;
+
+  const { action, villageId } = raid;
 
   if (action === 'scout') {
     scoutedVillageIds.add(villageId);
@@ -590,31 +630,23 @@ function resolveRaidAction(
     );
     scoutedAt.set(villageId, Date.now());
     emit('village-scouted', { villageId });
-    return false;
+    return;
   }
 
   if (action === 'loot') {
     const looted = Phaser.Math.Between(1, getRatCount());
     addResources(registry, { ratCorpses: looted });
     emit('village-looted', { villageId, lootedCorpses: looted });
-    return false;
+    return;
   }
 
-  // attack
-  const strength = Math.max(0, getRatCount() * getStat(registry, 'ratPower'));
-  const possibleKills = Math.trunc(strength / 10);
-
-  if (possibleKills < 1) {
-    setStat(registry, 'zombieRatsAmount', 0);
-    emit('creature-stats-changed');
-    return true;
-  }
+  // attack — apply the kills computed at the village (stored in pendingKills)
+  const kills = raid.pendingKills ?? 0;
+  if (kills < 1) return;
 
   const population = Math.trunc(
     getStat(registry, VILLAGE_POPULATION_KEYS[villageId])
   );
-  const kills = Math.min(population, Phaser.Math.Between(1, possibleKills));
-  const unitDeaths = Phaser.Math.Between(1, getRatCount());
 
   setStat(
     registry,
@@ -622,11 +654,7 @@ function resolveRaidAction(
     Math.max(0, population - kills)
   );
   addResources(registry, { humanCorpses: kills });
-  setStat(registry, 'zombieRatsAmount', getRatCount() - unitDeaths);
-  emit('creature-stats-changed');
   emit('village-attacked', { villageId, kills });
-
-  return getRatCount() < 1;
 }
 
 /** Whether a raid is currently in flight (used to re-sync 'rats-busy' when

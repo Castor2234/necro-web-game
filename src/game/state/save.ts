@@ -23,7 +23,7 @@ import { isVillageId } from '../config/villages';
 const SAVE_STORAGE_KEY = 'necro-web-game.save';
 
 /** Bump when SavedGameData changes shape; older saves are discarded. */
-const SAVE_VERSION = 3;
+const SAVE_VERSION = 4;
 
 /** How long registry changes are debounced before writing to localStorage. */
 const AUTO_SAVE_DEBOUNCE_MS = 500;
