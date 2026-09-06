@@ -12,6 +12,7 @@ import { emitConversionUiState, refreshUpgradeState } from '../state/worldSim';
  */
 export class Workshop extends Phaser.Scene {
   background: Phaser.GameObjects.Image;
+  treeImg: Phaser.GameObjects.Image;
 
   constructor() {
     super(SCENE.Workshop);
@@ -19,6 +20,8 @@ export class Workshop extends Phaser.Scene {
 
   create(): void {
     this.background = this.add.image(320, 180, 'inside_workshop').setDepth(-1);
+
+    this.treeImg = this.add.image(550, 150, 'dark_tree');
 
     // Publish the live conversion queue + upgrade state to the React overlay
     // (the sim may have advanced while we were away).

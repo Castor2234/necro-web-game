@@ -1,7 +1,8 @@
 .upgradesButton {
   position: absolute;
-  top: 6px;
-  left: 70%;
+  top: 50%;
+  left: 85%;
   transform: translateX(-50%);
   z-index: 15;
 }
+

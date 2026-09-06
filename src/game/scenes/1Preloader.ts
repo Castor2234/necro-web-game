@@ -47,7 +47,7 @@ export class Preloader extends Scene {
     this.load.image('forest_img', 'forest_tile.png');
     this.load.image('village_img', 'village_tile.png');
     this.load.image('house_1_img', 'house1.png');
-    this.load.image('dark_tree_img', 'dark_tree.png');
+    this.load.image('dark_tree', 'dark_tree.png');
     this.load.image('cave_lake', 'cave_lake.png');
     this.load.image('workshop', 'workshop.png');
     this.load.image('tent', 'tent.png');
