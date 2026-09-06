@@ -3,7 +3,7 @@ import * as Phaser from 'phaser';
 import { Core } from 'phaser';
 import { emit, on, off } from '../helpers/events';
 import type { VillageAction, ConversionProgress } from '../helpers/events';
-import { getStat, setStat } from './gameState';
+import { getStat, setStat, type GameState } from './gameState';
 import { addResources, getResources } from './secondary/resources';
 import { CONVERSION_RECIPES } from './secondary/conversions';
 import type { CreatureType } from './secondary/creatures';
@@ -20,6 +20,7 @@ import {
   setRatTaskSaveData,
   getVillageGrowthSaveData,
   setVillageGrowthSaveData,
+  setGroupSaveData,
 } from './save';
 import {
   NECROMANCER_POSITION,
@@ -48,6 +49,14 @@ import {
  * upgrade UI. The registry remains the source of truth for stats; this module
  * owns the in-flight queues/raids and mirrors them to the save layer.
  */
+
+// --- Creature stat mapping ---------------------------------------------------
+
+/** Maps each creature type to its registry stat keys. Add new creature types here. */
+const CREATURE_STAT_MAP: Record<CreatureType, { amount: string; speed: string; power: string }> = {
+  zombieRats: { amount: 'zombieRatsAmount', speed: 'ratSpeed', power: 'ratPower' },
+  ghouls: { amount: 'ghoulsAmount', speed: 'ghoulSpeed', power: 'ghoulPower' },
+};
 
 // --- Conversion tasks --------------------------------------------------------
 
@@ -87,6 +96,10 @@ export interface RatRaid {
   actionDurationMs: number;
   /** For attack: villagers killed at the village, subtracted from population when rats return. */
   pendingKills?: number;
+  /** Group this raid belongs to. */
+  groupId: number;
+  /** Snapshot of creatures on this raid (by type). */
+  creatures: Partial<Record<CreatureType, number>>;
 }
 
 /** What the UI needs to render the raid on any given frame. */
@@ -95,6 +108,8 @@ export interface RatRaidRenderState {
   x: number;
   y: number;
   visible: boolean;
+  /** Total creatures in the raiding group (rendered under the horde sprite). */
+  creatureCount: number;
   /** 0..1 fill for the action progress bar (meaningful while 'in-progress'). */
   barProgress: number;
   /** Village world position where the progress bar should be drawn. */
@@ -103,6 +118,12 @@ export interface RatRaidRenderState {
   /** End of the current movement segment (draw the travel line to here). */
   toX: number;
   toY: number;
+}
+
+/** A player-organized group of creatures that can be sent on raids. */
+export interface CreatureGroup {
+  id: number;
+  creatures: Partial<Record<CreatureType, number>>;
 }
 
 /** Snapshot pushed to the Workshop React UI. */
@@ -133,7 +154,12 @@ let registry: Phaser.Data.DataManager | null = null;
 let conversionTasks: ConversionTask[] = [];
 let nextTaskId = 0;
 
-let ratRaid: RatRaid | null = null;
+let raids: RatRaid[] = [];
+
+// --- Groups ------------------------------------------------------------------
+
+let groups: CreatureGroup[] = [];
+let nextGroupId = 0;
 
 /** villageId → epoch ms the village last grew. */
 let lastGrowthAt: Record<VillageId, number> = {} as Record<VillageId, number>;
@@ -175,7 +201,7 @@ export function installWorldSim(game: Phaser.Game): void {
   );
   nextTaskId = Math.max(savedNextTaskId, maxSavedId + 1);
 
-  ratRaid = getRatTaskSaveData();
+  raids = getRatTaskSaveData();
 
   const savedGrowth = getVillageGrowthSaveData();
   const now = Date.now();
@@ -217,7 +243,9 @@ export function resetWorldSim(target: Phaser.Data.DataManager): void {
   registry = target;
   conversionTasks = [];
   nextTaskId = 0;
-  ratRaid = null;
+  raids = [];
+  groups = [];
+  nextGroupId = 0;
   scoutedVillageIds.clear();
   scoutedPopulation.clear();
   scoutedAt.clear();
@@ -228,7 +256,7 @@ export function resetWorldSim(target: Phaser.Data.DataManager): void {
   for (const cfg of VILLAGE_CONFIGS) lastGrowthAt[cfg.id] = now;
 
   setConversionSaveData([], 0);
-  setRatTaskSaveData(null);
+  setRatTaskSaveData([]);
   setVillageGrowthSaveData(lastGrowthAt);
 
   emit('rats-busy', false);
@@ -358,7 +386,7 @@ function syncConversionSaveData(): void {
 function tick(now: number): void {
   if (!registry) return;
   tickConversions(now);
-  tickRaid(now);
+  tickRaids(now);
   tickVillageGrowth(now);
 }
 
@@ -449,12 +477,33 @@ function tickConversions(now: number): void {
 
 // --- Rat raids ---------------------------------------------------------------
 
-function getRatCount(): number {
-  return getStat(registry as Phaser.Data.DataManager, 'zombieRatsAmount');
+/** Total creatures in a group (sum across types). */
+function getGroupSize(group: Partial<Record<CreatureType, number>>): number {
+  return Object.values(group).reduce((sum, count) => sum + (count || 0), 0);
 }
 
-function getRatSpeed(): number {
-  return getStat(registry as Phaser.Data.DataManager, 'ratSpeed');
+/** Combined combat strength of a group = sum of (count * power) for each type. */
+function getGroupStrength(group: Partial<Record<CreatureType, number>>): number {
+  if (!registry) return 0;
+  let strength = 0;
+  for (const [type, count] of Object.entries(group)) {
+    if (count && count > 0) {
+      strength += count * getStat(registry, CREATURE_STAT_MAP[type as CreatureType].power as keyof GameState);
+    }
+  }
+  return strength;
+}
+
+/** Movement speed of a group = slowest creature type present. */
+function getGroupSpeed(group: Partial<Record<CreatureType, number>>): number {
+  if (!registry) return 0;
+  let minSpeed = Infinity;
+  for (const [type, count] of Object.entries(group)) {
+    if (count && count > 0) {
+      minSpeed = Math.min(minSpeed, getStat(registry, CREATURE_STAT_MAP[type as CreatureType].speed as keyof GameState));
+    }
+  }
+  return minSpeed === Infinity ? 0 : minSpeed;
 }
 
 function getActionDuration(action: VillageAction): number {
@@ -476,24 +525,41 @@ function travelDuration(distance: number, speed: number): number {
 const handleVillageAction = (payload: {
   action: VillageAction;
   villageId: string;
+  groupId: number;
 }): void => {
   if (!isVillageId(payload.villageId)) return;
-  sendRats(payload.action, payload.villageId);
+  sendGroup(payload.action, payload.villageId, payload.groupId);
 };
 
-/** Starts a raid if possible (idle horde with at least one rat). */
-export function sendRats(action: VillageAction, villageId: VillageId): void {
+/** Starts a raid for a group if the group exists, has creatures, and isn't already raiding. */
+export function sendGroup(action: VillageAction, villageId: VillageId, groupId: number): void {
   if (!registry) return;
-  // One raid at a time — the React UI also blocks via 'rats-busy', but this
-  // guards against a stale UI state, so a second send can't corrupt the task.
-  if (ratRaid) return;
-  if (getRatCount() < 1) return;
+  const group = groups.find((g) => g.id === groupId);
+  if (!group) return;
+  if (getGroupSize(group.creatures) < 1) return;
+  // Prevent sending the same group twice.
+  if (raids.some((r) => r.groupId === groupId)) return;
 
   const village = getVillageConfig(villageId);
   const start = NECROMANCER_POSITION;
   const now = Date.now();
+  const creatures = { ...group.creatures };
+  const speed = getGroupSpeed(creatures);
 
-  ratRaid = {
+  // Subtract creatures from registry (they're now in-flight).
+  for (const [type, count] of Object.entries(creatures) as [CreatureType, number][]) {
+    if (count) {
+      const statKey = CREATURE_STAT_MAP[type as CreatureType].amount as keyof GameState;
+      const current = getStat(registry, statKey);
+      setStat(registry, statKey, Math.max(0, current - count));
+    }
+  }
+  emit('creature-stats-changed');
+
+  // Clear the group's creatures (they're now on the raid).
+  group.creatures = {};
+
+  raids.push({
     action,
     villageId,
     phase: 'moving-to-target',
@@ -504,24 +570,29 @@ export function sendRats(action: VillageAction, villageId: VillageId): void {
     moveStartAt: now,
     moveDurationMs: travelDuration(
       Phaser.Math.Distance.Between(start.x, start.y, village.x, village.y),
-      getRatSpeed()
+      speed
     ),
     actionEndAt: 0,
     actionDurationMs: 0,
-  };
-  emit('rats-busy', true);
+    groupId,
+    creatures,
+  });
   persistRaid();
 }
 
 function persistRaid(): void {
-  setRatTaskSaveData(ratRaid ? { ...ratRaid } : null);
+  setRatTaskSaveData(raids.map((r) => ({ ...r })));
 }
 
-function tickRaid(now: number): void {
-  const raid = ratRaid;
-  if (!raid) return;
+function persistGroups(): void {
+  setGroupSaveData(groups);
+}
 
-  switch (raid.phase) {
+function tickRaids(now: number): void {
+  for (let i = raids.length - 1; i >= 0; i--) {
+    const raid = raids[i];
+
+    switch (raid.phase) {
     case 'moving-to-target':
       if (now >= raid.moveStartAt + raid.moveDurationMs) {
         // Arrived: start the action.
@@ -537,8 +608,7 @@ function tickRaid(now: number): void {
         const wiped = checkWipe(raid);
         if (wiped) {
           // Horde wiped out mid-raid (attack) — no return trip.
-          ratRaid = null;
-          emit('rats-busy', false);
+          raids.splice(i, 1);
           persistRaid();
         } else {
           beginReturnTrip(raid, now);
@@ -550,12 +620,13 @@ function tickRaid(now: number): void {
       if (now >= raid.moveStartAt + raid.moveDurationMs) {
         const villageId = raid.villageId;
         applyRaidAction(raid);
-        ratRaid = null;
+        returnGroupToPool(raid);
+        raids.splice(i, 1);
         emit('rats-returned', { villageId });
-        emit('rats-busy', false);
         persistRaid();
       }
       break;
+    }
   }
 }
 
@@ -570,9 +641,33 @@ function beginReturnTrip(raid: RatRaid, now: number): void {
   raid.moveStartAt = now;
   raid.moveDurationMs = travelDuration(
     Phaser.Math.Distance.Between(village.x, village.y, home.x, home.y),
-    getRatSpeed()
+    getGroupSpeed(raid.creatures)
   );
   persistRaid();
+}
+
+/** Returns surviving creatures from a completed raid back to their group. */
+function returnGroupToPool(raid: RatRaid): void {
+  if (!registry) return;
+  const group = groups.find((g) => g.id === raid.groupId);
+  if (!group) {
+    // Group was deleted while raiding — creatures go to unassigned pool.
+    for (const [type, count] of Object.entries(raid.creatures) as [CreatureType, number][]) {
+      if (count) {
+        const statKey = CREATURE_STAT_MAP[type as CreatureType].amount as keyof GameState;
+        const current = getStat(registry, statKey);
+        setStat(registry, statKey, current + count);
+      }
+    }
+  } else {
+    for (const [type, count] of Object.entries(raid.creatures) as [CreatureType, number][]) {
+      if (count) {
+        group.creatures[type] = (group.creatures[type] || 0) + count;
+      }
+    }
+  }
+  emit('creature-stats-changed');
+  persistGroups();
 }
 
 /** Checks whether the horde is wiped out at the village (attack only). Returns true
@@ -581,36 +676,60 @@ function beginReturnTrip(raid: RatRaid, now: number): void {
 function checkWipe(raid: RatRaid): boolean {
   if (!registry) return false;
 
-  const { action, villageId } = raid;
+  const { action, villageId, creatures } = raid;
 
   // Only attack can wipe the horde; scout and loot never do.
   if (action !== 'attack') return false;
 
-  const strength = Math.max(0, getRatCount() * getStat(registry, 'ratPower'));
+  const strength = Math.max(0, getGroupStrength(creatures));
   const possibleKills = Math.trunc(strength / 10);
 
   if (possibleKills < 1) {
-    // Attack too weak — the whole horde dies at the village.
-    setStat(registry, 'zombieRatsAmount', 0);
-    emit('creature-stats-changed');
+    // Attack too weak — the whole group dies at the village.
+    raid.creatures = {};
     return true;
   }
 
-  // Horde survives but takes losses. Compute kills now (based on current horde
-  // strength) but defer their application to the population until return.
+  // Group survives but takes proportional losses. Compute kills now but defer
+  // their application to the population until return.
   const population = Math.trunc(
     getStat(registry, VILLAGE_POPULATION_KEYS[villageId])
   );
   const kills = Math.min(population, Phaser.Math.Between(1, possibleKills));
-  const unitDeaths = Phaser.Math.Between(1, getRatCount());
+  const totalCreatures = getGroupSize(creatures);
+  const unitDeaths = Phaser.Math.Between(1, totalCreatures);
 
-  setStat(registry, 'zombieRatsAmount', getRatCount() - unitDeaths);
-  emit('creature-stats-changed');
+  // Apply losses proportionally across creature types.
+  applyLosses(creatures, unitDeaths);
 
-  // Store kills to apply to population when rats return home.
+  // Store kills to apply to population when group returns home.
   raid.pendingKills = kills;
 
-  return getRatCount() < 1;
+  return getGroupSize(creatures) < 1;
+}
+
+/** Applies losses proportionally across creature types in a group. */
+function applyLosses(
+  creatures: Partial<Record<CreatureType, number>>,
+  deaths: number
+): void {
+  const total = getGroupSize(creatures);
+  if (total <= 0 || deaths <= 0) return;
+  let remaining = Math.min(deaths, total);
+  const types = Object.keys(creatures) as CreatureType[];
+  // Distribute losses round-robin style for fairness.
+  let idx = 0;
+  while (remaining > 0 && types.length > 0) {
+    const type = types[idx % types.length];
+    const count = creatures[type] || 0;
+    if (count > 0) {
+      creatures[type] = count - 1;
+      remaining--;
+    }
+    idx++;
+    // Safety: break if all creatures are dead.
+    if (getGroupSize(creatures) <= 0) break;
+  }
 }
 
 /** Applies the raid's effects when the rats successfully return home. Deferred
@@ -618,7 +737,7 @@ function checkWipe(raid: RatRaid): boolean {
 function applyRaidAction(raid: RatRaid): void {
   if (!registry) return;
 
-  const { action, villageId } = raid;
+  const { action, villageId, creatures } = raid;
 
   if (action === 'scout') {
     scoutedVillageIds.add(villageId);
@@ -634,9 +753,12 @@ function applyRaidAction(raid: RatRaid): void {
   }
 
   if (action === 'loot') {
-    const looted = Phaser.Math.Between(1, getRatCount());
-    addResources(registry, { ratCorpses: looted });
-    emit('village-looted', { villageId, lootedCorpses: looted });
+    const totalCreatures = getGroupSize(creatures);
+    const looted = totalCreatures > 0 ? Phaser.Math.Between(1, totalCreatures) : 0;
+    if (looted > 0) {
+      addResources(registry, { ratCorpses: looted });
+      emit('village-looted', { villageId, lootedCorpses: looted });
+    }
     return;
   }
 
@@ -660,7 +782,32 @@ function applyRaidAction(raid: RatRaid): void {
 /** Whether a raid is currently in flight (used to re-sync 'rats-busy' when
  *  the Location_1 UI mounts). */
 export function isRaidActive(): boolean {
-  return ratRaid !== null;
+  return raids.length > 0;
+}
+
+export function isGroupRaiding(groupId: number): boolean {
+  return raids.some((r) => r.groupId === groupId);
+}
+
+export function getRaids(): RatRaid[] {
+  return raids.map((r) => ({ ...r }));
+}
+
+/** Returns current creature stats from the registry (available/unassigned creatures). */
+export function getCreatureStatsSnapshot(): import('./secondary/creatures').AllCreatureStats | null {
+  if (!registry) return null;
+  return {
+    zombieRats: {
+      amount: getStat(registry, 'zombieRatsAmount'),
+      speed: getStat(registry, 'ratSpeed'),
+      power: getStat(registry, 'ratPower'),
+    },
+    ghouls: {
+      amount: getStat(registry, 'ghoulsAmount'),
+      speed: getStat(registry, 'ghoulSpeed'),
+      power: getStat(registry, 'ghoulPower'),
+    },
+  };
 }
 
 /** Was this village scouted this session? (Shows its population on the map.) */
@@ -683,12 +830,108 @@ export function getScoutedAt(id: VillageId): number | undefined {
   return scoutedAt.get(id);
 }
 
-/** Read-only render snapshot for the Location_1 scene. */
-export function getRatRaidRenderState(now: number): RatRaidRenderState | null {
-  const raid = ratRaid;
-  if (!raid) return null;
+// --- Group management --------------------------------------------------------
+
+export function getGroups(): CreatureGroup[] {
+  return groups.map((g) => ({ ...g, creatures: { ...g.creatures } }));
+}
+
+export function getMaxGroups(): number {
+  if (!registry) return 1;
+  return getStat(registry, 'maxGroups');
+}
+
+export function getMaxUnitsPerGroup(): number {
+  if (!registry) return 10;
+  return getStat(registry, 'maxUnitsPerGroup');
+}
+
+export function createGroup(): boolean {
+  if (!registry) return false;
+  if (groups.length >= getMaxGroups()) return false;
+  groups.push({ id: nextGroupId++, creatures: {} });
+  persistGroups();
+  emit('groups-changed');
+  return true;
+}
+
+export function deleteGroup(groupId: number): boolean {
+  const idx = groups.findIndex((g) => g.id === groupId);
+  if (idx === -1) return false;
+  // Return creatures to pool.
+  const group = groups[idx];
+  for (const [type, count] of Object.entries(group.creatures) as [CreatureType, number][]) {
+    if (count) {
+      const statKey = CREATURE_STAT_MAP[type as CreatureType].amount as keyof GameState;
+      const current = getStat(registry as Phaser.Data.DataManager, statKey);
+      setStat(registry as Phaser.Data.DataManager, statKey, current + count);
+    }
+  }
+  groups.splice(idx, 1);
+  emit('creature-stats-changed');
+  persistGroups();
+  emit('groups-changed');
+  return true;
+}
+
+export function assignCreature(
+  groupId: number,
+  creatureType: CreatureType,
+  count: number
+): boolean {
+  if (!registry || count <= 0) return false;
+  const group = groups.find((g) => g.id === groupId);
+  if (!group) return false;
+  const statKey = CREATURE_STAT_MAP[creatureType].amount as keyof GameState;
+  const available = getStat(registry as Phaser.Data.DataManager, statKey);
+  if (available < count) return false;
+  // Check group capacity.
+  const currentGroupSize = getGroupSize(group.creatures);
+  if (currentGroupSize + count > getMaxUnitsPerGroup()) return false;
+  // Subtract from pool, add to group.
+  setStat(registry as Phaser.Data.DataManager, statKey, available - count);
+  group.creatures[creatureType] = (group.creatures[creatureType] || 0) + count;
+  emit('creature-stats-changed');
+  persistGroups();
+  emit('groups-changed');
+  return true;
+}
+
+export function unassignCreature(
+  groupId: number,
+  creatureType: CreatureType,
+  count: number
+): boolean {
+  if (!registry || count <= 0) return false;
+  const group = groups.find((g) => g.id === groupId);
+  if (!group) return false;
+  const current = group.creatures[creatureType] || 0;
+  if (current < count) return false;
+  // Return to pool, remove from group.
+  const statKey = CREATURE_STAT_MAP[creatureType].amount as keyof GameState;
+  const poolCount = getStat(registry as Phaser.Data.DataManager, statKey);
+  setStat(registry as Phaser.Data.DataManager, statKey, poolCount + count);
+  group.creatures[creatureType] = current - count;
+  if (group.creatures[creatureType] === 0) delete group.creatures[creatureType];
+  emit('creature-stats-changed');
+  persistGroups();
+  emit('groups-changed');
+  return true;
+}
+
+/** Read-only render snapshots for all active raids. */
+export function getRaidRenderStates(now: number): RatRaidRenderState[] {
+  return raids.map((raid) => getSingleRaidRenderState(raid, now));
+}
+
+function getSingleRaidRenderState(raid: RatRaid, now: number): RatRaidRenderState {
+  if (!raid) throw new Error('raid is undefined');
 
   const village = getVillageConfig(raid.villageId);
+  const creatureCount = Object.values(raid.creatures).reduce(
+    (sum, count) => sum + (count || 0),
+    0
+  );
 
   if (raid.phase === 'in-progress') {
     const actionStart = raid.actionEndAt - raid.actionDurationMs;
@@ -701,6 +944,7 @@ export function getRatRaidRenderState(now: number): RatRaidRenderState | null {
       x: village.x,
       y: village.y,
       visible: false,
+      creatureCount,
       barProgress: progress,
       barX: village.x,
       barY: village.y,
@@ -719,6 +963,7 @@ export function getRatRaidRenderState(now: number): RatRaidRenderState | null {
     x: Phaser.Math.Linear(raid.startX, raid.endX, t),
     y: Phaser.Math.Linear(raid.startY, raid.endY, t),
     visible: true,
+    creatureCount,
     barProgress: 0,
     barX: village.x,
     barY: village.y,

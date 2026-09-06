@@ -34,6 +34,7 @@ export interface GameEvents {
   'resources-updated': Resources;
   'zombie-rats-updated': number;
   'creature-stats-changed': void;
+  'groups-changed': void;
 
   // --- Canvas scale sync (React overlay <-> Phaser scale manager) ---
   'canvas-scale': CanvasScale;
@@ -49,7 +50,7 @@ export interface GameEvents {
   'necromancer-selected': boolean;
   'necromancer-ui-position': { x: number; y: number };
   'necromancer-sleep': void;
-  'village-action': { action: VillageAction; villageId: string };
+  'village-action': { action: VillageAction; villageId: string; groupId: number };
   'rats-busy': boolean;
   'rats-returned': { villageId: string };
   'village-attacked': { villageId: string; kills: number };

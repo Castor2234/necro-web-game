@@ -20,7 +20,7 @@ export interface UpgradeConfig {
 }
 
 export type WorkshopUpgradeKey =
-  'ratSpeed' | 'maxConcurrentConversions' | 'maxConversionQueue';
+  'ratSpeed' | 'maxConcurrentConversions' | 'maxConversionQueue' | 'maxGroups' | 'maxUnitsPerGroup';
 
 export interface UpgradeState {
   upgradeKey: WorkshopUpgradeKey;
@@ -58,6 +58,24 @@ export const WORKSHOP_UPGRADES: Record<WorkshopUpgradeKey, UpgradeConfig> = {
     costGrowth: 1.6,
     costResource: 'ratCorpses',
     tree: 'workshop',
+  },
+  maxGroups: {
+    key: 'maxGroups',
+    label: 'Max Groups',
+    increment: 1,
+    baseCost: 10,
+    costGrowth: 2.0,
+    costResource: 'humanCorpses',
+    tree: 'necromancer',
+  },
+  maxUnitsPerGroup: {
+    key: 'maxUnitsPerGroup',
+    label: 'Max Units Per Group',
+    increment: 5,
+    baseCost: 8,
+    costGrowth: 1.8,
+    costResource: 'humanCorpses',
+    tree: 'necromancer',
   },
 };
 

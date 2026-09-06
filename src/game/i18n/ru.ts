@@ -66,6 +66,8 @@ export const ru: Record<TranslationKey, string> = {
   'cost.ratCorpses': 'Труп крысы',
   'upgrades.ratSpeed': 'Скорость крыс',
   'upgrades.maxConcurrentConversions': 'Макс. Преобразований',
+  'upgrades.maxGroups': 'РњР°РєСЃ. РіСЂСѓРїРї',
+  'upgrades.maxUnitsPerGroup': 'РњР°РєСЃ. СЋРЅРёС‚РѕРІ РІ РіСЂСѓРїРїРµ',
   'upgrades.maxConversionQueue': 'Макс. Очередь',
   'upgrades.tree.necromancer': 'Некромант',
   'upgrades.tree.simple': 'Простые создания',
@@ -84,4 +86,16 @@ export const ru: Record<TranslationKey, string> = {
   // --- World map scene (Phaser) ---
   'worldMap.title': 'Карта мира... В разработке...',
   'worldMap.backToBase': 'Вернуться на базу',
+
+  // --- Group management ---
+  'necro.groupManagement': 'Управление группами',
+  'groupManagement.title': 'Управление группами',
+  'groupManagement.maxGroups': 'Макс. групп',
+  'groupManagement.maxUnitsPerGroup': 'Макс. юнитов в группе',
+  'groupManagement.group': 'Группа',
+  'groupManagement.raiding': '(В рейде)',
+  'groupManagement.delete': 'Удалить',
+  'groupManagement.available': 'Доступно',
+  'groupManagement.total': 'Всего',
+  'groupManagement.createGroup': 'Создать группу',
 };

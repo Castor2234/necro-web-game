@@ -25,6 +25,10 @@ export interface GameState {
 
   // ----------Creatures
 
+  // Groups
+  maxGroups: number;
+  maxUnitsPerGroup: number;
+
   // Rats
   zombieRatsAmount: number;
   ratSpeed: number;
@@ -63,6 +67,10 @@ export const INITIAL_VALUES_CONFIG: Record<keyof GameState, number> = {
   maxConversionQueue: 4,
 
   // ----------Creatures
+
+  // Groups
+  maxGroups: 1,
+  maxUnitsPerGroup: 10,
 
   // Rats
   zombieRatsAmount: 0,
