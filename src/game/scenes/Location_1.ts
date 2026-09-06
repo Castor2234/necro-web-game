@@ -32,7 +32,7 @@ export class Location_1 extends Phaser.Scene {
   zombieRats: Phaser.GameObjects.Sprite;
 
   private villages: Phaser.GameObjects.Sprite[] = [];
-  private populationLabels: Map<VillageId, Phaser.GameObjects.Text> = new Map();
+  private populationLabels: Map<VillageId, Phaser.GameObjects.BitmapText> = new Map();
   private villageAnchor: { x: number; y: number } | null = null;
   private necroAnchor: { x: number; y: number } | null = null;
   private travelLine: Phaser.GameObjects.Graphics | null = null;
@@ -100,13 +100,7 @@ export class Location_1 extends Phaser.Scene {
     this.villages.forEach((village) => {
       const villageId = village.getData('villageId') as VillageId;
       const label = this.add
-        .text(village.x, village.y - 28, '???', {
-          fontFamily: 'Alagard',
-          fontSize: '20px',
-          color: '#ffffff',
-          stroke: '#000000',
-          strokeThickness: 2,
-        })
+        .bitmapText(village.x, village.y - 28, 'font1', '???', 16)
         .setOrigin(0.5, 1)
         .setDepth(22);
       this.populationLabels.set(villageId, label);
