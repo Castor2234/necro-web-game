@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useEventBus } from '@/hooks/useEventBus';
 import { useTranslation } from '@/hooks/useTranslation';
 import { emit } from '@/game/helpers/events';
+import { formatNumber } from '@/game/helpers/format';
 import {
   getUpgradeState,
   UpgradeState,
@@ -38,14 +39,14 @@ export function UpgradesColumn({ tree }: UpgradesColumnProps) {
       {visibleUpgrades.map((u) => (
         <div key={u.upgradeKey} className={styles.row}>
           <span className={styles.label}>
-            {t(`upgrades.${u.upgradeKey}`)}: {u.currentValue}
+            {t(`upgrades.${u.upgradeKey}`)}: {formatNumber(u.currentValue)}
           </span>
           <button
             className={styles.UpgradeButton}
             onClick={() => handleUpgrade(u.upgradeKey)}
           >
             {t('workshop.upgradeCost', {
-              cost: u.cost,
+              cost: formatNumber(u.cost),
               resource: t(
                 u.costResource === 'humanCorpses'
                   ? 'cost.humanCorpses'

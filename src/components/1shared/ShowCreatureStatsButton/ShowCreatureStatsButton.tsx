@@ -7,6 +7,7 @@ import {
   getCreatureStats,
   AllCreatureStats,
 } from '../../../game/state/secondary/creatures';
+import { formatNumber } from '../../../game/helpers/format';
 import { Button } from '../Button/Button';
 import styles from './CreatureStatsButton.module.css';
 
@@ -47,19 +48,19 @@ export const ShowCreatureStatsButton = ({ phaserRef }: Props) => {
           <div className={styles.grid}>
             <div className={styles.corner} />
             <div className={styles.header}>
-              {t('stats.rats')}: {stats.zombieRats.amount}
+              {t('stats.rats')}: {formatNumber(stats.zombieRats.amount)}
             </div>
             <div className={styles.header}>
-              {t('stats.ghouls')}: {stats.ghouls.amount}
+              {t('stats.ghouls')}: {formatNumber(stats.ghouls.amount)}
             </div>
 
             <div className={styles.rowLabel}>{t('stats.power')}:</div>
-            <div className={styles.cell}>{stats.zombieRats.power}</div>
-            <div className={styles.cell}>{stats.ghouls.power}</div>
+            <div className={styles.cell}>{formatNumber(stats.zombieRats.power)}</div>
+            <div className={styles.cell}>{formatNumber(stats.ghouls.power)}</div>
 
             <div className={styles.rowLabel}>{t('stats.speed')}:</div>
-            <div className={styles.cell}>{stats.zombieRats.speed}</div>
-            <div className={styles.cell}>{stats.ghouls.speed}</div>
+            <div className={styles.cell}>{formatNumber(stats.zombieRats.speed)}</div>
+            <div className={styles.cell}>{formatNumber(stats.ghouls.speed)}</div>
           </div>
         </div>
       )}

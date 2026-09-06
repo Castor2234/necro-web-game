@@ -1,6 +1,7 @@
 import * as Phaser from 'phaser';
 import { SCENE } from '../helpers/keys';
 import { emit } from '../helpers/events';
+import { formatNumber, formatTime } from '../helpers/format';
 import { CameraController } from '../controllers/CameraController';
 import {
   getRatRaidRenderState,
@@ -286,13 +287,13 @@ export class Location_1 extends Phaser.Scene {
       if (!label) return;
 
       // A scouted village shows the population captured at scout time
-      // (frozen snapshot) plus how many seconds ago the scout happened.
+      // (frozen snapshot) plus how long ago the scout happened.
       const scoutedAt = getScoutedAt(id);
       const text =
         isVillageScouted(id) && scoutedAt !== undefined
-          ? `${Math.trunc(getScoutedPopulation(id))} (${Math.floor(
-              (now - scoutedAt) / 1000
-            )}s)`
+          ? `${formatNumber(getScoutedPopulation(id))} (${formatTime(
+              Math.floor((now - scoutedAt) / 1000)
+            )})`
               : '???';
       // Only touch the Text object when the value actually changed.
       if (label.text !== text) label.setText(text);

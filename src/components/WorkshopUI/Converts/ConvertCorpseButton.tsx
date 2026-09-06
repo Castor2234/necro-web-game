@@ -16,6 +16,7 @@ import {
 import type { IRefPhaserGame } from '../../../PhaserGame';
 import { CreatureDropdown } from '../CreatureDropdown';
 import { Button } from '../../1shared/Button/Button';
+import { formatTime } from '../../../game/helpers/format';
 import styles from './ConvertCorpseButton.module.css';
 
 interface Props {
@@ -144,7 +145,7 @@ export function ConvertCorpseButton({ phaserRef }: Props) {
             />
           </div>
           <span className={styles.taskSeconds}>
-            {task.queued ? t('workshop.queued') : `${task.secondsLeft}s`}
+            {task.queued ? t('workshop.queued') : formatTime(task.secondsLeft)}
           </span>
         </div>
       ))}

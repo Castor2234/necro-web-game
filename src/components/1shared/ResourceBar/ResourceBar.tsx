@@ -6,6 +6,7 @@ import {
   getResources,
   Resources,
 } from '../../../game/state/secondary/resources';
+import { formatNumber } from '../../../game/helpers/format';
 import styles from './ResourceBar.module.css';
 
 interface Props {
@@ -32,11 +33,11 @@ export const ResourceBar = ({ phaserRef }: Props) => {
     <div className={styles.resourceBar}>
       <div className={styles.resourceLabel}>
         <span>{t('resources.ratCorpses')}</span>
-        <span>{resources.ratCorpses}</span>
+        <span>{formatNumber(resources.ratCorpses)}</span>
       </div>
       <div className={styles.resourceLabel}>
         <span>{t('resources.humanCorpses')}</span>
-        <span>{resources.humanCorpses}</span>
+        <span>{formatNumber(resources.humanCorpses)}</span>
       </div>
     </div>
   );
