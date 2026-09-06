@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useTranslation } from '../../hooks/useTranslation';
-import { WorkshopHUD } from './WorkshopHUD';
 import { ConvertRatesColumn } from './Converts/ConvertRatesColumn';
 import { ConvertCorpseButton } from './Converts/ConvertCorpseButton';
 import { UpgradesWindow } from './Upgrades/UpgradesWindow';
@@ -14,7 +13,6 @@ export const WorkshopUI: React.FC<SceneUIProps> = ({ phaserRef }) => {
 
   return (
     <>
-      <WorkshopHUD />
       <ConvertRatesColumn />
       <ConvertCorpseButton phaserRef={phaserRef} />
       <div className={styles.upgradesButton}>
