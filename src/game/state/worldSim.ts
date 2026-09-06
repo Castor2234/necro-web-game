@@ -139,6 +139,16 @@ let lastGrowthAt: Record<VillageId, number> = {} as Record<VillageId, number>;
 /** Village ids whose population the player has revealed this session. */
 const scoutedVillageIds = new Set<VillageId>();
 
+/**
+ * Population captured at the moment each village was scouted. The display
+ * uses this frozen snapshot instead of the live registry value, so the
+ * number only changes when the player scouts again.
+ */
+const scoutedPopulation: Map<VillageId, number> = new Map();
+
+/** Epoch ms of each village's most recent scout. */
+const scoutedAt: Map<VillageId, number> = new Map();
+
 let lastProgressEmitAt = 0;
 
 let teardownWorldSim: (() => void) | null = null;
@@ -207,6 +217,8 @@ export function resetWorldSim(target: Phaser.Data.DataManager): void {
   nextTaskId = 0;
   ratRaid = null;
   scoutedVillageIds.clear();
+  scoutedPopulation.clear();
+  scoutedAt.clear();
   lastProgressEmitAt = Date.now();
 
   const now = Date.now();
@@ -570,6 +582,13 @@ function resolveRaidAction(
 
   if (action === 'scout') {
     scoutedVillageIds.add(villageId);
+    // Freeze the population at scout time — the displayed number stays
+    // fixed until the next scout, while the real population keeps growing.
+    scoutedPopulation.set(
+      villageId,
+      Math.trunc(getStat(registry, VILLAGE_POPULATION_KEYS[villageId]))
+    );
+    scoutedAt.set(villageId, Date.now());
     emit('village-scouted', { villageId });
     return false;
   }
@@ -619,6 +638,21 @@ export function isRaidActive(): boolean {
 /** Was this village scouted this session? (Shows its population on the map.) */
 export function isVillageScouted(id: VillageId): boolean {
   return scoutedVillageIds.has(id);
+}
+
+/**
+ * Population captured at the moment the village was scouted. The real
+ * population keeps growing in the background, but the displayed number is
+ * frozen until the next scout — the seconds-since-scout label shows how
+ * stale the intel is.
+ */
+export function getScoutedPopulation(id: VillageId): number {
+  return scoutedPopulation.get(id) ?? 0;
+}
+
+/** Epoch ms of the last scout of this village (undefined if never scouted). */
+export function getScoutedAt(id: VillageId): number | undefined {
+  return scoutedAt.get(id);
 }
 
 /** Read-only render snapshot for the Location_1 scene. */

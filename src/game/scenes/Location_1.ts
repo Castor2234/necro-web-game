@@ -2,16 +2,16 @@ import * as Phaser from 'phaser';
 import { SCENE } from '../helpers/keys';
 import { emit } from '../helpers/events';
 import { CameraController } from '../controllers/CameraController';
-import { getStat } from '../state/gameState';
 import {
   getRatRaidRenderState,
   isRaidActive,
   isVillageScouted,
+  getScoutedPopulation,
+  getScoutedAt,
 } from '../state/worldSim';
 import {
   NECROMANCER_POSITION,
   VILLAGE_CONFIGS,
-  VILLAGE_POPULATION_KEYS,
   type VillageId,
 } from '../config/villages';
 
@@ -193,10 +193,6 @@ export class Location_1 extends Phaser.Scene {
     emit(event, { x, y });
   }
 
-  private getVillagePopulation(id: VillageId): number {
-    return getStat(this.registry, VILLAGE_POPULATION_KEYS[id]);
-  }
-
   // --- Raid rendering (state is owned by WorldSim) --------------------------
 
   private renderRaid(): void {
@@ -283,14 +279,21 @@ export class Location_1 extends Phaser.Scene {
   // --- Population labels ------------------------------------------------------
 
   private renderPopulationLabels(): void {
+    const now = Date.now();
     this.villages.forEach((village) => {
       const id = village.getData('villageId') as VillageId;
       const label = this.populationLabels.get(id);
       if (!label) return;
 
-      const text = isVillageScouted(id)
-        ? String(Math.trunc(this.getVillagePopulation(id)))
-        : '???';
+      // A scouted village shows the population captured at scout time
+      // (frozen snapshot) plus how many seconds ago the scout happened.
+      const scoutedAt = getScoutedAt(id);
+      const text =
+        isVillageScouted(id) && scoutedAt !== undefined
+          ? `${Math.trunc(getScoutedPopulation(id))} (${Math.floor(
+              (now - scoutedAt) / 1000
+            )}s)`
+              : '???';
       // Only touch the Text object when the value actually changed.
       if (label.text !== text) label.setText(text);
     });
