@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useEventBus } from '../../hooks/useEventBus';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useAnchoredMenu } from '../../hooks/useAnchoredMenu';
-import { isRaidActive, isGroupRaiding, getGroups } from '../../game/state/worldSim';
+import { isGroupRaiding, getGroups } from '../../game/state/worldSim';
 import styles from './ActionMenu.module.css';
 import { Button } from '../1shared/Button/Button';
 
@@ -14,13 +14,11 @@ interface Props {
 
 export const VillageActionMenu = ({ onAttack, onLoot, onScout }: Props) => {
   const [selected, setSelected] = useState<{ id: string } | null>(null);
-  const [busy, setBusy] = useState<boolean>(isRaidActive);
   const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null);
   const { t } = useTranslation();
   const containerRef = useAnchoredMenu('village-ui-position');
 
   useEventBus('village-selected', setSelected);
-  useEventBus('rats-busy', setBusy);
   useEventBus('groups-changed', () => setSelectedGroupId(null));
 
   if (!selected) return null;
@@ -57,21 +55,21 @@ export const VillageActionMenu = ({ onAttack, onLoot, onScout }: Props) => {
       )}
       <Button
         variant="danger"
-        disabled={busy || activeGroupId === null}
+        disabled={activeGroupId === null}
         onClick={() => handleAction('attack')}
       >
         {t('village.attack')}
       </Button>
       <Button
         variant="green"
-        disabled={busy || activeGroupId === null}
+        disabled={activeGroupId === null}
         onClick={() => handleAction('loot')}
       >
         {t('village.loot')}
       </Button>
       <Button
         variant="blue"
-        disabled={busy || activeGroupId === null}
+        disabled={activeGroupId === null}
         onClick={() => handleAction('scout')}
       >
         {t('village.scout')}
