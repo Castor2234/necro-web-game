@@ -3,8 +3,9 @@ import * as Phaser from 'phaser';
 import { EventBus } from '../EventBus';
 import { SCENE, isSceneKey, type SceneKey } from '../helpers/keys';
 import { INITIAL_VALUES_CONFIG, type GameState } from './gameState';
-import { isCreatureType, type CreatureType } from './secondary/creatures';
-import type { VillageAction } from '../helpers/events';
+import { isCreatureType } from './secondary/creatures';
+import type { ConversionTask, RatRaid } from './worldSim';
+import { isVillageId } from '../config/villages';
 
 /**
  * localStorage-backed save system.
@@ -22,38 +23,24 @@ import type { VillageAction } from '../helpers/events';
 const SAVE_STORAGE_KEY = 'necro-web-game.save';
 
 /** Bump when SavedGameData changes shape; older saves are discarded. */
-const SAVE_VERSION = 2;
+const SAVE_VERSION = 3;
 
 /** How long registry changes are debounced before writing to localStorage. */
 const AUTO_SAVE_DEBOUNCE_MS = 500;
 
-/** In-flight corpse conversion task, persisted so paid corpses survive a refresh. */
-export interface SavedConversionTask {
-  id: number;
-  timer: number;
-  duration: number;
-  /** Which creature this task produces. */
-  creatureType: CreatureType;
-}
+/**
+ * In-flight corpse conversion task, persisted so paid corpses survive a
+ * refresh. Wall-clock timestamps (`startAt`/`durationMs`) mean a conversion
+ * also finishes correctly after being saved mid-way.
+ */
+export type SavedConversionTask = ConversionTask;
 
-/** In-flight Location_1 rat raid, persisted so the journey survives a scene
- *  switch or a page refresh. `timer` is only meaningful for in-progress raids. */
-export interface SavedRatTask {
-  action: VillageAction;
-  villageId: string;
-  targetX: number;
-  targetY: number;
-  state: 'moving-to-target' | 'in-progress' | 'returning';
-  /** Remaining ms for in-progress raids; 0 otherwise. */
-  timer: number;
-  /** Progress-bar fill (0..1) captured for in-progress raids. */
-  barFillScale: number;
-  /** Current horde position, so travel resumes from the same spot. */
-  ratsX: number;
-  ratsY: number;
-  /** Whether the horde sprite was visible when saving. */
-  ratsVisible: boolean;
-}
+/**
+ * In-flight Location_1 rat raid, persisted so the journey survives a scene
+ * switch or a page refresh. Fully wall-clock described, so the horde resumes
+ * exactly where it should be even after the page was closed.
+ */
+export type SavedRatTask = RatRaid;
 
 export interface SavedGameData {
   version: number;
@@ -67,6 +54,9 @@ export interface SavedGameData {
   nextTaskId: number;
   /** In-flight rat raid, or null when the horde is idle. */
   ratTask: SavedRatTask | null;
+  /** villageId → epoch ms the village last grew, so offline growth can be
+   *  replayed exactly when the game resumes. */
+  villageGrowth: Record<string, number>;
 }
 
 // --- Shared extras that live outside the registry ----------------------------
@@ -79,10 +69,13 @@ let trackedSceneKey: SceneKey | null = null;
 let conversionTasksSnapshot: SavedConversionTask[] = [];
 let conversionNextTaskIdSnapshot = 0;
 
-/** In-flight Location_1 rat raid snapshot, kept in sync by that scene. */
+/** In-flight Location_1 rat raid snapshot, kept in sync by WorldSim. */
 let ratTaskSnapshot: SavedRatTask | null = null;
 
-/** Workshop reports its conversion queue here after every change. */
+/** villageId → last-growth-epoch snapshot, kept in sync by WorldSim. */
+let villageGrowthSnapshot: Record<string, number> = {};
+
+/** WorldSim reports the current conversion queue here after every change. */
 export function setConversionSaveData(
   tasks: SavedConversionTask[],
   nextTaskId: number
@@ -110,6 +103,15 @@ export function getRatTaskSaveData(): SavedRatTask | null {
   return ratTaskSnapshot ? { ...ratTaskSnapshot } : null;
 }
 
+/** WorldSim reports the per-village growth timestamps here. */
+export function setVillageGrowthSaveData(growth: Record<string, number>): void {
+  villageGrowthSnapshot = { ...growth };
+}
+
+export function getVillageGrowthSaveData(): Record<string, number> {
+  return { ...villageGrowthSnapshot };
+}
+
 // --- Serialization -----------------------------------------------------------
 
 function collectStats(
@@ -135,6 +137,7 @@ export function saveGame(registry: Phaser.Data.DataManager): boolean {
     conversionTasks: conversionTasksSnapshot.map((task) => ({ ...task })),
     nextTaskId: conversionNextTaskIdSnapshot,
     ratTask: ratTaskSnapshot ? { ...ratTaskSnapshot } : null,
+    villageGrowth: { ...villageGrowthSnapshot },
   };
 
   try {
@@ -168,30 +171,30 @@ function sanitizeConversionTasks(raw: unknown): SavedConversionTask[] {
 
   return raw.flatMap((task) => {
     if (typeof task !== 'object' || task === null) return [];
-    const { id, timer, duration, creatureType } = task as Record<
+    const { id, creatureType, startAt, durationMs } = task as Record<
       string,
       unknown
     >;
     if (
       !isFiniteNumber(id) ||
-      !isFiniteNumber(timer) ||
-      !isFiniteNumber(duration) ||
-      !isCreatureType(creatureType)
+      !isCreatureType(creatureType) ||
+      !isFiniteNumber(startAt) ||
+      !isFiniteNumber(durationMs)
     ) {
       return [];
     }
     return [
       {
         id,
-        timer: Math.max(0, timer),
-        duration: Math.max(0, duration),
         creatureType,
+        startAt: Math.max(0, startAt),
+        durationMs: Math.max(0, durationMs),
       },
     ];
   });
 }
 
-const RAT_TASK_STATES = [
+const RAT_TASK_PHASES = [
   'moving-to-target',
   'in-progress',
   'returning',
@@ -203,23 +206,23 @@ function sanitizeRatTask(raw: unknown): SavedRatTask | null {
   const {
     action,
     villageId,
-    targetX,
-    targetY,
-    state,
-    timer,
-    barFillScale,
-    ratsX,
-    ratsY,
-    ratsVisible,
+    phase,
+    startX,
+    startY,
+    endX,
+    endY,
+    moveStartAt,
+    moveDurationMs,
+    actionEndAt,
+    actionDurationMs,
   } = raw as Record<string, unknown>;
 
   if (
     (action !== 'attack' && action !== 'loot' && action !== 'scout') ||
     typeof villageId !== 'string' ||
-    !isFiniteNumber(targetX) ||
-    !isFiniteNumber(targetY) ||
-    typeof state !== 'string' ||
-    !(RAT_TASK_STATES as readonly string[]).includes(state)
+    !isVillageId(villageId) ||
+    typeof phase !== 'string' ||
+    !(RAT_TASK_PHASES as readonly string[]).includes(phase)
   ) {
     return null;
   }
@@ -227,17 +230,32 @@ function sanitizeRatTask(raw: unknown): SavedRatTask | null {
   return {
     action,
     villageId,
-    targetX,
-    targetY,
-    state: state as SavedRatTask['state'],
-    timer: isFiniteNumber(timer) ? Math.max(0, timer) : 0,
-    barFillScale: isFiniteNumber(barFillScale)
-      ? Math.min(1, Math.max(0, barFillScale))
+    phase: phase as SavedRatTask['phase'],
+    startX: isFiniteNumber(startX) ? startX : 0,
+    startY: isFiniteNumber(startY) ? startY : 0,
+    endX: isFiniteNumber(endX) ? endX : 0,
+    endY: isFiniteNumber(endY) ? endY : 0,
+    moveStartAt: isFiniteNumber(moveStartAt) ? Math.max(0, moveStartAt) : 0,
+    moveDurationMs: isFiniteNumber(moveDurationMs)
+      ? Math.max(0, moveDurationMs)
       : 0,
-    ratsX: isFiniteNumber(ratsX) ? ratsX : 0,
-    ratsY: isFiniteNumber(ratsY) ? ratsY : 0,
-    ratsVisible: ratsVisible === true,
+    actionEndAt: isFiniteNumber(actionEndAt) ? Math.max(0, actionEndAt) : 0,
+    actionDurationMs: isFiniteNumber(actionDurationMs)
+      ? Math.max(0, actionDurationMs)
+      : 0,
   };
+}
+
+function sanitizeVillageGrowth(raw: unknown): Record<string, number> {
+  const out: Record<string, number> = {};
+  if (typeof raw !== 'object' || raw === null) return out;
+
+  for (const [key, value] of Object.entries(raw as Record<string, unknown>)) {
+    if (isVillageId(key) && isFiniteNumber(value) && value >= 0) {
+      out[key] = value;
+    }
+  }
+  return out;
 }
 
 /** Reads and validates the save file. Returns null when absent or invalid
@@ -267,6 +285,7 @@ export function loadSavedGame(): SavedGameData | null {
         ? Math.max(0, Math.trunc(parsed.nextTaskId))
         : 0,
       ratTask: sanitizeRatTask(parsed.ratTask),
+      villageGrowth: sanitizeVillageGrowth(parsed.villageGrowth),
     };
   } catch (error) {
     console.warn('[save] Could not read save from localStorage:', error);
@@ -319,6 +338,7 @@ export function initGameStateFromSave(
   // snapshots are the source of truth for the in-flight task queues.
   setConversionSaveData(save.conversionTasks, save.nextTaskId);
   setRatTaskSaveData(save.ratTask);
+  setVillageGrowthSaveData(save.villageGrowth);
 
   return save;
 }
@@ -331,9 +351,11 @@ export function resetGameState(registry: Phaser.Data.DataManager): void {
   ).forEach(([key, value]) => {
     registry.set(key, value);
   });
-  // A reset game must not resurrect the old conversion queue or rat raids.
+  // A reset game must not resurrect the old conversion queue, rat raids or
+  // village growth timestamps.
   setConversionSaveData([], 0);
   setRatTaskSaveData(null);
+  setVillageGrowthSaveData({});
 }
 
 /** The scene to continue from: the saved scene, unless it's missing or a

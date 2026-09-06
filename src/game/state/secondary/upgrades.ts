@@ -1,5 +1,7 @@
 // game/state/helpers/upgrades.ts
+import * as Phaser from 'phaser';
 import { emit } from '../../helpers/events';
+import { getStat, INITIAL_VALUES_CONFIG } from '../gameState';
 import type { GameState } from '../gameState';
 
 /** The four upgrade trees shown in the Upgrades window. */
@@ -64,6 +66,31 @@ let currentUpgradeState: UpgradeState[] = [];
 export function setUpgradeState(state: UpgradeState[]): void {
   currentUpgradeState = state;
   emit('upgrades-updated', state);
+}
+
+/**
+ * The upgrade level is derived from the stat itself (initial value → each
+ * purchase adds `increment`), so purchased upgrades survive a page refresh:
+ * the stat value is what gets saved and restored.
+ */
+export function getUpgradeLevel(
+  registry: Phaser.Data.DataManager,
+  upgradeKey: WorkshopUpgradeKey
+): number {
+  const config = WORKSHOP_UPGRADES[upgradeKey];
+  const initial = INITIAL_VALUES_CONFIG[config.key];
+  const current = getStat(registry, config.key);
+  return Math.max(0, Math.round((current - initial) / config.increment));
+}
+
+/** Current cost of the next level of `upgradeKey`, based on its level. */
+export function getUpgradeCost(
+  registry: Phaser.Data.DataManager,
+  upgradeKey: WorkshopUpgradeKey
+): number {
+  const config = WORKSHOP_UPGRADES[upgradeKey];
+  const level = getUpgradeLevel(registry, upgradeKey);
+  return Math.round(config.baseCost * Math.pow(config.costGrowth, level));
 }
 
 export function getUpgradeState(): UpgradeState[] {

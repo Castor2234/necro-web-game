@@ -2,6 +2,7 @@ import * as Phaser from 'phaser';
 import { SCENE } from '../helpers/keys';
 import { emit, on, off } from '../helpers/events';
 import { clearSavedGame, resetGameState } from '../state/save';
+import { resetWorldSim } from '../state/worldSim';
 import { getResources } from '../state/secondary/resources';
 
 export class MainMenu extends Phaser.Scene {
@@ -29,10 +30,11 @@ export class MainMenu extends Phaser.Scene {
   private handleResetGame(): void {
     clearSavedGame();
     resetGameState(this.registry);
+    // Clear the world simulation queues/raids/growth timestamps too.
+    resetWorldSim(this.registry);
 
     // Re-sync any live UI with the reset values.
     emit('resources-updated', getResources(this.registry));
     emit('creature-stats-changed');
   }
 }
-

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useEventBus } from '../../hooks/useEventBus';
 import { useTranslation } from '../../hooks/useTranslation';
 import { useAnchoredMenu } from '../../hooks/useAnchoredMenu';
+import { isRaidActive } from '../../game/state/worldSim';
 import styles from './ActionMenu.module.css';
 import { Button } from '../1shared/Button/Button';
 
@@ -13,7 +14,9 @@ interface Props {
 
 export const VillageActionMenu = ({ onAttack, onLoot, onScout }: Props) => {
   const [selected, setSelected] = useState<{ id: string } | null>(null);
-  const [busy, setBusy] = useState(false);
+  // Pull the initial busy state from WorldSim: a raid started in another scene
+  // must still lock the buttons when this UI mounts.
+  const [busy, setBusy] = useState<boolean>(isRaidActive);
   const { t } = useTranslation();
   const containerRef = useAnchoredMenu('village-ui-position');
 

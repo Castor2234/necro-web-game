@@ -6,6 +6,7 @@ import {
   initGameStateFromSave,
   installAutoSave,
 } from '../state/save';
+import { installWorldSim } from '../state/worldSim';
 import { getResources } from '../state/secondary/resources';
 
 export class Preloader extends Scene {
@@ -68,6 +69,10 @@ export class Preloader extends Scene {
     // Keep the save file in sync from here on: debounced writes on every
     // registry change + a flush when the page is hidden or closed.
     installAutoSave(this.game, save?.scene ?? null);
+
+    // Start the world simulation (conversions, raids, village growth) — it
+    // then runs on the game-level STEP event, no matter which scene is active.
+    installWorldSim(this.game);
 
     // Notify the React UI (ResourceBar, etc.) about the (possibly restored) values
     emit('resources-updated', getResources(this.registry));
