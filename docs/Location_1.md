@@ -119,7 +119,7 @@ touch it without `timer!` assertions (the type system narrows the union).
 | `POPULATION_GROWTH_INTERVAL_MS` | `5000` | Village population ticks every 5 s while the scene is active |
 | `BAR_WIDTH` / `BAR_HEIGHT` | `64` / `6` | Raid progress-bar rectangle size |
 | `BAR_OFFSET_Y` | `38` | Progress bar is drawn 38 px below the village |
-| `RAID_LABEL_OFFSET_Y` | `24` | Creature-count label sits 24 px below the horde sprite (visible while hovered) |
+| `RAID_LABEL_OFFSET_Y` | `24` | Creature-count label sits 24 px below the horde sprite |
 
 Action durations and horde speed are **not** hard-coded; they come from the registry
 (`attackDuration`, `lootDuration`, `scoutDuration`, `ratSpeed`) so upgrades in the Workshop
@@ -328,7 +328,7 @@ the `emit` / `on` / `off` helpers.
 | `'necromancer-selected'` | `boolean` | Necromancer selected / deselected. |
 | `'village-ui-position'` | `{ x, y }` | Anchor sync (village menu). |
 | `'necromancer-ui-position'` | `{ x, y }` | Anchor sync (necromancer menu). |
-| `'rats-busy'` | `boolean` | Legacy single-raid lock (sending is now gated per group, not globally). |
+| `'rats-busy'` | `boolean` | Raid started / finished (UI disables buttons while `true`). |
 | `'rats-returned'` | `{ villageId }` | Horde is back at the necromancer. |
 | `'village-attacked'` | `{ villageId, kills }` | Attack resolved. |
 | `'village-looted'` | `{ villageId, lootedCorpses }` | Loot resolved. |
@@ -362,12 +362,8 @@ keeps it in sync with the save module (`src/game/state/save.ts`):
 
 ## 10. Key Design Notes
 
-- **Single Graphics for the travel line** — `drawTravelLineSegment()` reuses one
+- **Single Graphics for the travel line** — `drawTravelLine()` reuses one
   `Phaser.GameObjects.Graphics` object instead of allocating a fresh one per frame.
-- **One horde visual per raid** — `ensureHorde()` lazily creates a sprite + count
-  label keyed by `groupId`, so multiple groups can travel simultaneously; visuals
-  (and per-raid progress bars) are destroyed as soon as their raid disappears
-  from `getRaidRenderStates()`.
 - **Type-safe timer** — the `RatTask` discriminated union makes the `timer` accessible only
   in the `'in-progress'` branch, removing the old `timer!` assertions.
 - **No manual overlap cleanup** — colliders/overlaps are owned by the Arcade world, which

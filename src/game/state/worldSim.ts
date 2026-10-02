@@ -20,7 +20,6 @@ import {
   setRatTaskSaveData,
   getVillageGrowthSaveData,
   setVillageGrowthSaveData,
-  getGroupSaveData,
   setGroupSaveData,
 } from './save';
 import {
@@ -106,8 +105,6 @@ export interface RatRaid {
 /** What the UI needs to render the raid on any given frame. */
 export interface RatRaidRenderState {
   phase: RatRaidPhase;
-  /** Owning group — the scene keys one horde visual per groupId. */
-  groupId: number;
   x: number;
   y: number;
   visible: boolean;
@@ -205,16 +202,6 @@ export function installWorldSim(game: Phaser.Game): void {
   nextTaskId = Math.max(savedNextTaskId, maxSavedId + 1);
 
   raids = getRatTaskSaveData();
-
-  // Restore player groups. Creatures assigned to a group are subtracted from
-  // the registry, so groups MUST come back with the save or those creatures
-  // are lost for good. nextGroupId also skips ids referenced by in-flight
-  // raids, so a newly created group can never collide with a raid's groupId.
-  groups = getGroupSaveData();
-  nextGroupId = Math.max(
-    groups.reduce((max, g) => Math.max(max, g.id), -1),
-    raids.reduce((max, r) => Math.max(max, r.groupId), -1)
-  ) + 1;
 
   const savedGrowth = getVillageGrowthSaveData();
   const now = Date.now();
@@ -569,11 +556,8 @@ export function sendGroup(action: VillageAction, villageId: VillageId, groupId: 
   }
   emit('creature-stats-changed');
 
-  // Clear the group's creatures (they're now on the raid). Persist + notify so
-  // the save never holds the same creatures in BOTH the group and the raid.
+  // Clear the group's creatures (they're now on the raid).
   group.creatures = {};
-  persistGroups();
-  emit('groups-changed');
 
   raids.push({
     action,
@@ -684,7 +668,6 @@ function returnGroupToPool(raid: RatRaid): void {
   }
   emit('creature-stats-changed');
   persistGroups();
-  emit('groups-changed');
 }
 
 /** Checks whether the horde is wiped out at the village (attack only). Returns true
@@ -958,7 +941,6 @@ function getSingleRaidRenderState(raid: RatRaid, now: number): RatRaidRenderStat
         : 1;
     return {
       phase: 'in-progress',
-      groupId: raid.groupId,
       x: village.x,
       y: village.y,
       visible: false,
@@ -978,7 +960,6 @@ function getSingleRaidRenderState(raid: RatRaid, now: number): RatRaidRenderStat
 
   return {
     phase: raid.phase,
-    groupId: raid.groupId,
     x: Phaser.Math.Linear(raid.startX, raid.endX, t),
     y: Phaser.Math.Linear(raid.startY, raid.endY, t),
     visible: true,

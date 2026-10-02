@@ -22,13 +22,14 @@ import {
  * other scene. This scene only:
  *  - renders the map, villages and the necromancer,
  *  - handles selection / hover / navigation input,
- *  - draws the raid states (one horde sprite, progress bar and travel line
- *    per raid) from WorldSim every frame.
+ *  - draws the current raid state (horde position, progress bar, travel line)
+ *    from WorldSim every frame.
  */
 export class Location_1 extends Phaser.Scene {
   // --- Scene objects ---
   necromancer: Phaser.GameObjects.Sprite;
   house1: Phaser.GameObjects.Image;
+  zombieRats: Phaser.GameObjects.Sprite;
 
   private villages: Phaser.GameObjects.Sprite[] = [];
   private populationLabels: Map<VillageId, Phaser.GameObjects.BitmapText> =
@@ -37,25 +38,15 @@ export class Location_1 extends Phaser.Scene {
   private necroAnchor: { x: number; y: number } | null = null;
   private travelLine: Phaser.GameObjects.Graphics | null = null;
 
-  // Action progress bars (one per raiding group)
+  // Action progress bar
+  private barBg: Phaser.GameObjects.Rectangle | null = null;
+  private barFill: Phaser.GameObjects.Rectangle | null = null;
   private readonly BAR_WIDTH = 64;
   private readonly BAR_HEIGHT = 6;
   private readonly BAR_OFFSET_Y = 38;
   private readonly RAID_LABEL_OFFSET_Y = 24;
-  /** One horde visual (sprite + count label) per in-flight raid, keyed by groupId. */
-  private hordes: Map<
-    number,
-    {
-      sprite: Phaser.GameObjects.Sprite;
-      label: Phaser.GameObjects.BitmapText;
-      hovered: boolean;
-    }
-  > = new Map();
-  /** One action progress bar per raiding group, keyed by groupId. */
-  private progressBars: Map<
-    number,
-    { bg: Phaser.GameObjects.Rectangle; fill: Phaser.GameObjects.Rectangle }
-  > = new Map();
+  /** Creature-count label under the moving horde sprite. */
+  private raidCountLabel: Phaser.GameObjects.BitmapText | null = null;
 
   // Camera zoom and drag
   private cameraController: CameraController;
@@ -136,8 +127,19 @@ export class Location_1 extends Phaser.Scene {
     // Decorative house
     this.house1 = this.add.image(600, 40, 'house_1_img');
 
-    // Rat hordes — pure visuals, one per in-flight raid (keyed by groupId);
-    // position/movement come from WorldSim. ensureHorde() lazily creates them.
+    // Rat horde — a pure visual now; position/movement come from WorldSim.
+    this.zombieRats = this.add
+      .sprite(0, 0, 'zombie_horde_img')
+      .setScale(0.5)
+      .setDepth(2)
+      .setVisible(false);
+
+    // Creature count shown under the horde while it travels.
+    this.raidCountLabel = this.add
+      .bitmapText(0, 0, 'font1', '', 16)
+      .setOrigin(0.5, 0)
+      .setDepth(22)
+      .setVisible(false);
 
     // Re-sync the raid-busy flag in case a raid is already in flight.
     emit('rats-busy', isRaidActive());
@@ -146,16 +148,8 @@ export class Location_1 extends Phaser.Scene {
       this.cameraController.destroy();
       this.travelLine?.destroy();
       this.travelLine = null;
-      this.hordes.forEach((horde) => {
-        horde.sprite.destroy();
-        horde.label.destroy();
-      });
-      this.hordes.clear();
-      this.progressBars.forEach((bar) => {
-        bar.bg.destroy();
-        bar.fill.destroy();
-      });
-      this.progressBars.clear();
+      this.raidCountLabel?.destroy();
+      this.raidCountLabel = null;
       this.populationLabels.forEach((label) => label.destroy());
       this.populationLabels.clear();
     });
@@ -211,102 +205,57 @@ export class Location_1 extends Phaser.Scene {
 
   private renderRaid(): void {
     const states = getRaidRenderStates(Date.now());
+    const state = states[0]; // Render first active raid
 
-    // One shared Graphics for all travel lines; cleared and redrawn per frame.
-    this.ensureTravelLine();
-    this.travelLine?.clear();
+    if (!state) {
+      this.zombieRats.setVisible(false);
+      this.raidCountLabel?.setVisible(false);
+      this.destroyProgressBar();
+      this.travelLine?.clear();
+      return;
+    }
 
-    const activeGroups = new Set<number>();
-    const barsInProgress = new Set<number>();
+    this.zombieRats.setPosition(state.x, state.y);
+    this.zombieRats.setVisible(state.visible);
 
-    for (const state of states) {
-      activeGroups.add(state.groupId);
-
-      const horde = this.ensureHorde(state.groupId);
-      horde.sprite.setPosition(state.x, state.y);
-      horde.sprite.setVisible(state.visible);
-
-      horde.label.setPosition(state.x, state.y + this.RAID_LABEL_OFFSET_Y);
-      horde.label.setVisible(state.visible && horde.hovered);
+    if (this.raidCountLabel) {
+      this.raidCountLabel.setPosition(
+        state.x,
+        state.y + this.RAID_LABEL_OFFSET_Y
+      );
+      this.raidCountLabel.setVisible(state.visible);
       const countText = String(state.creatureCount);
       // Only touch the Text object when the value actually changed.
-      if (horde.label.text !== countText) {
-        horde.label.setText(countText);
-      }
-
-      if (state.phase === 'in-progress') {
-        // Horde is hidden inside the village; show the action progress bar.
-        barsInProgress.add(state.groupId);
-        this.ensureProgressBar(state.groupId, state.barX, state.barY);
-        const bar = this.progressBars.get(state.groupId);
-        if (bar) bar.fill.scaleX = state.barProgress;
-      } else {
-        this.drawTravelLineSegment(state.x, state.y, state.toX, state.toY);
+      if (this.raidCountLabel.text !== countText) {
+        this.raidCountLabel.setText(countText);
       }
     }
 
-    // Destroy visuals whose raid no longer exists.
-    for (const [groupId, horde] of this.hordes) {
-      if (!activeGroups.has(groupId)) {
-        horde.sprite.destroy();
-        horde.label.destroy();
-        this.hordes.delete(groupId);
-      }
-    }
-    for (const [groupId, bar] of this.progressBars) {
-      if (!barsInProgress.has(groupId)) {
-        bar.bg.destroy();
-        bar.fill.destroy();
-        this.progressBars.delete(groupId);
-      }
+    if (state.phase === 'in-progress') {
+      // Horde is hidden inside the village; show the action progress bar.
+      this.ensureProgressBar(state.barX, state.barY);
+      if (this.barFill) this.barFill.scaleX = state.barProgress;
+      this.travelLine?.clear();
+    } else {
+      this.destroyProgressBar();
+      this.drawTravelLine(
+        this.zombieRats.x,
+        this.zombieRats.y,
+        state.toX,
+        state.toY
+      );
     }
   }
 
-  /** Lazily creates (and registers) the horde visual for a raiding group. */
-  private ensureHorde(groupId: number): {
-    sprite: Phaser.GameObjects.Sprite;
-    label: Phaser.GameObjects.BitmapText;
-    hovered: boolean;
-  } {
-    const existing = this.hordes.get(groupId);
-    if (existing) return existing;
-
-    const sprite = this.add
-      .sprite(0, 0, 'zombie_horde_img')
-      .setScale(0.5)
-      .setDepth(2)
-      .setVisible(false);
-
-    // Creature count shown under the horde while it travels. Hovering reveals it.
-    const label = this.add
-      .bitmapText(0, 0, 'font1', '', 16)
-      .setOrigin(0.5, 0)
-      .setDepth(22)
-      .setVisible(false);
-
-    const horde = { sprite, label, hovered: false };
-    sprite.setInteractive();
-    sprite.on('pointerover', () => {
-      horde.hovered = true;
-    });
-    sprite.on('pointerout', () => {
-      horde.hovered = false;
-    });
-
-    this.hordes.set(groupId, horde);
-    return horde;
-  }
-
-  private ensureProgressBar(groupId: number, x: number, y: number): void {
-    if (this.progressBars.has(groupId)) return;
+  private createProgressBar(x: number, y: number): void {
     const barY = y + this.BAR_OFFSET_Y;
 
-    const bg = this.add
+    this.barBg = this.add
       .rectangle(x, barY, this.BAR_WIDTH, this.BAR_HEIGHT, 0x000000, 0.7)
       .setOrigin(0.5, 0.5)
       .setDepth(20);
 
-    const fill = this.add
+    this.barFill = this.add
       .rectangle(
         x - this.BAR_WIDTH / 2,
         barY,
@@ -318,31 +267,36 @@ export class Location_1 extends Phaser.Scene {
       .setOrigin(0, 0.5)
       .setDepth(21)
       .setScale(0, 1);
+  }
 
-    this.progressBars.set(groupId, { bg, fill });
+  private ensureProgressBar(x: number, y: number): void {
+    if (!this.barBg || !this.barFill) this.createProgressBar(x, y);
+  }
+
+  private destroyProgressBar(): void {
+    this.barBg?.destroy();
+    this.barFill?.destroy();
+    this.barBg = null;
+    this.barFill = null;
   }
 
   /** Reuses one Graphics object instead of allocating a fresh one per frame. */
-  private ensureTravelLine(): void {
-    if (!this.travelLine) {
-      this.travelLine = this.add.graphics();
-      this.travelLine.setDepth(0.5);
-    }
-  }
-
-  /** Draws one travel line segment; the shared Graphics is cleared per frame. */
-  private drawTravelLineSegment(
+  private drawTravelLine(
     fromX: number,
     fromY: number,
     toX: number,
     toY: number
   ): void {
-    this.ensureTravelLine();
-    this.travelLine?.lineStyle(4, 0xaf0000, 0.7);
-    this.travelLine?.beginPath();
-    this.travelLine?.moveTo(fromX, fromY);
-    this.travelLine?.lineTo(toX, toY);
-    this.travelLine?.strokePath();
+    if (!this.travelLine) {
+      this.travelLine = this.add.graphics();
+      this.travelLine.setDepth(0.5);
+    }
+    this.travelLine.clear();
+    this.travelLine.lineStyle(4, 0xaf0000, 0.7);
+    this.travelLine.beginPath();
+    this.travelLine.moveTo(fromX, fromY);
+    this.travelLine.lineTo(toX, toY);
+    this.travelLine.strokePath();
   }
 
   // --- Population labels ------------------------------------------------------

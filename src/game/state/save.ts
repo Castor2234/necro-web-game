@@ -282,24 +282,6 @@ function sanitizeVillageGrowth(raw: unknown): Record<string, number> {
   return out;
 }
 
-/** Validates player groups: integer id and a clean creatures map. */
-function sanitizeGroups(raw: unknown[]): SavedGroup[] {
-  return raw.flatMap((g) => {
-    if (typeof g !== 'object' || g === null) return [];
-    const { id, creatures } = g as Record<string, unknown>;
-    if (typeof id !== 'number' || !Number.isInteger(id) || id < 0) return [];
-    const clean: Partial<Record<CreatureType, number>> = {};
-    if (typeof creatures === 'object' && creatures !== null) {
-      for (const [type, count] of Object.entries(creatures)) {
-        if (isCreatureType(type) && isFiniteNumber(count) && count > 0) {
-          clean[type] = Math.trunc(count);
-        }
-      }
-    }
-    return [{ id, creatures: clean }];
-  });
-}
-
 /** Reads and validates the save file. Returns null when absent or invalid
  *  (corrupted JSON, wrong version, …) so the game falls back to defaults. */
 export function loadSavedGame(): SavedGameData | null {
@@ -329,7 +311,9 @@ export function loadSavedGame(): SavedGameData | null {
       raids: Array.isArray(parsed.raids)
         ? parsed.raids.map(sanitizeRatTask).filter((t): t is SavedRatTask => t !== null)
         : [],
-      groups: Array.isArray(parsed.groups) ? sanitizeGroups(parsed.groups) : [],
+      groups: Array.isArray(parsed.groups)
+        ? parsed.groups.filter((g) => typeof g?.id === 'number')
+        : [],
       villageGrowth: sanitizeVillageGrowth(parsed.villageGrowth),
     };
   } catch (error) {
