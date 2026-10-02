@@ -5,7 +5,6 @@ import { SCENE, isSceneKey, type SceneKey } from '../helpers/keys';
 import { INITIAL_VALUES_CONFIG, type GameState } from './gameState';
 import { isCreatureType } from './secondary/creatures';
 import type { ConversionTask, RatRaid } from './worldSim';
-import type { CreatureType } from './secondary/creatures';
 import { isVillageId } from '../config/villages';
 
 /**
@@ -24,7 +23,7 @@ import { isVillageId } from '../config/villages';
 const SAVE_STORAGE_KEY = 'necro-web-game.save';
 
 /** Bump when SavedGameData changes shape; older saves are discarded. */
-const SAVE_VERSION = 5;
+const SAVE_VERSION = 4;
 
 /** How long registry changes are debounced before writing to localStorage. */
 const AUTO_SAVE_DEBOUNCE_MS = 500;
@@ -43,11 +42,6 @@ export type SavedConversionTask = ConversionTask;
  */
 export type SavedRatTask = RatRaid;
 
-export interface SavedGroup {
-  id: number;
-  creatures: Partial<Record<CreatureType, number>>;
-}
-
 export interface SavedGameData {
   version: number;
   /** Epoch ms of the last write. */
@@ -58,10 +52,8 @@ export interface SavedGameData {
   stats: Partial<Record<keyof GameState, number>>;
   conversionTasks: SavedConversionTask[];
   nextTaskId: number;
-  /** In-flight rat raids (one per group). */
-  raids: SavedRatTask[];
-  /** Player-organized creature groups. */
-  groups: SavedGroup[];
+  /** In-flight rat raid, or null when the horde is idle. */
+  ratTask: SavedRatTask | null;
   /** villageId → epoch ms the village last grew, so offline growth can be
    *  replayed exactly when the game resumes. */
   villageGrowth: Record<string, number>;
@@ -78,9 +70,7 @@ let conversionTasksSnapshot: SavedConversionTask[] = [];
 let conversionNextTaskIdSnapshot = 0;
 
 /** In-flight Location_1 rat raid snapshot, kept in sync by WorldSim. */
-let ratTaskSnapshot: SavedRatTask[] = [];
-
-let groupsSnapshot: SavedGroup[] = [];
+let ratTaskSnapshot: SavedRatTask | null = null;
 
 /** villageId → last-growth-epoch snapshot, kept in sync by WorldSim. */
 let villageGrowthSnapshot: Record<string, number> = {};
@@ -104,22 +94,13 @@ export function getConversionSaveData(): {
   };
 }
 
-/** Location_1 reports the current raids here on every state change. */
-export function setRatTaskSaveData(tasks: SavedRatTask[]): void {
-  ratTaskSnapshot = tasks.map((task) => ({ ...task }));
+/** Location_1 reports the current raid here on every state change. */
+export function setRatTaskSaveData(task: SavedRatTask | null): void {
+  ratTaskSnapshot = task ? { ...task } : null;
 }
 
-export function getRatTaskSaveData(): SavedRatTask[] {
-  return ratTaskSnapshot.map((task) => ({ ...task }));
-}
-
-/** Location_1 reports the current groups here on every state change. */
-export function setGroupSaveData(groups: SavedGroup[]): void {
-  groupsSnapshot = groups.map((g) => ({ ...g, creatures: { ...g.creatures } }));
-}
-
-export function getGroupSaveData(): SavedGroup[] {
-  return groupsSnapshot.map((g) => ({ ...g, creatures: { ...g.creatures } }));
+export function getRatTaskSaveData(): SavedRatTask | null {
+  return ratTaskSnapshot ? { ...ratTaskSnapshot } : null;
 }
 
 /** WorldSim reports the per-village growth timestamps here. */
@@ -155,8 +136,7 @@ export function saveGame(registry: Phaser.Data.DataManager): boolean {
     stats: collectStats(registry),
     conversionTasks: conversionTasksSnapshot.map((task) => ({ ...task })),
     nextTaskId: conversionNextTaskIdSnapshot,
-    raids: ratTaskSnapshot.map((task) => ({ ...task })),
-    groups: groupsSnapshot.map((g) => ({ ...g, creatures: { ...g.creatures } })),
+    ratTask: ratTaskSnapshot ? { ...ratTaskSnapshot } : null,
     villageGrowth: { ...villageGrowthSnapshot },
   };
 
@@ -235,8 +215,6 @@ function sanitizeRatTask(raw: unknown): SavedRatTask | null {
     moveDurationMs,
     actionEndAt,
     actionDurationMs,
-    groupId,
-    creatures,
   } = raw as Record<string, unknown>;
 
   if (
@@ -265,8 +243,6 @@ function sanitizeRatTask(raw: unknown): SavedRatTask | null {
     actionDurationMs: isFiniteNumber(actionDurationMs)
       ? Math.max(0, actionDurationMs)
       : 0,
-    groupId: typeof groupId === 'number' ? groupId : 0,
-    creatures: typeof creatures === 'object' && creatures ? { ...creatures } : {},
   };
 }
 
@@ -308,12 +284,7 @@ export function loadSavedGame(): SavedGameData | null {
       nextTaskId: isFiniteNumber(parsed.nextTaskId)
         ? Math.max(0, Math.trunc(parsed.nextTaskId))
         : 0,
-      raids: Array.isArray(parsed.raids)
-        ? parsed.raids.map(sanitizeRatTask).filter((t): t is SavedRatTask => t !== null)
-        : [],
-      groups: Array.isArray(parsed.groups)
-        ? parsed.groups.filter((g) => typeof g?.id === 'number')
-        : [],
+      ratTask: sanitizeRatTask(parsed.ratTask),
       villageGrowth: sanitizeVillageGrowth(parsed.villageGrowth),
     };
   } catch (error) {
@@ -366,8 +337,7 @@ export function initGameStateFromSave(
   // The registry is the source of truth for stats; the module-level
   // snapshots are the source of truth for the in-flight task queues.
   setConversionSaveData(save.conversionTasks, save.nextTaskId);
-  setRatTaskSaveData(save.raids ?? []);
-  setGroupSaveData(save.groups ?? []);
+  setRatTaskSaveData(save.ratTask);
   setVillageGrowthSaveData(save.villageGrowth);
 
   return save;
@@ -384,8 +354,7 @@ export function resetGameState(registry: Phaser.Data.DataManager): void {
   // A reset game must not resurrect the old conversion queue, rat raids or
   // village growth timestamps.
   setConversionSaveData([], 0);
-  setRatTaskSaveData([]);
-  setGroupSaveData([]);
+  setRatTaskSaveData(null);
   setVillageGrowthSaveData({});
 }
 

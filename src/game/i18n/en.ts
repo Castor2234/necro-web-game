@@ -51,7 +51,6 @@ export const en = {
   'village.scout': 'Scout',
   'necro.toCave': 'To Cave',
   'necro.sleep': 'Sleep',
-  'necro.groupManagement': 'Group Management',
 
   // --- Workshop ---
   'workshop.convert': 'Raise Dead ({active}/{max})',
@@ -70,8 +69,6 @@ export const en = {
   'upgrades.ratSpeed': 'Rat Speed',
   'upgrades.maxConcurrentConversions': 'Max Conversions',
   'upgrades.maxConversionQueue': 'Max Queue',
-  'upgrades.maxGroups': 'Max Groups',
-  'upgrades.maxUnitsPerGroup': 'Max Units Per Group',
   'upgrades.tree.necromancer': 'Necromancer',
   'upgrades.tree.simple': 'Simple creatures',
   'upgrades.tree.advanced': 'Advanced creatures',
@@ -89,17 +86,6 @@ export const en = {
   // --- World map scene (Phaser) ---
   'worldMap.title': 'World Map... Under construction...',
   'worldMap.backToBase': 'Return to base',
-
-  // --- Group management ---
-  'groupManagement.title': 'Group Management',
-  'groupManagement.maxGroups': 'Max groups',
-  'groupManagement.maxUnitsPerGroup': 'Max units per group',
-  'groupManagement.group': 'Group',
-  'groupManagement.raiding': '(Raiding)',
-  'groupManagement.delete': 'Delete',
-  'groupManagement.available': 'Available',
-  'groupManagement.total': 'Total',
-  'groupManagement.createGroup': 'Create Group',
 } as const;
 
 export type TranslationKey = keyof typeof en;

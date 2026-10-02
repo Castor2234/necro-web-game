@@ -4,7 +4,7 @@ import { emit } from '../helpers/events';
 import { formatNumber, formatTime } from '../helpers/format';
 import { CameraController } from '../controllers/CameraController';
 import {
-  getRaidRenderStates,
+  getRatRaidRenderState,
   isRaidActive,
   isVillageScouted,
   getScoutedPopulation,
@@ -44,9 +44,6 @@ export class Location_1 extends Phaser.Scene {
   private readonly BAR_WIDTH = 64;
   private readonly BAR_HEIGHT = 6;
   private readonly BAR_OFFSET_Y = 38;
-  private readonly RAID_LABEL_OFFSET_Y = 24;
-  /** Creature-count label under the moving horde sprite. */
-  private raidCountLabel: Phaser.GameObjects.BitmapText | null = null;
 
   // Camera zoom and drag
   private cameraController: CameraController;
@@ -134,13 +131,6 @@ export class Location_1 extends Phaser.Scene {
       .setDepth(2)
       .setVisible(false);
 
-    // Creature count shown under the horde while it travels.
-    this.raidCountLabel = this.add
-      .bitmapText(0, 0, 'font1', '', 16)
-      .setOrigin(0.5, 0)
-      .setDepth(22)
-      .setVisible(false);
-
     // Re-sync the raid-busy flag in case a raid is already in flight.
     emit('rats-busy', isRaidActive());
 
@@ -148,8 +138,6 @@ export class Location_1 extends Phaser.Scene {
       this.cameraController.destroy();
       this.travelLine?.destroy();
       this.travelLine = null;
-      this.raidCountLabel?.destroy();
-      this.raidCountLabel = null;
       this.populationLabels.forEach((label) => label.destroy());
       this.populationLabels.clear();
     });
@@ -204,12 +192,10 @@ export class Location_1 extends Phaser.Scene {
   // --- Raid rendering (state is owned by WorldSim) --------------------------
 
   private renderRaid(): void {
-    const states = getRaidRenderStates(Date.now());
-    const state = states[0]; // Render first active raid
+    const state = getRatRaidRenderState(Date.now());
 
     if (!state) {
       this.zombieRats.setVisible(false);
-      this.raidCountLabel?.setVisible(false);
       this.destroyProgressBar();
       this.travelLine?.clear();
       return;
@@ -217,19 +203,6 @@ export class Location_1 extends Phaser.Scene {
 
     this.zombieRats.setPosition(state.x, state.y);
     this.zombieRats.setVisible(state.visible);
-
-    if (this.raidCountLabel) {
-      this.raidCountLabel.setPosition(
-        state.x,
-        state.y + this.RAID_LABEL_OFFSET_Y
-      );
-      this.raidCountLabel.setVisible(state.visible);
-      const countText = String(state.creatureCount);
-      // Only touch the Text object when the value actually changed.
-      if (this.raidCountLabel.text !== countText) {
-        this.raidCountLabel.setText(countText);
-      }
-    }
 
     if (state.phase === 'in-progress') {
       // Horde is hidden inside the village; show the action progress bar.

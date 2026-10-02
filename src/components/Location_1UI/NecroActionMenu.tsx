@@ -8,14 +8,9 @@ import { Button } from '../1shared/Button/Button';
 interface Props {
   onGoToCave: () => void;
   onSleep: () => void;
-  onGroupManagement: () => void;
 }
 
-export const NecromancerActionMenu = ({
-  onGoToCave,
-  onSleep,
-  onGroupManagement,
-}: Props) => {
+export const NecromancerActionMenu = ({ onGoToCave, onSleep }: Props) => {
   const [visible, setVisible] = useState(false);
   const { t } = useTranslation();
   const containerRef = useAnchoredMenu('necromancer-ui-position');
@@ -27,11 +22,9 @@ export const NecromancerActionMenu = ({
   return (
     <div ref={containerRef} className={styles.actionMenu}>
       <Button onClick={onGoToCave}>{t('necro.toCave')}</Button>
-      <Button onClick={onGroupManagement}>{t('necro.groupManagement')}</Button>
       <Button variant="ghost" onClick={onSleep}>
         {t('necro.sleep')}
       </Button>
     </div>
   );
 };
-

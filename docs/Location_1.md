@@ -119,7 +119,6 @@ touch it without `timer!` assertions (the type system narrows the union).
 | `POPULATION_GROWTH_INTERVAL_MS` | `5000` | Village population ticks every 5 s while the scene is active |
 | `BAR_WIDTH` / `BAR_HEIGHT` | `64` / `6` | Raid progress-bar rectangle size |
 | `BAR_OFFSET_Y` | `38` | Progress bar is drawn 38 px below the village |
-| `RAID_LABEL_OFFSET_Y` | `24` | Creature-count label sits 24 px below the horde sprite |
 
 Action durations and horde speed are **not** hard-coded; they come from the registry
 (`attackDuration`, `lootDuration`, `scoutDuration`, `ratSpeed`) so upgrades in the Workshop
